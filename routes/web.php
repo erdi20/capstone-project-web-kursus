@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Controllers\ClassController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Kelas_cont;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -20,7 +20,7 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-Route::get('/kelas', [Kelas_cont::class, 'show'])->name('course.show');
+Route::get('/kelas', [ClassController::class, 'show'])->name('course.show');
 // Route::get('/kelas/{courseId}', [Kelas_cont::class, 'show'])->name('course.show');
 // Route::get('/kelas/{courseId}/materi/{session}', [Kelas_cont::class, 'material'])->name('course.material');
 // // ... rute untuk Tugas akhir, Essai, Quiz

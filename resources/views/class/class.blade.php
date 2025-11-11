@@ -1,6 +1,6 @@
 <x-app-layout>
 
-    <main class="max-w-6xl mx-auto px-4">
+    <div class="max-w-6xl mx-auto px-4">
         <div class="page-container bg-white shadow-xl">
 
             <div class="pt-8 px-4 sm:px-6 mt-6 mb-6">
@@ -14,7 +14,7 @@
 
                     {{-- Keterangan Mentor --}}
                     <div class="flex items-center space-x-3 py-2 px-3 rounded-full w-fit"
-                        style="background-color: #EEF63E">
+                        style="background-color:#578FCA">
                         {{-- Lingkaran Abu-abu (Gambar Mentor) --}}
                         <img alt="Mentor Kelas" src="{{ asset('storage/image/20241211_085802.jpg') }}"
                             class="h-8 w-8 bg-gray-300 rounded-full flex-shrink-0" />
@@ -60,7 +60,7 @@
 
                     @foreach ($kelas as $item)
                         <a href="{{ $item['link'] }}"
-                         style="background-color: #EEF63E"
+                         style="background-color: 578FCA"
                             class="block text-gray-800 font-semibold py-3 px-4 mb-3 rounded-lg shadow text-center text-sm border-2 border-black hover:bg-gray-200 transition duration-200">
                             {{ $item['title'] }}
                         </a>
@@ -94,15 +94,15 @@
 
                 {{-- Tombol Unduh Sertifikat --}}
                 <div class="text-center pb-8">
-                    <a href="#" style="background-color: #EEF63E"
-                        class="inline-block hover:bg-yellow-500 text-gray-800 font-bold py-3 px-8 rounded-lg shadow-xl transition duration-200 border-2 border-black">
+                    <a href="#" style="background-color: #578FCA"
+                        class="inline-block hover:bg-yellow-500 text-gray-800 font-bold py-3 px-8 rounded-lg shadow-xl transition duration-200 border-2 border-gray-400">
                         Unduh Sertifikat
                     </a>
                 </div>
 
             </div>
         </div>
-    </main>
+    </div>
 
     <script>
         // 1. Definisikan array data (versi JavaScript)
@@ -145,11 +145,11 @@
             // 3. Logika pengondisian berdasarkan status
             if (item.status === 'finished') { // status selesai
                 styl = "";
-                statusClass = ' bg-yellow-200 text-gray-500 border-gray-400';
+                statusClass = ' bg-blue-400 text-gray-500 border-gray-400';
                 statusText = ' (Selesai)';
             } else { // status === 'unfinished'
-                styl = "style=background-color:#eef63f; opacity:1";
-                statusClass = 'bg-gray-200 hover:bg-gray-300';
+                styl = "style=background-color:#578FCA; opacity:1";
+                statusClass = 'bg-gray-200 hover:bg-gray-300 border-gray-400';
                 statusText = ' (Belum Dimulai)';
             }
 
