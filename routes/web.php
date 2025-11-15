@@ -13,6 +13,10 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/course', function () {
+        return view('student.course');
+    });
+     Route::get('/kelas', [ClassController::class, 'show'])->name('course.show');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -20,7 +24,3 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-Route::get('/kelas', [ClassController::class, 'show'])->name('course.show');
-// Route::get('/kelas/{courseId}', [Kelas_cont::class, 'show'])->name('course.show');
-// Route::get('/kelas/{courseId}/materi/{session}', [Kelas_cont::class, 'material'])->name('course.material');
-// // ... rute untuk Tugas akhir, Essai, Quiz
