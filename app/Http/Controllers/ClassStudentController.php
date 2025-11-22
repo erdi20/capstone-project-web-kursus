@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-class ClassController extends Controller
+class ClassStudentController extends Controller
 {
     public function show()
     { 
-        return view('class.class'); 
+        return view('students.class'); 
     }
 }

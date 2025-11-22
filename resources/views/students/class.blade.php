@@ -46,25 +46,6 @@
                     <h3 class="text-base font-semibold text-gray-800 mb-3">Pilih materi:</h3>
 
                     <div id="daftar-kelas"></div>
-
-                    {{-- @php
-                        $kelas = [
-                            ['title' => 'Pertemuan 1: Pengenalan Naratif Teknis', 'link' => '#'],
-                            ['title' => 'Pertemuan 2: Struktur Naratif Teknis', 'link' => '#'],
-                            ['title' => 'Pertemuan 3: Bahasa dan Gaya Penulisan', 'link' => '#'],
-                            ['title' => 'Pertemuan 4: Contoh Naratif Teknis', 'link' => '#'],
-                            ['title' => 'Pertemuan 5: Latihan Menulis Naratif Teknis', 'link' => '#'],
-                            ['title' => 'Pertemuan 6: Tes Akhir', 'link' => '#'],
-                        ];
-                    @endphp
-
-                    @foreach ($kelas as $item)
-                        <a href="{{ $item['link'] }}"
-                         style="background-color: 578FCA"
-                            class="block text-gray-800 font-semibold py-3 px-4 mb-3 rounded-lg shadow text-center text-sm border-2 border-black hover:bg-gray-200 transition duration-200">
-                            {{ $item['title'] }}
-                        </a>
-                    @endforeach --}}
                 </section>
 
                 {{-- Garis Pemisah --}}
@@ -95,7 +76,7 @@
                 {{-- Tombol Unduh Sertifikat --}}
                 <div class="text-center pb-8">
                     <a href="#" style="background-color: #578FCA"
-                        class="inline-block hover:bg-yellow-500 text-gray-800 font-bold py-3 px-8 rounded-lg shadow-xl transition duration-200 border-2 border-gray-400">
+                        class="inline-block hover:bg-yellow-500 text-gray-800 font-bold py-3 px-8 rounded-full shadow-xl transition duration-200 border-2 border-gray-400">
                         Unduh Sertifikat
                     </a>
                 </div>
@@ -171,7 +152,7 @@
         // Use a for...of loop to iterate over the array values directly
         for (const item of nilai_tambah_array) {
             output_nilai_tambah += `
-        <div class="w-full bg-gray-100 text-gray-800 font-semibold py-3 px-4 mb-3 rounded-lg shadow text-left text-sm border-2 border-black">
+        <div class="w-full bg-gray-300 text-gray-800 font-semibold py-3 px-4 mb-3 rounded-lg shadow text-center text-sm border-2 border-black">
             ${item}
         </div>`;
         }
