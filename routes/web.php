@@ -25,6 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/esay', [AssignmentsController::class, 'essay'])->name('course.essay');
     Route::get('/quiz', [AssignmentsController::class, 'quiz'])->name('course.quiz');
     Route::POST('/submitQuiz', [AssignmentsController::class, 'submit'])->name('course.submitQuiz');
+    Route::POST('/submitEssay', [AssignmentsController::class, 'submitEssay'])->name('course.submitEssay');
 });
 
 require __DIR__ . '/auth.php';

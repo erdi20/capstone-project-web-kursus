@@ -8,7 +8,7 @@ class AssignmentsController extends Controller
 {
     public function quiz()
     {
-        return view('students.quiz');
+        return view('student.quiz');
     }
 
     public function submitQuiz( Request $submission )
@@ -22,11 +22,20 @@ class AssignmentsController extends Controller
 
     public function hasilQuiz()
     {
-        return view('students.hasilQuiz');
+        return view('student.hasilQuiz');
     }
 
     function essay()
     {
-        return view('students.essay');
+        return view('student.essay');
+    }
+
+    function submitEssay( Request $submission )
+    {
+        echo "Essay submitted successfully.";
+        echo "<br>";
+        echo "Submitted Data: ";
+        echo "<br>";
+        print_r( $submission->all() );
     }
 }
