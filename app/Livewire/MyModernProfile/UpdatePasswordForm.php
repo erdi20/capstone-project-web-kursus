@@ -56,13 +56,10 @@ class UpdatePasswordForm extends Component implements HasForms
     {
         try {
             $data = $this->form->getState();
-
             Auth::user()->update([
                 'password' => Hash::make($data['password']),
             ]);
-
             $this->form->fill();  // Reset form setelah update
-
             Notification::make()
                 ->success()
                 ->title('Kata sandi berhasil diperbarui.')

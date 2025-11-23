@@ -25,6 +25,11 @@ class User extends Authenticatable implements HasAvatar
         'email',
         'password',
         'avatar_url',
+        'phone',
+        'address',
+        'birth_date',
+        'gender',
+        'education_level',
     ];
 
     /**
@@ -53,5 +58,20 @@ class User extends Authenticatable implements HasAvatar
     public function getFilamentAvatarUrl(): ?string
     {
         return $this->avatar_url ? Storage::url($this->avatar_url) : null;
+    }
+
+    public function getInitialsAttribute(): string
+    {
+        // Memecah nama berdasarkan spasi
+        $words = explode(' ', $this->name);
+
+        // Mengambil huruf pertama dari kata pertama dan kata terakhir
+        $initials = strtoupper(substr($words[0], 0, 1));
+
+        if (count($words) > 1) {
+            $initials .= strtoupper(substr(end($words), 0, 1));
+        }
+
+        return $initials;
     }
 }

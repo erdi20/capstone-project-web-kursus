@@ -77,14 +77,14 @@ class AppPanelProvider extends PanelProvider
             ->plugin(
                 BreezyCore::make()
                     ->myProfileComponents([])
-                // ->myProfile(
-                // shouldRegisterUserMenu: true,  // Sets the 'account' link in the panel User Menu (default = true)
-                // userMenuLabel: 'My Profile',  // Customizes the 'account' link label in the panel User Menu (default = null)
-                // shouldRegisterNavigation: false,  // Adds a main navigation item for the My Profile page (default = false)
-                // navigationGroup: 'Settings',  // Sets the navigation group for the My Profile page (default = null)
-                // hasAvatars: true,  // Enables the avatar upload form component (default = false)
-                // slug: 'my-profile'  // Sets the slug for the profile page (default = 'my-profile')
-                // )
+                    ->myProfile(
+                        // shouldRegisterUserMenu: true,  // Sets the 'account' link in the panel User Menu (default = true)
+                        // userMenuLabel: 'My Profile',  // Customizes the 'account' link label in the panel User Menu (default = null)
+                        // shouldRegisterNavigation: false,  // Adds a main navigation item for the My Profile page (default = false)
+                        // navigationGroup: 'Settings',  // Sets the navigation group for the My Profile page (default = null)
+                        hasAvatars: true,  // Enables the avatar upload form component (default = false)
+                        // slug: 'my-profile'  // Sets the slug for the profile page (default = 'my-profile')
+                    )
             );
     }
 }

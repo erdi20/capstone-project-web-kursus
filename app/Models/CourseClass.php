@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Model;
 
 class CourseClass extends Model
 {
@@ -49,4 +50,14 @@ class CourseClass extends Model
             ->withTimestamps()  // Jika kamu menggunakan created_at/updated_at di pivot
             ->orderBy('class_materials.order');  // <-- INI YANG DITAMBAHKAN
     }
+
+    public function essayAssignments(): HasMany
+    {
+        return $this->hasMany(EssayAssignment::class);
+    }
+
+    // public function quizAssignments(): HasMany
+    // {
+    //     return $this->hasMany(QuizAssignment::class);
+    // }
 }

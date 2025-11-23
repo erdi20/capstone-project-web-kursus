@@ -2,10 +2,12 @@
 
 namespace App\Filament\Pages;
 
-use App\Livewire\MyModernProfile\TwoFactorAuthenticationForm;
-use App\Livewire\MyModernProfile\UpdatePasswordForm;
-use App\Livewire\MyModernProfile\UpdatePersonalInfoForm;  // Import Livewire components Anda
 use Filament\Pages\Page;
+use Filament\Actions\Action;
+use Filament\Pages\Dashboard;
+use App\Livewire\MyModernProfile\UpdatePasswordForm;
+use App\Livewire\MyModernProfile\TwoFactorAuthenticationForm;
+use App\Livewire\MyModernProfile\UpdatePersonalInfoForm;  // Import Livewire components Anda
 // Anda bisa menambahkan Livewire components lain di sini
 
 class MyModernProfile extends Page
@@ -21,9 +23,9 @@ class MyModernProfile extends Page
     {
         return [
             // Contoh: Action untuk kembali ke dashboard
-            // Action::make('backToDashboard')
-            //     ->label('Kembali ke Dashboard')
-            //     ->url(fn (): string => Dashboard::getUrl()),
+            Action::make('backToDashboard')
+                ->label('Kembali ke Dashboard')
+                ->url(fn (): string => Dashboard::getUrl()),
         ];
     }
 
