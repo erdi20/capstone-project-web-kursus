@@ -2,6 +2,8 @@
 
 namespace App\Livewire\MyModernProfile;
 
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
@@ -9,6 +11,8 @@ use Filament\Notifications\Notification;
 use Filament\Forms;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
 class UpdatePersonalInfoForm extends Component implements HasForms
@@ -16,16 +20,42 @@ class UpdatePersonalInfoForm extends Component implements HasForms
     use InteractsWithForms;
 
     public ?array $data = [];
+    protected ?string $oldAvatarPath = null;  // <-- tambahkan ini
 
     public function mount(): void
     {
-        $this->form->fill(Auth::user()->only(['name', 'email', 'phone_number']));
+        $user = auth()->user();
+        $this->form->fill([
+            'name' => $user->name,
+            'email' => $user->email,
+            'avatar_url' => $user->avatar_url,
+            '_old_avatar' => $user->avatar_url,
+        ]);
     }
 
     public function form(Form $form): Form
     {
         return $form
             ->schema([
+                TextInput::make('_old_avatar')  // hidden field
+                    ->default(fn() => auth()->user()->avatar_url)
+                    ->hidden(),
+                FileUpload::make('avatar_url')
+                    ->disk('public')
+                    ->directory('avatars')
+                    ->visibility('public')
+                    ->image()
+                    ->avatar()
+                    ->deletable()
+                    ->downloadable(false),
+                // ->afterStateUpdated(function (?string $state, ?string $old) {
+                //     if (filled($old) && blank($state)) {
+                //         // Hanya hapus jika file lama ada dan berbeda
+                //         if (Storage::disk('public')->exists($old)) {
+                //             Storage::disk('public')->delete($old);
+                //         }
+                //     }
+                // }),
                 Forms\Components\TextInput::make('name')
                     ->label('Nama Lengkap')
                     ->required()
@@ -46,18 +76,49 @@ class UpdatePersonalInfoForm extends Component implements HasForms
                 //     ->label('Avatar Profil')
                 //     // ... konfigurasi avatar
             ])
-            ->statePath('data')
-            ->model(Auth::user());
+            ->statePath('data');
+        // ->model(Auth::user());
     }
 
     public function updateProfile(): void
     {
         $data = $this->form->getState();
-        Auth::user()->update($data);
 
+        // ⚡️ Muat ulang user dari database untuk pastikan getOriginal() akurat
+        $user = \App\Models\User::find(auth()->id());
+
+        $newAvatar = $data['avatar_url'] ?? null;
+        $oldAvatar = $user->getOriginal('avatar_url');  // nilai saat pertama kali diambil dari DB
+
+        Log::info('Avatar Change:', [
+            'old' => $oldAvatar,
+            'new' => $newAvatar,
+            'user_id' => $user->id
+        ]);
+
+        // Hanya hapus jika ada avatar lama dan berbeda
+        if ($oldAvatar && $oldAvatar !== $newAvatar) {
+            if (Storage::disk('public')->exists($oldAvatar)) {
+                Storage::disk('public')->delete($oldAvatar);
+                Log::info('✅ File lama berhasil dihapus.');
+            } else {
+                Log::warning('File tidak ditemukan di storage.', ['path' => $oldAvatar]);
+            }
+        }
+
+        // Simpan ke database
+        $user->update([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'avatar_url' => $newAvatar,
+        ]);
+
+        $this->dispatch('filament:refresh-user-avatar');
+        
+        $this->js('window.location.reload();');
         Notification::make()
             ->success()
-            ->title('Informasi profil berhasil diperbarui.')
+            ->title('Profil berhasil diperbarui.')
             ->send();
     }
 
