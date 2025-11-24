@@ -11,6 +11,7 @@ class Course extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'thumbnail',
         'price',
@@ -18,9 +19,11 @@ class Course extends Model
         'enrollment_start',
         'enrollment_end',
         'created_by',
+        'discount_price',
+        'discount_end_date',
     ];
 
-    public function CreatedBy(): BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
@@ -28,5 +31,11 @@ class Course extends Model
     public function materials()
     {
         return $this->hasMany(Material::class);
+    }
+
+    // ---------
+    public function scopeOpen($query)
+    {
+        return $query->where('status', 'open');
     }
 }

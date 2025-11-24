@@ -1,49 +1,176 @@
 <x-app-layout>
-<div class="max-w-6xl mx-auto px-4">
-      <section class="hero-bg rounded-lg mt-8 p-6 md:p-12 flex flex-col md:flex-row items-center gap-8">
-        <div class="md:w-1/2">
-          <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mb-4">
-            Tempat Terbaik untuk Mulai Perjalanan Belajarmu
-          </h1>
-          <p class="text-gray-600 mb-6">
-            Saatnya bijak memilih sumber belajar, tak hanya materi yang terjamin.
-          </p>
-          <div class="flex gap-3">
-            <a href="#" class="inline-block bg-yellow-400 text-black px-4 py-2 rounded font-semibold">Jelajahi Kelas</a>
-            <a href="#" class="inline-block border border-gray-300 text-gray-700 px-4 py-2 rounded">Pelajari Lebih Lanjut</a>
-          </div>
-        </div>
+    <div class="mx-auto max-w-[1200px] px-4 py-7" role="main">
 
-        <div class="md:w-1/2">
-          <img src="{{ asset('asset/6ded78e402afe633b1ad32e1d18e4c62.jpg') }}" alt="Ilustrasi belajar" class="w-full rounded-lg shadow-sm hero-image">
-        </div>
-      </section>
+        <!-- SESSION BANNER / SLIDE BANNER -->
+        <section class="mb-8 overflow-hidden rounded-xl bg-green-50">
+            <div class="flex flex-col items-center gap-6 p-6 md:flex-row md:p-10">
+                <div class="md:w-1/2">
+                    <h2 class="mb-3 text-2xl font-bold text-gray-800">Tempat Terbaik untuk Mulai Perjalanan Belajarmu</h2>
+                    <p class="mb-5 text-gray-600">Belajar jadi lebih seru dan terasa melejit. Materi terstruktur, latihan interaktif, dan kelas live yang membantu kamu berkembang.</p>
+                    <a href="#" class="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-6 py-3 font-semibold text-white transition hover:bg-green-700">
+                        Jelajahi Kelas
+                    </a>
+                </div>
+                <div class="md:w-1/2">
+                    <img src="https://via.placeholder.com/600x300?text=Ilustrasi+Animasi" alt="Ilustrasi belajar" class="h-auto w-full rounded-lg object-contain shadow-md">
+                </div>
+            </div>
+        </section>
 
-      <!-- deskripsi singkaadsadasat (dibatasi kanan-kiri agar sejajar dengan hero text) -->
-      <section class="mt-6">
-        <div class="mx-auto px-4 max-w-xl text-center">
-          <h2 class="text-2xl font-bold mb-2">KENAPA KAMI BISA DIANDALKAN</h2>
-          <p class="text-gray-600 mb-2 text-sm leading-relaxed">
-            Saatnya bijak memilih sumber belajar, tak hanya materi yang terjamin.
-          </p>
-          <p class="text-gray-600 mb-2 text-sm leading-relaxed">
-            meningkatkan pengalaman belajar sebagaimana pendidikan formal.
-          </p>
-        </div>`
-      </section>
+        <!-- HERO UTAMA -->
+        <section class="flex flex-wrap items-center justify-between gap-4 rounded-[14px] bg-gradient-to-r from-[#ffd89b] to-[#ffe0c7] p-9 shadow-[0_6px_20px_rgba(15,23,42,0.06)]" aria-labelledby="home-hero-title">
+            <div class="min-w-[260px] flex-1 flex-shrink-0">
+                <h1 id="home-hero-title" class="m-0 mb-3 text-[clamp(1.6rem,3.2vw,2.4rem)] font-bold leading-[1.05] text-[#072033]">Tempat Terbaik untuk Mulai Perjalanan Belajarmu</h1>
+                <p class="mb-5 text-[#6c757d]">Belajar jadi lebih seru dan terasa melejit. Materi terstruktur, latihan interaktif, dan kelas live yang membantu kamu berkembang.</p>
 
-      <!-- Banner statis menggantikan slideshow -->
-      <section class="py-10">
-        <div class="mx-auto max-w-4xl">
-          <img src="{{ asset('asset/wp5522970.jpg') }}" alt="Banner statis" class="w-full rounded-lg shadow-lg object-cover h-64 md:h-96">
-        </div>
-      </section>
+                <div class="flex flex-wrap gap-3">
+                    <a href="#" class="inline-flex min-w-[140px] flex-1 items-center justify-center gap-2 rounded-[10px] bg-gradient-to-r from-[#ffd89b] to-[#19547b] px-4 py-2.5 font-bold text-[#072033] shadow-[0_8px_20px_rgba(25,84,123,0.08)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] active:translate-y-0.5">Jelajahi Kelas</a>
+                    <a href="#" class="inline-flex min-w-[140px] flex-1 items-center justify-center gap-2 rounded-[10px] border border-[rgba(7,32,51,0.08)] bg-transparent px-4 py-2.5 font-bold text-[#072033] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] active:translate-y-0.5">Mulai Latihan Soal</a>
+                </div>
 
-      <!-- CTA Daftar -->
-      <section class="mt-12 mb-12 bg-yellow-400 rounded-lg p-8 text-center">
-        <h3 class="text-2xl font-bold mb-2">Ayo Daftar Sekarang, tunggu Apa lagi?</h3>
-        <p class="text-gray-800 mb-4">Dapatkan akses ke materi, sertifikat, dan komunitas pembelajar.</p>
-        <a href="#" class="inline-block bg-black text-white px-6 py-3 rounded font-semibold">Daftar</a>
-      </section>
+                <div class="mt-3.5 text-sm text-[#6c757d]">
+                    <span class="mr-4.5">• Kurikulum terstruktur</span>
+                    <span class="mr-4.5">• Sertifikat kelulusan</span>
+                    <span>• Komunitas & jadwal live</span>
+                </div>
+            </div>
+
+            <div>
+                <img src="/images/hero-illustration.png" alt="Ilustrasi hero" class="h-auto w-full max-w-[420px] flex-shrink-0 rounded-[12px] object-contain shadow-[0_6px_20px_rgba(15,23,42,0.06)]">
+            </div>
+        </section>
+
+        <!-- KELAS POPULER -->
+        <section class="mt-8.5" aria-labelledby="popular-classes">
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <h3 id="popular-classes" class="text-base font-medium">Kelas Populer</h3>
+                <a href="#" class="inline-flex items-center justify-center gap-2 rounded-[10px] border-none bg-transparent px-4 py-2.5 font-bold text-[#19547b] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] active:translate-y-0.5">Lihat semua</a>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4" role="list">
+                <article class="flex flex-col overflow-hidden rounded-[12px] bg-white shadow-[0_6px_20px_rgba(15,23,42,0.06)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:translate-y-[-6px] hover:shadow-[0_12px_40px_rgba(15,23,42,0.09)]" role="listitem" aria-label="Naratif Teknis">
+                    <img src="/images/class-placeholder.png" alt="Naratif Teknis" class="block h-40 w-full object-cover">
+                    <div class="flex flex-1 flex-col gap-2 p-3.5">
+                        <h4 class="m-0 text-base font-bold">Naratif Teknis</h4>
+                        <div class="text-sm text-[#6c757d]">Mentor: Gilung Ramadhan</div>
+                        <div class="mt-auto flex items-center justify-between gap-3">
+                            <div class="text-sm text-[#6c757d]">Durasi: 4 minggu</div>
+                            <a href="#" class="inline-block rounded-[8px] bg-[#0f5132] px-3 py-2 font-bold text-white no-underline">Rp 100.000</a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="flex flex-col overflow-hidden rounded-[12px] bg-white shadow-[0_6px_20px_rgba(15,23,42,0.06)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:translate-y-[-6px] hover:shadow-[0_12px_40px_rgba(15,23,42,0.09)]" role="listitem" aria-label="Kelas Contoh">
+                    <img src="/images/class-placeholder.png" alt="Kelas Contoh" class="block h-40 w-full object-cover">
+                    <div class="flex flex-1 flex-col gap-2 p-3.5">
+                        <h4 class="m-0 text-base font-bold">Kelas Contoh</h4>
+                        <div class="text-sm text-[#6c757d]">Mentor: Mentor Contoh</div>
+                        <div class="mt-auto flex items-center justify-between gap-3">
+                            <div class="text-sm text-[#6c757d]">Durasi: 3 minggu</div>
+                            <a href="#" class="inline-block rounded-[8px] bg-[#0f5132] px-3 py-2 font-bold text-white no-underline">Daftar</a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="flex flex-col overflow-hidden rounded-[12px] bg-white shadow-[0_6px_20px_rgba(15,23,42,0.06)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:translate-y-[-6px] hover:shadow-[0_12px_40px_rgba(15,23,42,0.09)]" role="listitem" aria-label="Kelas Lainnya">
+                    <img src="/images/class-placeholder.png" alt="Kelas Lainnya" class="block h-40 w-full object-cover">
+                    <div class="flex flex-1 flex-col gap-2 p-3.5">
+                        <h4 class="m-0 text-base font-bold">Kelas Lainnya</h4>
+                        <div class="text-sm text-[#6c757d]">Mentor: Mentor Lain</div>
+                        <div class="mt-auto flex items-center justify-between gap-3">
+                            <div class="text-sm text-[#6c757d]">Durasi: 2 minggu</div>
+                            <a href="#" class="inline-block rounded-[8px] bg-[#0f5132] px-3 py-2 font-bold text-white no-underline">Daftar</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <div class="mt-3.5 text-center">
+                <a href="#" class="mt-3.5 inline-block rounded-[10px] bg-black px-4 py-2.5 font-bold text-white no-underline">Lihat Kelas Lainnya</a>
+            </div>
+        </section>
+
+        <!-- KATEGORI POPULER -->
+        <section class="mt-8.5" aria-labelledby="categories">
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <h3 id="categories" class="text-base font-medium">Kategori Populer</h3>
+                <small class="text-sm text-[#6c757d]">Kelas berdasarkan kategori</small>
+            </div>
+
+            <div class="mt-3 grid grid-cols-3 gap-3" role="list">
+                <a class="flex min-h-[84px] items-center gap-3 rounded-[12px] bg-white p-3.5 text-inherit no-underline shadow-[0_6px_20px_rgba(15,23,42,0.06)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:translate-y-[-6px] hover:shadow-[0_12px_40px_rgba(15,23,42,0.09)]" role="listitem" href="#">
+                    <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full font-bold text-white" style="background:#8EE4AF;">🎓</div>
+                    <div class="flex flex-col gap-1">
+                        <strong>Pendidikan</strong>
+                        <div class="text-sm text-[#6c757d]">Kelas & materi</div>
+                    </div>
+                </a>
+
+                <a class="flex min-h-[84px] items-center gap-3 rounded-[12px] bg-white p-3.5 text-inherit no-underline shadow-[0_6px_20px_rgba(15,23,42,0.06)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:translate-y-[-6px] hover:shadow-[0_12px_40px_rgba(15,23,42,0.09)]" role="listitem" href="#">
+                    <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full font-bold text-white" style="background:#FFD166;">🗣️</div>
+                    <div class="flex flex-col gap-1">
+                        <strong>Bahasa</strong>
+                        <div class="text-sm text-[#6c757d]">Kelas & materi</div>
+                    </div>
+                </a>
+
+                <a class="flex min-h-[84px] items-center gap-3 rounded-[12px] bg-white p-3.5 text-inherit no-underline shadow-[0_6px_20px_rgba(15,23,42,0.06)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:translate-y-[-6px] hover:shadow-[0_12px_40px_rgba(15,23,42,0.09)]" role="listitem" href="#">
+                    <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full font-bold text-white" style="background:#89C2D9;">🔬</div>
+                    <div class="flex flex-col gap-1">
+                        <strong>Sains</strong>
+                        <div class="text-sm text-[#6c757d]">Kelas & materi</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- ULASAN -->
+        <section class="mt-8.5" aria-labelledby="reviews">
+            <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <h3 id="reviews" class="text-base font-medium">Ulasan Mereka</h3>
+                <small class="text-sm text-[#6c757d]">Dari siswa yang sudah mencoba</small>
+            </div>
+
+            <div class="mt-3 grid grid-cols-2 gap-4">
+                <div class="rounded-[12px] bg-gradient-to-b from-white to-[#f8fbff] p-4 shadow-[0_6px_20px_rgba(15,23,42,0.06)]">
+                    <p class="m-0 mb-3">“Kelasnya sangat membantu, pengajar jelas dan materi terstruktur.”</p>
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-full bg-[#0f5132] font-bold text-white">S</div>
+                        <div>
+                            <strong>Siti</strong>
+                            <div class="text-sm text-[#6c757d]">Siswa</div>
+                        </div>
+                        <div class="ml-auto font-bold text-[#0f5132]">Bidang Kemahiran</div>
+                    </div>
+                </div>
+
+                <div class="rounded-[12px] bg-gradient-to-b from-white to-[#f8fbff] p-4 shadow-[0_6px_20px_rgba(15,23,42,0.06)]">
+                    <p class="m-0 mb-3">“Latihan soal dan pembahasannya membuat saya lebih percaya diri menghadapi ujian.”</p>
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-full bg-[#0f5132] font-bold text-white">R</div>
+                        <div>
+                            <strong>Rian</strong>
+                            <div class="text-sm text-[#6c757d]">Siswa</div>
+                        </div>
+                        <div class="ml-auto font-bold text-[#0f5132]">Bidang Kemahiran</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- KENAPA KAMI BISA DIANDALKAN? -->
+        <section class="mt-8.5 rounded-xl bg-green-50 py-8">
+            <div class="text-center">
+                <h2 class="mb-3 text-2xl font-bold text-gray-800">KENAPA KAMI BISA DIANDALKAN?</h2>
+                <p class="text-gray-600">Karena kami memilih sumber belajar. Tak hanya materi yang terjamin.</p>
+            </div>
+        </section>
+
+        <!-- CTA AKHIR -->
+        <section class="p-6.5 mt-7 rounded-[12px] bg-gradient-to-r from-[#ffd89b] to-[#19547b] text-center text-[#072033]" role="region" aria-label="Daftar sekarang">
+            <h3 class="m-0 mb-2">Ayo Daftar Sekarang, tunggu apa lagi?</h3>
+            <p class="m-0 mb-3 text-[rgba(7,32,51,0.9)]">Dapatkan akses ke kelas populer, materi terstruktur, dan komunitas belajar.</p>
+            <a href="#" class="inline-flex min-w-[140px] flex-1 items-center justify-center gap-2 rounded-[10px] bg-gradient-to-r from-[#ffd89b] to-[#19547b] px-4 py-2.5 font-bold text-[#072033] shadow-[0_8px_20px_rgba(25,84,123,0.08)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] active:translate-y-0.5">Daftar Sekarang</a>
+        </section>
     </div>
 </x-app-layout>

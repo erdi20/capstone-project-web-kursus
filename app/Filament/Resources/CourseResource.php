@@ -9,9 +9,13 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\ImageColumn;
@@ -21,7 +25,10 @@ use Filament\Tables\Table;
 use Filament\Forms;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
+use Closure;
 
 class CourseResource extends Resource
 {
@@ -45,64 +52,109 @@ class CourseResource extends Resource
     {
         return $form
             ->schema([
-                Section::make('Informasi Utama Kursus')
-                    ->description('Detail dasar seperti nama, deskripsi, dan harga kursus.')
+                Section::make('Detail Dasar Kursus')
+                    ->description('Nama, deskripsi, slug URL, dan gambar sampul kursus.')
+                    ->columns(3)
                     ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->label('Nama Kursus')
-                            ->placeholder('Contoh: Full Stack Laravel Development')
-                            ->required()
-                            ->maxLength(255)
-                            ->autofocus(),
-                        Grid::make(2)
+                        Forms\Components\Group::make()
+                            ->columns(1)
+                            ->columnSpan(2)
                             ->schema([
-                                FileUpload::make('thumbnail')
-                                    ->label('Thumbnail Kursus (Gambar Sampul)')
-                                    // ->disk('public')
-                                    ->directory('course-thumbnails')
-                                    ->image()
-                                    ->required(),
-                                Forms\Components\TextInput::make('price')
-                                    ->label('Harga Kursus')
+                                TextInput::make('name')
+                                    ->label('Nama Kursus')
                                     ->required()
-                                    ->numeric()
-                                    ->prefix('Rp')
-                                    ->inputMode('decimal'),
+                                    ->maxLength(255)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn(Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                                TextInput::make('slug')
+                                    ->label('URL Slug')
+                                    ->helperText('Slug akan otomatis terisi. Ubah hanya jika diperlukan.')
+                                    ->required()
+                                    ->disabled()
+                                    ->dehydrated()
+                                    ->unique(ignoreRecord: true)
+                                    ->maxLength(255),
                             ]),
-                        Forms\Components\Textarea::make('description')
-                            ->label('Deskripsi Singkat Kursus')
-                            ->placeholder('Jelaskan secara singkat manfaat dan fokus utama kursus ini.')
-                            ->rows(5)
+                        FileUpload::make('thumbnail')
+                            ->label('Thumbnail Kursus')
+                            ->helperText('Gambar sampul yang menarik untuk kursus Anda.')
+                            ->disk('public')
+                            ->directory('course-thumbnails')
+                            ->image()
+                            ->imageEditor()
+                            ->required()
+                            ->columnSpan(1),
+                        RichEditor::make('description')
+                            ->label('Deskripsi Lengkap Kursus')
+                            ->placeholder('Jelaskan manfaat, kurikulum, dan siapa target kursus ini.')
                             ->required()
                             ->columnSpanFull(),
                     ]),
-                Section::make('Pengaturan Pendaftaran (Enrollment) dan Status')
-                    ->description('Atur kapan kursus ini dibuka untuk pendaftaran dan status publikasi.')
+                Section::make('Harga & Promosi (Diskon)')
+                    ->description('Tentukan harga dasar dan aktifkan promosi dengan harga diskon serta batas waktu.')
+                    ->columns(3)
+                    ->schema([
+                        TextInput::make('price')
+                            ->label('Harga Dasar (Rp)')
+                            ->numeric()
+                            ->prefix('Rp')
+                            ->required()
+                            ->minValue(0)
+                            ->columnSpan(1),
+                        TextInput::make('discount_price')
+                            ->label('Harga Diskon (Rp)')
+                            ->helperText('Kosongkan jika tidak ada diskon.')
+                            ->numeric()
+                            ->prefix('Rp')
+                            ->nullable()
+                            ->rule(fn(Get $get, $state): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                                $price = $get('price');
+                                if ($value !== null && $price !== null && $value >= $price) {
+                                    $fail("Harga diskon harus lebih rendah dari Harga Dasar (Rp {$price}).");
+                                }
+                            })
+                            ->columnSpan(1),
+                        DateTimePicker::make('discount_end_date')
+                            ->label('Diskon Berakhir Pada')
+                            ->helperText('Tanggal dan waktu diskon akan berakhir. Diperlukan jika Harga Diskon diisi.')
+                            ->nullable()
+                            ->minDate(now())
+                            ->columnSpan(1)
+                            ->rules([
+                                fn(Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                                    if ($get('discount_price') !== null && $value === null) {
+                                        $fail('Tanggal berakhir diskon wajib diisi jika Harga Diskon ditetapkan.');
+                                    }
+                                },
+                            ]),
+                    ]),
+                Section::make('Pengaturan Pendaftaran & Status')
+                    ->description('Kapan kursus dibuka/ditutup dan status publikasinya.')
                     ->columns(3)
                     ->schema([
                         Select::make('status')
-                            ->label('Status Publikasi')
+                            ->label('Status Kursus')
                             ->options([
                                 'draft' => 'Draft',
-                                'open' => 'Dibuka',
-                                'closed' => 'Tutup',
+                                'open' => 'Dibuka (Siap Pendaftaran)',
+                                'closed' => 'Tutup Pendaftaran',
                                 'archived' => 'Diarsipkan',
                             ])
                             ->default('draft')
                             ->required(),
                         DateTimePicker::make('enrollment_start')
                             ->label('Mulai Pendaftaran')
-                            ->placeholder('Pilih tanggal dan waktu')
+                            ->placeholder('Tanggal Mulai Pendaftaran')
                             ->seconds(false)
                             ->required(),
                         DateTimePicker::make('enrollment_end')
                             ->label('Akhir Pendaftaran')
-                            ->placeholder('Pilih tanggal dan waktu')
+                            ->placeholder('Tanggal Akhir Pendaftaran')
                             ->seconds(false)
                             ->required(),
                     ]),
                 Hidden::make('created_by')
-                    ->default(auth()->id()),  // Asumsi Anda menggunakan autentikasi default Laravel
+                    ->default(auth()->id()),
             ]);
     }
 
@@ -118,28 +170,60 @@ class CourseResource extends Resource
                     ->label('Nama Kursus')
                     ->searchable()
                     ->sortable()
-                    ->limit(35),
-                SelectColumn::make('status')
+                    ->limit(35)
+                    ->weight('bold'),
+                BadgeColumn::make('status')
                     ->label('Status')
                     ->sortable()
-                    ->options([
-                        'draft' => 'Draft',
-                        'open' => 'Dibuka',
-                        'closed' => 'Tutup',
-                        'archived' => 'Diarsipkan',
+                    ->colors([
+                        'warning' => 'draft',
+                        'success' => 'open',
+                        'danger' => 'closed',
+                        'secondary' => 'archived',
                     ]),
-                TextColumn::make('price')
-                    ->label('Harga')
+                TextColumn::make('price_display')
+                    ->label('Harga Jual')
+                    ->getStateUsing(function (Model $record) {
+                        $isDiscountActive =
+                            $record->discount_price !== null &&
+                            ($record->discount_end_date === null || now()->lessThan($record->discount_end_date));
+
+                        if ($isDiscountActive) {
+                            return $record->discount_price;
+                        }
+                        return $record->price;
+                    })
                     ->money('IDR')
+                    ->color(fn(Model $record) =>
+                        ($record->discount_price !== null && now()->lessThan($record->discount_end_date ?? now()->addDay())) ? 'danger' : 'success')  // Warna Merah jika diskon aktif
+                    ->description(function (Model $record) {
+                        $isDiscountActive =
+                            $record->discount_price !== null &&
+                            ($record->discount_end_date === null || now()->lessThan($record->discount_end_date));
+
+                        if ($isDiscountActive) {
+                            return 'Harga Normal: Rp' . number_format($record->price, 0, ',', '.');
+                        }
+                        return null;
+                    })
                     ->sortable(),
-                TextColumn::make('createdBy.name')
-                    ->label('Mentor (Dibuat Oleh)')
+                TextColumn::make('classes_count')
+                    ->label('Jml. Kelas')
+                    ->counts('classes')
+                    ->alignCenter()
                     ->sortable()
-                    ->searchable(),
+                    ->toggleable(),
+                TextColumn::make('createdBy.name')
+                    ->label('Mentor')
+                    ->sortable()
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('enrollment_start')
-                    ->label('Mulai Pendaftaran')
+                    ->label('Pendaftaran')
                     ->date('d M Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->description(fn(Model $record): string => 'Akhir: ' . \Carbon\Carbon::parse($record->enrollment_end)->format('d M Y'))
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->date('d M Y H:i')
