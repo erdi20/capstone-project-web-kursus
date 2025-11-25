@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 
 class Course extends Model
@@ -13,6 +14,7 @@ class Course extends Model
         'name',
         'slug',
         'description',
+        'short_description',
         'thumbnail',
         'price',
         'status',
@@ -31,6 +33,11 @@ class Course extends Model
     public function materials()
     {
         return $this->hasMany(Material::class);
+    }
+
+    public function classes(): HasMany
+    {
+        return $this->hasMany(CourseClass::class, 'course_id');
     }
 
     // ---------

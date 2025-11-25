@@ -13,7 +13,7 @@ class CourseController extends Controller
     public function index()
     {
         $courses = Course::Open()->with('user')->get();
-        return view('student.listcourse', \compact('courses'));
+        return view('student.course.listcourse', \compact('courses'));
     }
 
     /**
@@ -35,9 +35,10 @@ class CourseController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($slug)
     {
-        //
+        $course = Course::where('slug', $slug)->with('user')->first();
+        return view('student.course.course', \compact('course'));
     }
 
     /**

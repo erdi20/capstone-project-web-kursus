@@ -84,6 +84,11 @@ class CourseResource extends Resource
                             ->imageEditor()
                             ->required()
                             ->columnSpan(1),
+                        RichEditor::make('short_description')
+                            ->label('Deskripsi Singkat / Teaser')
+                            ->helperText('Paragraf pembuka yang menarik perhatian pengunjung. Gunakan gaya italic, bold, dll.')
+                            ->required()
+                            ->columnSpanFull(),
                         RichEditor::make('description')
                             ->label('Deskripsi Lengkap Kursus')
                             ->placeholder('Jelaskan manfaat, kurikulum, dan siapa target kursus ini.')

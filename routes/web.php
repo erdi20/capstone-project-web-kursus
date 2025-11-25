@@ -17,7 +17,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/course', function () {
         return view('student.course');
     });
-    Route::get('/listcourse', [CourseController::class, 'index']);
+    Route::get('/listkursus', [CourseController::class, 'index']);
+    Route::get('/detailkursus/{slug}', [CourseController::class, 'show'])->name('detailkursus');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
