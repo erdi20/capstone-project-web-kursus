@@ -1,9 +1,25 @@
 <x-app-layout>
+    @if ($errors->any())
+        <div class="mx-auto mb-4 max-w-6xl rounded-lg border border-red-400 bg-red-100 px-4 py-3 text-red-700">
+            <strong class="font-bold">Gagal Mendaftar!</strong>
+            <ul class="mt-1 list-inside list-disc">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="mx-auto mb-4 max-w-6xl rounded-lg border border-yellow-400 bg-yellow-100 px-4 py-3 text-yellow-700">
+            {{ session('error') }}
+        </div>
+    @endif
     <div class="mx-auto max-w-6xl px-4 py-10">
         <section class="grid grid-cols-1 items-center gap-6 rounded-lg bg-white p-6 shadow-sm md:grid-cols-2 md:p-10">
             <div class="rounded-lg bg-white p-6 shadow-sm">
                 <h2 class="mb-3 text-2xl font-bold">{{ $course->name }}</h2>
-                <div class="prose prose-sm sm:prose-base max-w-none text-gray-700">
+                <div class="prose prose-sm max-w-none text-gray-700 sm:prose-base">
                     {!! $course->short_description !!}
                 </div>
             </div>
@@ -17,6 +33,40 @@
                 <h3 class="mb-3 text-xl font-bold">Deskripsi Lengkap</h3>
                 <div class="prose max-w-none text-gray-700">
                     {!! $course->description !!}
+                </div>
+
+                <div class="mt-8">
+                    <h3 class="mb-4 text-xl font-bold">Kelas yang Tersedia</h3>
+
+                    @if ($course->classes->isEmpty())
+                        <p class="text-gray-500">Saat ini tidak ada kelas yang dibuka untuk pendaftaran.</p>
+                    @else
+                        <div class="grid grid-cols-1 gap-4">
+                            @foreach ($course->classes as $class)
+                                <div class="rounded-lg border border-gray-200 p-5 hover:shadow-md">
+                                    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                                        <div>
+                                            <h4 class="font-bold">{{ $class->name }}</h4>
+                                            <p class="mt-1 text-sm text-gray-600">
+                                                {!! Str::limit($class->description, 120) !!}
+                                            </p>
+                                        </div>
+                                        <div class="mt-3 md:mt-0">
+                                            <form action="{{ route('payment.initiate') }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="course_id" value="{{ $course->id }}">
+                                                <input type="hidden" name="course_class_id" value="{{ $class->id }}">
+                                                <p>{{ $class->id }}</p>
+                                                <button type="submit" class="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 md:w-auto">
+                                                    Daftar & Bayar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             </article>
 
@@ -50,11 +100,6 @@
                     <div class="text-sm text-gray-500">Level</div>
                     <div class="font-semibold">Pemula - Menengah</div>
                 </div>
-
-                <a href="#" class="inline-block w-full rounded-lg bg-gradient-to-r from-amber-400 to-amber-300 px-4 py-3 text-center font-semibold text-black shadow transition hover:shadow-md">
-                    Daftar Sekarang
-                </a>
-
                 <div class="mt-6 text-sm text-gray-500">
                     <div class="mb-2 font-semibold">Fitur Tambahan</div>
                     <ul class="list-disc space-y-1 pl-5">

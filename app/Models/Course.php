@@ -45,4 +45,11 @@ class Course extends Model
     {
         return $query->where('status', 'open');
     }
+
+    public function classEnrollments(): HasMany
+    {
+        // Asumsi foreign key di tabel 'class_enrollments' adalah 'class_id'
+        // dan merujuk ke 'id' dari 'course_classes'
+        return $this->hasMany(ClassEnrollment::class, 'class_id');
+    }
 }

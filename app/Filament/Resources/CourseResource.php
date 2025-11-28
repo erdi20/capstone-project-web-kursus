@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\CourseResource\RelationManagers\ClassesRelationManager;
 use App\Filament\Resources\CourseResource\Pages;
 use App\Filament\Resources\CourseResource\RelationManagers;
 use App\Models\Course;
@@ -251,7 +252,7 @@ class CourseResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ClassesRelationManager::class,
         ];
     }
 
