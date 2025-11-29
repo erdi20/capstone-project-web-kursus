@@ -1,71 +1,74 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<x-app-layout>
 
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+    <div class="max-w-[450px] mx-auto px-4 py-6">
 
-  <title>Naratif Teknis</title>
-</head>
+        {{-- Judul Tengah --}}
+        <h1 class="text-center font-bold text-2xl mb-6">Naratif Teknis</h1>
 
-<body class="m-0 bg-[#f2f2f2] font-[Arial,sans-serif] box-border">
+        {{-- Subjudul --}}
+        <h2 class="text-left text-xl font-bold mb-2">Naratif Teknis</h2>
 
-  <!-- Konten -->
-  <div class="w-full flex flex-col items-center px-[15px] md:px-[80px] pt-10 pb-[120px]">
+        {{-- Paragraf 1 --}}
+        <p class="text-sm text-gray-700 leading-relaxed mb-6">
+            Naratif teknis adalah suatu penulisan berbentuk narasi (cerita) yang digunakan untuk
+            menjelaskan proses, prosedur, atau teknologi secara sistematis.
+        </p>
 
-    <h1 class="text-center mb-10 text-[50px] font-bold">Naratif Teknis</h1>
+        {{-- Video 1 --}}
+        <div class="w-full max-w-[350px] h-[180px] bg-gray-300 mx-auto rounded-md mb-2"></div>
+        <p class="text-center text-xs text-gray-600 mb-6">Video pengenalan youtube</p>
 
-    <p class="text-[16px] leading-[1.8] text-justify mb-[25px] max-w-[1000px]">
-      Naratif teknis adalah teks atau penjelasan berbentuk narasi (cerita) yang digunakan untuk
-      menjelaskan proses, prosedur, atau teknologi secara sistematis. Naratif teknis adalah teks atau penjelasan berbentuk narasi (cerita) yang digunakan untuk
-      menjelaskan proses, prosedur, atau teknologi secara sistematis.Naratif teknis adalah teks atau penjelasan berbentuk narasi (cerita) yang digunakan untuk
-      menjelaskan proses, prosedur, atau teknologi secara sistematis.Naratif teknis adalah teks atau penjelasan berbentuk narasi (cerita) yang digunakan untuk
-      menjelaskan proses, prosedur, atau teknologi secara sistematis.
-    </p>
+        {{-- Paragraf 2 --}}
+        <p class="text-sm text-gray-700 leading-relaxed mb-6">
+            Naratif teknis adalah teks atau penulisan berbentuk narasi (cerita) yang digunakan
+            untuk menjelaskan proses, prosedur, atau teknologi secara sistematis. Naratif teknis
+            membantu pembaca memahami langkah kerja secara runtut. Naratif teknis adalah teks atau penulisan berbentuk narasi (cerita) yang digunakan
+            untuk menjelaskan proses, prosedur, atau teknologi secara sistematis. Naratif teknis
+            membantu pembaca memahami langkah kerja secara runtut.
+        </p>
 
-    <!-- Video Box -->
-    <div class="w-full max-w-[500px] aspect-video bg-[#d9d9d9] rounded-lg mx-auto mb-5"></div>
-    <div class="text-[14px] text-[#666] text-center mb-[30px]">Video pengenalan Youtube</div>
+        {{-- Video 2 --}}
+        <div class="w-full max-w-[350px] h-[180px] bg-gray-300 mx-auto rounded-md mb-2"></div>
+        <p class="text-center text-xs text-gray-600 mb-6">Video pengenalan youtube 2</p>
 
-    <p class="text-[16px] leading-[1.8] text-justify mb-[25px] max-w-[1000px]">
-      Naratif teknis membantu pembaca memahami langkah kerja secara runtut, jelas, dan terstruktur. Naratif teknis adalah teks atau penjelasan berbentuk narasi (cerita) yang digunakan untuk
-      menjelaskan proses, prosedur, atau teknologi secara sistematis.Naratif teknis adalah teks atau penjelasan berbentuk narasi (cerita) yang digunakan untuk
-      menjelaskan proses, prosedur, atau teknologi secara sistematis.
-    </p>
+        {{-- Paragraf 3 --}}
+        <p class="text-sm text-gray-700 leading-relaxed mb-6">
+            Naratif teknis juga digunakan dalam pendidikan dan industri untuk menjelaskan alur
+            kerja secara terstruktur dan jelas. Naratif teknis juga digunakan dalam pendidikan dan industri untuk menjelaskan alur
+            kerja secara terstruktur dan jelas. Naratif teknis juga digunakan dalam pendidikan dan industri untuk menjelaskan alur
+            kerja secara terstruktur dan jelas. 
+        </p>
 
-    <!-- Video Box -->
-    <div class="w-full max-w-[500px] aspect-video bg-[#d9d9d9] rounded-lg mx-auto mb-5"></div>
-    <div class="text-[14px] text-[#666] text-center mb-[30px]">Video pengenalan Youtube</div>
+        {{-- Garis kiri-kanan --}}
+        <div class="flex justify-between mb-8">
+            <div class="w-[40%] border-b border-gray-400"></div>
+            <div class="w-[40%] border-b border-gray-400"></div>
+        </div>
 
-    <p class="text-[16px] leading-[1.8] text-justify mb-[25px] max-w-[1000px]">
-      Teks ini banyak digunakan dalam pendidikan dan dunia industri untuk menjelaskan prosedur kerja.
-    </p>
+        {{-- Tombol Quiz --}}
+        <button class="w-full bg-gray-300 text-gray-900 font-semibold py-3 mb-4 rounded-md">
+            quiz
+        </button>
 
-    <!-- Garis -->
-    <hr class="border-none h-[2px] bg-[#ddd] my-10 w-full max-w-[1000px]">
+        {{-- Tombol Esai --}}
+        <button class="w-full bg-gray-300 text-gray-900 font-semibold py-3 mb-10 rounded-md">
+            esai
+        </button>
 
-    <!-- Tombol -->
-    <div class="w-[300px] bg-[#e0e0e0] text-center py-[14px] mb-[15px] rounded-[10px] font-bold cursor-pointer">
-      Quiz
     </div>
 
-    <div class="w-[300px] bg-[#e0e0e0] text-center py-[14px] mb-[15px] rounded-[10px] font-bold cursor-pointer">
-      Esai
+    {{-- Navigasi bawah --}}
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 
+                px-6 py-4 flex justify-between items-center">
+
+        <button class="bg-[#00c896] text-white font-semibold px-8 py-2 rounded-full shadow-md">
+            Back
+        </button>
+
+        <button class="bg-[#00c896] text-white font-semibold px-8 py-2 rounded-full shadow-md">
+            Next
+        </button>
+
     </div>
-  </div>
 
-  <!-- Navigasi Bawah -->
-  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-[#ddd] 
-              px-[20px] md:px-[80px] py-[15px] flex justify-between items-center">
-    <button class="bg-[#00c896] border-none px-[40px] py-[12px] rounded-full font-bold text-[16px] cursor-pointer">
-      Back
-    </button>
-    <button class="bg-[#00c896] border-none px-[40px] py-[12px] rounded-full font-bold text-[16px] cursor-pointer">
-      Next
-    </button>
-  </div>
-
-</body>
-</html>
+</x-app-layout>
