@@ -27,9 +27,13 @@ class ClassEnrollment extends Model
         return $this->belongsTo(User::class, 'student_id');  // foreign key = student_id
     }
 
+    public function courseClass()
+    {
+        return $this->belongsTo(CourseClass::class, 'class_id');
+    }
+
     public function course()
     {
-        return $this->belongsTo(Course::class, 'class_id');  // foreign key = class_id
+        return $this->belongsTo(Course::class, 'course_id');
     }
-    
 }

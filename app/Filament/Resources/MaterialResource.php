@@ -96,7 +96,7 @@ class MaterialResource extends Resource
                         // Video Link
                         TextInput::make('link_video')
                             ->label('Tautan Video (YouTube/Vimeo)')
-                            ->url()  // Menambah validasi URL
+                            // ->url()  // Menambah validasi URL
                             ->placeholder('Masukkan URL video'),
                         // Unggah PDF
                         FileUpload::make('pdf')

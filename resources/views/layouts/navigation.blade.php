@@ -12,11 +12,11 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link>
-                        {{ __('Sertifikat') }}
+                    <x-nav-link href="{{ route('listkursus') }}">
+                        {{ __('Daftar Kursus') }}
                     </x-nav-link>
-                    <x-nav-link>
-                        {{ __('Jadwal Live') }}
+                    <x-nav-link href="{{ route('listkelas') }}">
+                        {{ __('Kelas Saya') }}
                     </x-nav-link>
                     <x-nav-link>
                         {{ __('Klinik Skripsi') }}

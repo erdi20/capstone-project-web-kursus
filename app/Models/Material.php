@@ -28,12 +28,4 @@ class Material extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
-
-    public function materials()
-    {
-        return $this
-            ->belongsToMany(Material::class, 'class_materials')
-            ->withPivot('order', 'schedule_date', 'visibility')
-            ->orderBy('pivot_order');
-    }
 }

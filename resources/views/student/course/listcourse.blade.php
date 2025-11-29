@@ -15,11 +15,7 @@
             </div>
         </div>
 
-        <div class="mb-8 flex justify-center">
-            <button class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
-                📋 Filter Kelas
-            </button>
-        </div>
+
 
         <div class="my-8 border-t border-gray-200"></div>
 
