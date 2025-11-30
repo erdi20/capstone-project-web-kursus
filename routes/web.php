@@ -6,6 +6,7 @@ use App\Http\Controllers\EssayController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QuizController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -33,6 +34,12 @@ Route::middleware('auth')->group(function () {
     // --------------------- tugas essay
     Route::get('/kelas/{classId}/essay/{assignmentId}', [EssayController::class, 'show'])->name('essay.show');
     Route::post('/kelas/{classId}/essay/{assignmentId}/submit', [EssayController::class, 'submit'])->name('essay.submit');
+    // ---------------------
+    // Quiz
+    Route::get('/kelas/{classId}/quiz/{assignmentId}', [QuizController::class, 'show'])->name('quiz.show');
+    Route::post('/kelas/{classId}/quiz/{assignmentId}/submit', [QuizController::class, 'submit'])->name('quiz.submit');
+    Route::get('/kelas/{classId}/quiz/{assignmentId}/result', [QuizController::class, 'result'])
+        ->name('quiz.result');
     // ---------------------
     Route::post('/payment/initiate', [PaymentController::class, 'initiatePayment'])->name('payment.initiate');
     Route::get('/payment/checkout', [PaymentController::class, 'showCheckoutPage'])->name('payment.checkout');

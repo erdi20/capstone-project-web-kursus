@@ -102,22 +102,50 @@
                     <div class="lg:col-span-4">
                         <section class="rounded-xl border border-gray-200 bg-gray-50 p-6 shadow-inner">
                             <!-- Daftar Tugas Essay -->
-                            <h3 class="mb-4 border-b pb-2 text-xl font-bold text-gray-900">Tugas Essay</h3>
+                            <!-- Daftar Semua Tugas (Essay + Quiz) -->
+                            <h3 class="mb-4 border-b pb-2 text-xl font-bold text-gray-900">Daftar Tugas</h3>
                             <div id="daftar-tugas" class="space-y-3">
-                                @forelse ($essayAssignments as $assignment)
+                                @forelse ($allAssignments as $assignment)
                                     @php
-                                        $isSubmitted = in_array($assignment->id, $userSubmissions);
+                                        // Tentukan jenis tugas
+                                        $isEssay = $assignment->type === 'essay';
+                                        $isQuiz = $assignment->type === 'quiz';
+
+                                        // Cek apakah sudah dikerjakan
+                                        $isSubmitted = false;
+                                        if ($isEssay) {
+                                            $isSubmitted = in_array($assignment->id, $userEssaySubmissions);
+                                        } elseif ($isQuiz) {
+                                            $isSubmitted = in_array($assignment->id, $userQuizSubmissions);
+                                        }
+
                                         $status = $isSubmitted ? 'Selesai' : 'Belum Dikerjakan';
                                         $statusColor = $isSubmitted ? 'bg-green-100 text-green-700 border-green-300' : 'bg-red-100 text-red-700 border-red-300';
                                         $icon = $isSubmitted
                                             ? '<svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
                                             : '<svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
+
+                                        // Tentukan route berdasarkan jenis
+                                        if ($isEssay) {
+                                            $routeUrl = route('essay.show', ['classId' => $class->id, 'assignmentId' => $assignment->id]);
+                                        } elseif ($isQuiz) {
+                                            $routeUrl = route('quiz.show', ['classId' => $class->id, 'assignmentId' => $assignment->id]);
+                                        } else {
+                                            $routeUrl = '#';
+                                        }
                                     @endphp
 
-                                    <a href="{{ route('essay.show', ['classId' => $class->id, 'assignmentId' => $assignment->id]) }}" class="{{ $statusColor }} block rounded-lg border bg-white p-3 shadow-sm transition duration-150 hover:bg-gray-50">
+                                    <a href="{{ $routeUrl }}" class="{{ $statusColor }} block rounded-lg border bg-white p-3 shadow-sm transition duration-150 hover:bg-gray-50">
                                         <div class="flex items-start justify-between">
                                             <div class="flex flex-col">
-                                                <span class="text-sm font-semibold">{{ $assignment->title }}</span>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-sm font-semibold">{{ $assignment->title }}</span>
+                                                    @if ($isEssay)
+                                                        <span class="rounded bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-700">Essay</span>
+                                                    @elseif ($isQuiz)
+                                                        <span class="rounded bg-purple-100 px-1.5 py-0.5 text-xs font-medium text-purple-700">Quiz</span>
+                                                    @endif
+                                                </div>
                                                 <div class="mt-1 flex items-center text-xs">
                                                     {!! $icon !!}
                                                     <span class="font-medium">{{ $status }}</span>
@@ -132,7 +160,7 @@
                                         </div>
                                     </a>
                                 @empty
-                                    <p class="italic text-gray-500">Belum ada tugas essay untuk kelas ini.</p>
+                                    <p class="italic text-gray-500">Belum ada tugas untuk kelas ini.</p>
                                 @endforelse
                             </div>
 

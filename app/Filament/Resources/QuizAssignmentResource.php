@@ -174,6 +174,11 @@ class QuizAssignmentResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\Action::make('submissions')
+                    ->label('Lihat Pengumpulan')
+                    ->url(fn(QuizAssignment $record) => static::getUrl('submissions', ['record' => $record->id]))
+                    ->button()
+                    ->color('info'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -189,12 +194,19 @@ class QuizAssignmentResource extends Resource
         ];
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('created_by', auth()->id());
+    }
+
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListQuizAssignments::route('/'),
             'create' => Pages\CreateQuizAssignment::route('/create'),
             'edit' => Pages\EditQuizAssignment::route('/{record}/edit'),
+            'submissions' => Pages\ViewQuizSubmissions::route('/{record}/submissions'),  // ← tambahkan ini
         ];
     }
 }
