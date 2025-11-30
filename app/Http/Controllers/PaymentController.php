@@ -52,10 +52,10 @@ class PaymentController extends Controller
             $orderId = 'TRX-' . time() . '-' . $class->id;
 
             // Setup Midtrans configuration
-            \Midtrans\Config::$serverKey = config('services.midtrans.server_key');
-            \Midtrans\Config::$isProduction = config('services.midtrans.is_production');
-            \Midtrans\Config::$isSanitized = true;
-            \Midtrans\Config::$is3ds = true;
+            Config::$serverKey = config('services.midtrans.server_key');
+            Config::$isProduction = config('services.midtrans.is_production');
+            Config::$isSanitized = true;
+            Config::$is3ds = true;
 
             $params = [
                 'transaction_details' => [
@@ -76,7 +76,7 @@ class PaymentController extends Controller
                 ],
             ];
 
-            $snapToken = \Midtrans\Snap::getSnapToken($params);
+            $snapToken = Snap::getSnapToken($params);
 
             $payment = new Payment();
             $payment->course_id = $course->id;
@@ -105,8 +105,8 @@ class PaymentController extends Controller
     public function handleMidtransNotification(Request $request)
     {
         // 🔒 Set Midtrans config (wajib untuk verifikasi signature)
-        \Midtrans\Config::$serverKey = config('services.midtrans.server_key');
-        \Midtrans\Config::$isProduction = config('services.midtrans.is_production');
+        Config::$serverKey = config('services.midtrans.server_key');
+        Config::$isProduction = config('services.midtrans.is_production');
 
         try {
             // 1. Ambil notifikasi dari Midtrans (otomatis verifikasi signature)

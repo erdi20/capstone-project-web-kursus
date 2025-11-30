@@ -96,14 +96,6 @@
                             <div class=" text-left">Presensi</div>
                             <div class="text-right">5X</div>
                         </div>
-                        <div class="w-full bg-gray-300 text-gray-800 font-semibold py-3 px-4 mb-3 rounded-lg shadow text-center text-sm border-2 border-black grid grid-cols-2 justify-items-center">
-                            <div class=" text-left">Essai</div>
-                            <div class="text-right">5X</div>
-                        </div>
-                        <div class="w-full bg-gray-300 text-gray-800 font-semibold py-3 px- mb-3 rounded-lg shadow text-center text-sm border-2 border-black grid grid-cols-2 justify-items-center">
-                            <div class=" text-left">Quiz</div>
-                            <div class="text-right">5X</div>
-                        </div>
                     </div>
                 </section>
 
