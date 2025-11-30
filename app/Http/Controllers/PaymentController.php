@@ -158,7 +158,7 @@ class PaymentController extends Controller
 
             // 6. Buat ClassEnrollment jika memenuhi syarat
             if ($shouldEnroll) {
-                // ✅ PERBAIKAN UTAMA: gunakan course_class_id dari payment
+                //  PERBAIKAN UTAMA: gunakan course_class_id dari payment
                 $courseClassId = $payment->course_class_id;
                 $studentId = $payment->student_id;
 

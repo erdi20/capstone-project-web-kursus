@@ -3,13 +3,13 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Support\Facades\Storage;
-use Filament\Models\Contracts\HasAvatar;
-use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\FilamentUser;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable implements HasAvatar
 {
@@ -81,5 +81,18 @@ class User extends Authenticatable implements HasAvatar
         // Model ClassEnrollment menggunakan foreign key 'student_id'
         // untuk merujuk ke 'users.id'.
         return $this->hasMany(ClassEnrollment::class, 'student_id');
+    }
+
+    // policy
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    // Method untuk mengecek apakah user adalah Mentor
+    public function isMentor(): bool
+    {
+        return $this->role === 'mentor';
     }
 }

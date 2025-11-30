@@ -2,12 +2,14 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Auth\RegisterMentor;
 use App\Filament\Pages\MyModernProfile;
 use App\Livewire\MyCustomComponent;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Pages\Auth\Register;
 use Filament\Support\Colors\Color;
 use Filament\Pages;
 use Filament\Panel;
@@ -31,6 +33,7 @@ class AppPanelProvider extends PanelProvider
             ->id('app')
             ->path('app')
             ->login()
+            ->registration(RegisterMentor::class)
             ->brandName('web kursus')
             ->topNavigation()
             // ->sidebarCollapsibleOnDesktop()
