@@ -30,6 +30,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/kelas/{classId}/materi/{materialId}', [MaterialController::class, 'show'])->name('materials.show');
     // Route::get('/detailmateri/{id}', [MaterialController::class, 'show'])->name('materi.show');
     // Route::get('/certificates/{classId}/download', [CertificateController::class, 'download'])->name('certificates.download');
+    // --------------------- tugas essay
+    Route::get('/kelas/{classId}/essay/{assignmentId}', [EssayController::class, 'show'])->name('essay.show');
+    Route::post('/kelas/{classId}/essay/{assignmentId}/submit', [EssayController::class, 'submit'])->name('essay.submit');
     // ---------------------
     Route::post('/payment/initiate', [PaymentController::class, 'initiatePayment'])->name('payment.initiate');
     Route::get('/payment/checkout', [PaymentController::class, 'showCheckoutPage'])->name('payment.checkout');

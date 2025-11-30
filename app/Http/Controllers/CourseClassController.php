@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ClassEnrollment;
 use App\Models\Course;
-use App\Models\CourseClass;
 use App\Models\Material;
+use App\Models\CourseClass;
 use Illuminate\Http\Request;
+use App\Models\ClassEnrollment;
+use App\Models\EssayAssignment;
+use App\Models\EssaySubmission;
 use Illuminate\Support\Facades\Auth;
 
 class CourseClassController extends Controller
@@ -45,23 +47,45 @@ class CourseClassController extends Controller
      * Display the specified resource.
      */
     // CourseClassController.php
+    // public function show(string $id)
+    // {
+    //     $user = Auth::user();
+    //     $class = CourseClass::with(['course', 'materialsFE'])  // ✅ eager load materials
+    //         ->where('id', $id)
+    //         ->firstOrFail();
+    //     $enrollment = ClassEnrollment::where('student_id', $user->id)
+    //         ->where('class_id', $class->id)
+    //         ->first();
+    //     if (!$enrollment) {
+    //         abort(403, 'Anda tidak terdaftar di kelas ini.');
+    //     }
+    //     return view('student.class.class', compact('class', 'enrollment'));
+    // }
+    // ------------------- refactor
     public function show(string $id)
     {
         $user = Auth::user();
-
-        $class = CourseClass::with(['course', 'materialsFE'])  // ✅ eager load materials
-            ->where('id', $id)
-            ->firstOrFail();
+        $class = CourseClass::with('course', 'materials')->findOrFail($id);
 
         $enrollment = ClassEnrollment::where('student_id', $user->id)
-            ->where('class_id', $class->id)
-            ->first();
+            ->where('class_id', $id)
+            ->firstOrFail();
 
-        if (!$enrollment) {
-            abort(403, 'Anda tidak terdaftar di kelas ini.');
-        }
+        // Ambil semua essay assignments untuk kelas ini
+        $essayAssignments = EssayAssignment::where('course_class_id', $id)
+            ->where('is_published', true)
+            ->orderBy('due_date', 'asc')
+            ->get();
 
-        return view('student.class.class', compact('class', 'enrollment'));
+        // Ambil submission user (jika ada)
+        $userSubmissions = EssaySubmission::where('student_id', $user->id)
+            ->whereIn('essay_assignment_id', $essayAssignments->pluck('id'))
+            ->pluck('essay_assignment_id')
+            ->toArray();
+
+        return view('student.class.class', compact(
+            'class', 'enrollment', 'essayAssignments', 'userSubmissions'
+        ));
     }
 
     /**
@@ -89,6 +113,4 @@ class CourseClassController extends Controller
     }
 
     // -------------------
-
-    
 }

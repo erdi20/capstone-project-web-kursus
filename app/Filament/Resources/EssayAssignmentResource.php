@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\EssayAssignmentResource\RelationManagers\SubmissionsRelationManager;
 use App\Filament\Resources\EssayAssignmentResource\Pages;
 use App\Filament\Resources\EssayAssignmentResource\RelationManagers;
 use App\Models\EssayAssignment;
@@ -185,8 +186,12 @@ class EssayAssignmentResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                // Menambahkan ViewAction untuk melihat detail tugas (UX yang baik)
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\Action::make('submissions')
+                    ->label('Lihat Pengumpulan')
+                    ->url(fn(EssayAssignment $record): string => static::getUrl('submissions', ['record' => $record->id]))
+                    ->button()
+                    ->color('info'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -198,8 +203,14 @@ class EssayAssignmentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            SubmissionsRelationManager::class,
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('created_by', auth()->id());  // hanya tugas yang dibuat oleh user ini
     }
 
     public static function getPages(): array
@@ -208,6 +219,7 @@ class EssayAssignmentResource extends Resource
             'index' => Pages\ListEssayAssignments::route('/'),
             'create' => Pages\CreateEssayAssignment::route('/create'),
             'edit' => Pages\EditEssayAssignment::route('/{record}/edit'),
+            'submissions' => Pages\ViewEssaySubmissions::route('/{record}/submissions'),  // ← tambahkan ini
         ];
     }
 }

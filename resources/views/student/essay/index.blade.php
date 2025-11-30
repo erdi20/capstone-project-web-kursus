@@ -1,57 +1,39 @@
 <x-app-layout>
+    <div class="mx-auto max-w-4xl px-4 py-8">
+        <div class="mb-6">
+            <a href="{{ route('kelas', $assignment->course_class_id) }}" class="inline-flex items-center text-blue-600 hover:underline">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Kembali ke Kelas
+            </a>
+        </div>
 
-    <div class="mx-auto max-w-6xl px-4">
-        <div class="page-container mb-6 bg-white pb-4 shadow-xl">
-            <div class="mb-6 mt-6 px-4 pb-6 pt-8 sm:px-6">
-                <h1 class="mb-6 text-center text-2xl font-bold text-gray-900">Essay Assignment</h1>
-                <form method="POST" action="">
+        <div class="rounded-xl bg-white p-6 shadow-lg">
+            <h1 class="mb-2 text-2xl font-bold text-gray-900">{{ $assignment->title }}</h1>
 
-                    @csrf
-                    <div class="mx-4 my-4 rounded-2xl bg-gradient-to-r from-[#20C896] to-[#259D7A] px-5 py-5 shadow-xl">
-                        <div class="mt-4 rounded-lg bg-transparent p-4">
-                            <div class="mb-4 flex items-center justify-between font-semibold text-gray-800">
-                                <p class="m-2 mb-3 ml-5 p-2 px-6 text-2xl">Iki Judul Materi e Pling</p>
-                                <p class="m-2 mb-3 mr-8 p-2 px-6">
-                                    Time: <span id="time" class="font-bold">10:00</span>
-                                </p>
-                            </div>
+            @if ($assignment->due_date)
+                <p class="mb-6 text-sm text-gray-600">Batas pengumpulan: {{ \Carbon\Carbon::parse($assignment->due_date)->translatedFormat('d F Y, H:i') }}</p>
+            @endif
 
-                            <div class="mx-12 mb-5 h-3 w-auto border-b-4 border-t-2 border-slate-700"></div>
-
-                            <ol class="m-2 mb-3 ml-5 list-decimal space-y-3 p-2 px-6 text-gray-900">
-                                <li>Naratif teknis adalah teks atau penulisan berbentuk narasi (cerita) yang digunakan
-                                    untuk
-                                    menjelaskan proses, prosedur, atau teknologi secara sistematis.</li>
-                                <li>Naratif teknis adalah teks atau penulisan berbentuk narasi (cerita) yang digunakan
-                                    untuk
-                                    menjelaskan proses, prosedur, atau teknologi secara sistematis.</li>
-                                <li>Naratif teknis adalah teks atau penulisan berbentuk narasi (cerita) yang digunakan
-                                    untuk
-                                    menjelaskan proses, prosedur, atau teknologi secara sistematis.</li>
-                            </ol>
-                            <div class="m-2 mx-5 mb-3 rounded-xl border border-gray-200 bg-white p-2 px-6 shadow-inner">
-
-                                <div class="border-t border-gray-200 pt-3">
-                                    <textarea name="essay_answer" class="min-h-[120px] w-full resize-none border-0 p-2 text-gray-800 placeholder-gray-400 focus:outline-none" placeholder="Tulis jawabanmu di sini..."></textarea>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <div id="buttons" class="justify-items-center py-6">
-                        {{-- <div class="invisible">
-                                    <h1><button
-                                            class="p-3 px-6 rounded-xl  bg-gradient-to-r from-[#20C896] to-[#259D7A] font-black"><a
-                                                href="#">Back</a></button></h1>
-                                </div> --}}
-                        <div>
-                            <button type="submit" class="rounded-xl bg-gradient-to-r from-[#20C896] to-[#259D7A] p-3 px-6 font-black">Kirim
-                                Quiz</button>
-                        </div>
-                    </div>
-                </form>
+            <div class="prose prose-slate mb-8 max-w-none">
+                {!! ($assignment->description) !!}
             </div>
+
+            <form method="POST" action="{{ route('essay.submit', ['classId' => $assignment->course_class_id, 'assignmentId' => $assignment->id]) }}">
+                @csrf
+                <div class="mb-6">
+                    <label for="essay_answer" class="mb-2 block text-sm font-medium text-gray-700">Jawaban Anda</label>
+                    <textarea name="essay_answer" id="essay_answer" required class="min-h-[150px] w-full rounded-lg border border-gray-300 p-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-500" placeholder="Tulis jawaban Anda di sini...">{{ old('essay_answer', $submission?->answer_text) }}</textarea>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <a href="{{ route('kelas', $assignment->course_class_id) }}" class="rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-100">Batal</a>
+                    <button type="submit" class="rounded-lg bg-gradient-to-r from-[#20C896] to-[#259D7A] px-6 py-2 font-semibold text-white hover:opacity-90">
+                        {{ $submission ? 'Perbarui Jawaban' : 'Kirim Jawaban' }}
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </x-app-layout>

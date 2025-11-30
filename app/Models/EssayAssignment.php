@@ -37,4 +37,6 @@ class EssayAssignment extends Model
     {
         return $this->hasMany(EssaySubmission::class);
     }
+
+   
 }

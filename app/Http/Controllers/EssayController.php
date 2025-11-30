@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ClassEnrollment;
+use App\Models\EssayAssignment;
+use App\Models\EssaySubmission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class EssayController extends Controller
 {
@@ -14,51 +18,56 @@ class EssayController extends Controller
         return view('student.essay.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function show(string $classId, string $assignmentId)
     {
-        //
+        $user = Auth::user();
+
+        // Validasi: user terdaftar di kelas?
+        $enrollment = ClassEnrollment::where('student_id', $user->id)
+            ->where('class_id', $classId)
+            ->firstOrFail();
+
+        // Ambil assignment
+        $assignment = EssayAssignment::where('id', $assignmentId)
+            ->where('course_class_id', $classId)
+            ->where('is_published', true)
+            ->firstOrFail();
+
+        // Cek apakah sudah pernah submit
+        $submission = EssaySubmission::where('essay_assignment_id', $assignmentId)
+            ->where('student_id', $user->id)
+            ->first();
+
+        return view('student.essay.index', compact('assignment', 'submission', 'classId'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function submit(Request $request, string $classId, string $assignmentId)
     {
-        //
-    }
+        $request->validate([
+            'essay_answer' => 'required|string|max:10000',
+            // 'file' => 'nullable|file|max:5120', // jika izinkan upload file
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        $user = Auth::user();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+        // Pastikan assignment valid
+        $assignment = EssayAssignment::where('id', $assignmentId)
+            ->where('course_class_id', $classId)
+            ->firstOrFail();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        // Simpan jawaban
+        EssaySubmission::updateOrCreate(
+            [
+                'essay_assignment_id' => $assignmentId,
+                'student_id' => $user->id,
+            ],
+            [
+                'answer_text' => $request->essay_answer,
+                'submitted_at' => now(),
+                'is_graded' => false,
+            ]
+        );
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->route('kelas', ['id' => $classId]);
     }
 }

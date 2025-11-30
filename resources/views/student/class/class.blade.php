@@ -101,55 +101,39 @@
                     <!-- KOLOM KANAN: TUGAS DAN AKSI (4/12) -->
                     <div class="lg:col-span-4">
                         <section class="rounded-xl border border-gray-200 bg-gray-50 p-6 shadow-inner">
-                            <h3 class="mb-4 border-b pb-2 text-xl font-bold text-gray-900">Daftar Tugas dan Penilaian</h3>
-
-                            <!-- Looping Daftar Tugas (Menggunakan Dummy Data karena variabel aslinya tidak ada di sini, sesuai permintaan) -->
+                            <!-- Daftar Tugas Essay -->
+                            <h3 class="mb-4 border-b pb-2 text-xl font-bold text-gray-900">Tugas Essay</h3>
                             <div id="daftar-tugas" class="space-y-3">
-                                {{-- ASUMSI: Anda memiliki variabel $classAssignments yang dikirim dari controller --}}
-                                @php
-                                    // Contoh data dummy untuk simulasi loop
-                                    $classAssignments = [
-                                        (object) ['name' => 'Kuis Pendahuluan', 'status' => 'Selesai', 'score' => '100'],
-                                        (object) ['name' => 'Essai Naratif', 'status' => 'Belum Dikerjakan', 'score' => '-'],
-                                        (object) ['name' => 'Presensi Pertemuan 1', 'status' => 'Selesai', 'score' => '50'],
-                                        (object) ['name' => 'Ujian Akhir Kelas', 'status' => 'Ditunda', 'score' => '-'],
-                                    ];
-                                @endphp
-
-                                @foreach ($classAssignments as $assignment)
+                                @forelse ($essayAssignments as $assignment)
                                     @php
-                                        // Menentukan warna dan ikon berdasarkan status
-                                        $statusLower = strtolower($assignment->status);
-                                        $statusColor = match ($statusLower) {
-                                            'selesai' => 'bg-green-100 text-green-700 border-green-300',
-                                            'belum dikerjakan' => 'bg-red-100 text-red-700 border-red-300',
-                                            'ditunda' => 'bg-yellow-100 text-yellow-700 border-yellow-300',
-                                            default => 'bg-gray-100 text-gray-700 border-gray-300',
-                                        };
-                                        $icon = match ($statusLower) {
-                                            'selesai' => '<svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
-                                            'belum dikerjakan'
-                                                => '<svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z"></path></svg>',
-                                            default
-                                                => '<svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v4m8-4v4m0 4v4m-8-4v4m9-10H3.94a1 1 0 00-.921 1.488l2.94 5.918c.288.581.85 1 1.489 1h9.043c.64 0 1.2-.419 1.489-1l2.94-5.918A1 1 0 0020.06 7H15"></path></svg>',
-                                        };
+                                        $isSubmitted = in_array($assignment->id, $userSubmissions);
+                                        $status = $isSubmitted ? 'Selesai' : 'Belum Dikerjakan';
+                                        $statusColor = $isSubmitted ? 'bg-green-100 text-green-700 border-green-300' : 'bg-red-100 text-red-700 border-red-300';
+                                        $icon = $isSubmitted
+                                            ? '<svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+                                            : '<svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
                                     @endphp
 
-                                    <a href="#" class="{{ $statusColor }} block rounded-lg border bg-white p-3 shadow-sm transition duration-150 hover:bg-gray-50">
+                                    <a href="{{ route('essay.show', ['classId' => $class->id, 'assignmentId' => $assignment->id]) }}" class="{{ $statusColor }} block rounded-lg border bg-white p-3 shadow-sm transition duration-150 hover:bg-gray-50">
                                         <div class="flex items-start justify-between">
                                             <div class="flex flex-col">
-                                                <span class="text-sm font-semibold">{{ $assignment->name }}</span>
+                                                <span class="text-sm font-semibold">{{ $assignment->title }}</span>
                                                 <div class="mt-1 flex items-center text-xs">
                                                     {!! $icon !!}
-                                                    <span class="font-medium">{{ $assignment->status }}</span>
+                                                    <span class="font-medium">{{ $status }}</span>
                                                 </div>
+                                                @if ($assignment->due_date)
+                                                    <span class="mt-1 text-xs text-gray-500">Batas: {{ \Carbon\Carbon::parse($assignment->due_date)->translatedFormat('d M Y') }}</span>
+                                                @endif
                                             </div>
                                             <div class="flex-shrink-0 text-xl font-extrabold text-indigo-600">
-                                                {{ $assignment->score }}
+                                                {{ $isSubmitted ? '✓' : '-' }}
                                             </div>
                                         </div>
                                     </a>
-                                @endforeach
+                                @empty
+                                    <p class="italic text-gray-500">Belum ada tugas essay untuk kelas ini.</p>
+                                @endforelse
                             </div>
 
                             <p class="mb-6 mt-6 text-xs italic text-gray-600">
