@@ -52,10 +52,10 @@ class PaymentController extends Controller
             $orderId = 'TRX-' . time() . '-' . $class->id;
 
             // Setup Midtrans configuration
-            Config::$serverKey = config('services.midtrans.server_key');
-            Config::$isProduction = config('services.midtrans.is_production');
-            Config::$isSanitized = true;
-            Config::$is3ds = true;
+            \Midtrans\Config::$serverKey = config('services.midtrans.server_key');
+            \Midtrans\Config::$isProduction = config('services.midtrans.is_production');
+            \Midtrans\Config::$isSanitized = true;
+            \Midtrans\Config::$is3ds = true;
 
             $params = [
                 'transaction_details' => [
@@ -76,7 +76,7 @@ class PaymentController extends Controller
                 ],
             ];
 
-            $snapToken = Snap::getSnapToken($params);
+            $snapToken = \Midtrans\Snap::getSnapToken($params);
 
             $payment = new Payment();
             $payment->course_id = $course->id;
