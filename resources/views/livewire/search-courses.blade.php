@@ -16,12 +16,6 @@
         </div>
     </div>
 
-        <div class="mb-8 flex justify-center">
-            <button
-                class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50">
-                📋 Filter Kelas
-            </button>
-        </div>
 
     <div class="my-8 border-t border-gray-200"></div>
 
@@ -33,9 +27,9 @@
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {{-- Card --}}
             @foreach ($courses as $item)
-            <div
-            class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-md">
-            <a href="{{ route('detailkursus', $item->slug) }}">
+                <div
+                    class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-md">
+                    <a href="{{ route('detailkursus', $item->slug) }}">
                         <div class="relative">
                             {{-- Gunakan asset() --}}
                             <img src="{{ asset('storage/' . $item->thumbnail) }}" alt="Course Image"
@@ -81,7 +75,7 @@
                             </div>
                         </div>
                     </a>
-                    </div>
+                </div>
             @endforeach
         </div>
     @endif

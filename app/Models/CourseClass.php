@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Model;
 
 class CourseClass extends Model
 {
@@ -60,4 +60,17 @@ class CourseClass extends Model
     // {
     //     return $this->hasMany(QuizAssignment::class);
     // }
+    // -------------------------
+    public function classMaterials()
+    {
+        return $this->hasMany(ClassMaterial::class)->orderBy('order');
+    }
+
+    public function materialsFE(): BelongsToMany
+    {
+        return $this
+            ->belongsToMany(Material::class, 'class_materials')
+            ->withPivot('order', 'schedule_date', 'visibility')
+            ->orderBy('class_materials.order');
+    }
 }

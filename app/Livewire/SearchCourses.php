@@ -23,6 +23,8 @@ class SearchCourses extends Component
             })
             ->get();
 
+            // dd($courses);
+
         // Perbaiki penamaan variabel: 'courses' (bukan 'cousres')
         return view('livewire.search-courses', ['courses' => $courses, 'searchTerm' => $this->searchTerm]);
     }

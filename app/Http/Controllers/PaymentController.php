@@ -104,9 +104,8 @@ class PaymentController extends Controller
 
     public function handleMidtransNotification(Request $request)
     {
-        // 🔒 Set Midtrans config (wajib untuk verifikasi signature)
-        Config::$serverKey = config('services.midtrans.server_key');
-        Config::$isProduction = config('services.midtrans.is_production');
+        \Midtrans\Config::$serverKey = config('services.midtrans.server_key');
+        \Midtrans\Config::$isProduction = config('services.midtrans.is_production');
 
         try {
             // 1. Ambil notifikasi dari Midtrans (otomatis verifikasi signature)
@@ -159,8 +158,8 @@ class PaymentController extends Controller
 
             // 6. Buat ClassEnrollment jika memenuhi syarat
             if ($shouldEnroll) {
-                // ✅ PERBAIKAN UTAMA: gunakan course_class_id dari payment
-                $courseClassId = $payment->course_class_id;  // 👈 ini yang benar!
+                //  PERBAIKAN UTAMA: gunakan course_class_id dari payment
+                $courseClassId = $payment->course_class_id;
                 $studentId = $payment->student_id;
 
                 // Cek apakah sudah terdaftar
