@@ -17,6 +17,8 @@ class MentorEarningsReport extends Page implements HasTable
 
     protected static ?string $navigationIcon = 'heroicon-o-document-chart-bar';
     protected static string $view = 'filament.pages.mentor-earnings-report';
+    protected static ?string $navigationGroup = 'Laporan';
+    protected static ?string $navigationLabel = 'Pendapatan Mentor';
 
     public static function canAccess(): bool
     {

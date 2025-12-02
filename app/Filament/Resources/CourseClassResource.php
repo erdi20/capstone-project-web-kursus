@@ -126,6 +126,11 @@ class CourseClassResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('attendances')
+                    ->label('Lihat Absensi')
+                    ->url(fn(\App\Models\CourseClass $record) => static::getUrl('attendances', ['record' => $record->id]))
+                    ->button()
+                    ->color('info'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -147,6 +152,7 @@ class CourseClassResource extends Resource
             'index' => Pages\ListCourseClasses::route('/'),
             'create' => Pages\CreateCourseClass::route('/create'),
             'edit' => Pages\EditCourseClass::route('/{record}/edit'),
+            'attendances' => Pages\ViewClassAttendances::route('/{record}/attendances'),
         ];
     }
 }

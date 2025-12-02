@@ -1,13 +1,14 @@
 <?php
 
-use App\Http\Controllers\CourseClassController;
-use App\Http\Controllers\CourseController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\QuizController;
 use App\Http\Controllers\EssayController;
-use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\QuizController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\CourseClassController;
 
 Route::get('/', function () {
     return view('guest');
@@ -43,6 +44,9 @@ Route::middleware('auth')->group(function () {
     // ---------------------
     Route::post('/payment/initiate', [PaymentController::class, 'initiatePayment'])->name('payment.initiate');
     Route::get('/payment/checkout', [PaymentController::class, 'showCheckoutPage'])->name('payment.checkout');
+    // ---------------------
+    // Absensi
+    Route::post('/kelas/{classId}/absen', [AttendanceController::class, 'store'])->name('attendance.store');
     // ---------------------
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

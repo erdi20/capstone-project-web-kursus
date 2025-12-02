@@ -84,7 +84,6 @@ class User extends Authenticatable implements HasAvatar
     }
 
     // policy
-
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
@@ -94,5 +93,11 @@ class User extends Authenticatable implements HasAvatar
     public function isMentor(): bool
     {
         return $this->role === 'mentor';
+    }
+
+    // relasi
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'student_id');
     }
 }

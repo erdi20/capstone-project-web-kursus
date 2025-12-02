@@ -15,4 +15,14 @@ class ClassMaterial extends Model
         'schedule_date',
         'visibility',
     ];
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'class_material_id');
+    }
+
+    public function material()
+    {
+        return $this->belongsTo(Material::class, 'material_id');
+    }
 }

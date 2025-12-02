@@ -7,7 +7,7 @@
                 <div class="md:w-1/2">
                     <h2 class="mb-3 text-2xl font-bold text-gray-800">Tempat Terbaik untuk Mulai Perjalanan Belajarmu</h2>
                     <p class="mb-5 text-gray-600">Belajar jadi lebih seru dan terasa melejit. Materi terstruktur, latihan interaktif, dan Kursus live yang membantu kamu berkembang.</p>
-                    <a href="{{ route('listKelas') }}" class="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-6 py-3 font-semibold text-white transition hover:bg-green-700">
+                    <a href="{{ route('listkelas') }}" class="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-6 py-3 font-semibold text-white transition hover:bg-green-700">
                         Jelajahi Kelas
                     </a>
                 </div>

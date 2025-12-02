@@ -94,7 +94,12 @@ class CourseClassController extends Controller
         $enrollment = ClassEnrollment::where('student_id', $user->id)
             ->where('class_id', $classId)
             ->firstOrFail();
-
+        // absen
+        $today = now()->startOfDay();
+        $todayMaterial = $class
+            ->classMaterials()
+            ->whereDate('schedule_date', $today)
+            ->first();
         // Ambil Essay Assignments
         $essayAssignments = EssayAssignment::where('course_class_id', $classId)
             ->where('is_published', true)
@@ -134,7 +139,8 @@ class CourseClassController extends Controller
             'enrollment',
             'allAssignments',
             'userEssaySubmissions',
-            'userQuizSubmissions'
+            'userQuizSubmissions',
+            'todayMaterial'
         ));
     }
 

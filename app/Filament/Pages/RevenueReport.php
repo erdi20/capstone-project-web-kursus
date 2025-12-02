@@ -15,6 +15,7 @@ class RevenueReport extends Page implements Tables\Contracts\HasTable
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
     protected static ?string $navigationGroup = 'Laporan';
+    protected static ?string $navigationLabel = 'Pendapatan Kursus';
     protected static string $view = 'filament.pages.revenue-report';
 
     // Judul halaman
