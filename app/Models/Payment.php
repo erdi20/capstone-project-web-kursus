@@ -25,7 +25,7 @@ class Payment extends Model
 
     public function course(): BelongsTo
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Course::class, 'course_id');
     }
 
     public function user(): BelongsTo

@@ -6,13 +6,13 @@
             <div class="flex flex-col items-center gap-6 p-6 md:flex-row md:p-10">
                 <div class="md:w-1/2">
                     <h2 class="mb-3 text-2xl font-bold text-gray-800">Tempat Terbaik untuk Mulai Perjalanan Belajarmu</h2>
-                    <p class="mb-5 text-gray-600">Belajar jadi lebih seru dan terasa melejit. Materi terstruktur, latihan interaktif, dan kelas live yang membantu kamu berkembang.</p>
-                    <a href="#" class="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-6 py-3 font-semibold text-white transition hover:bg-green-700">
+                    <p class="mb-5 text-gray-600">Belajar jadi lebih seru dan terasa melejit. Materi terstruktur, latihan interaktif, dan Kursus live yang membantu kamu berkembang.</p>
+                    <a href="{{ route('listKelas') }}" class="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-6 py-3 font-semibold text-white transition hover:bg-green-700">
                         Jelajahi Kelas
                     </a>
                 </div>
                 <div class="md:w-1/2">
-                    <img src="https://via.placeholder.com/600x300?text=Ilustrasi+Animasi" alt="Ilustrasi belajar" class="h-auto w-full rounded-lg object-contain shadow-md">
+                    <img src="{{ asset('img/satu.jpg') }}" alt="Ilustrasi belajar" class="h-auto w-full rounded-lg object-contain shadow-md">
                 </div>
             </div>
         </section>
@@ -21,10 +21,10 @@
         <section class="flex flex-wrap items-center justify-between gap-4 rounded-[14px] bg-gradient-to-r from-[#ffd89b] to-[#ffe0c7] p-9 shadow-[0_6px_20px_rgba(15,23,42,0.06)]" aria-labelledby="home-hero-title">
             <div class="min-w-[260px] flex-1 flex-shrink-0">
                 <h1 id="home-hero-title" class="m-0 mb-3 text-[clamp(1.6rem,3.2vw,2.4rem)] font-bold leading-[1.05] text-[#072033]">Tempat Terbaik untuk Mulai Perjalanan Belajarmu</h1>
-                <p class="mb-5 text-[#6c757d]">Belajar jadi lebih seru dan terasa melejit. Materi terstruktur, latihan interaktif, dan kelas live yang membantu kamu berkembang.</p>
+                <p class="mb-5 text-[#6c757d]">Belajar jadi lebih seru dan terasa melejit. Materi terstruktur, latihan interaktif, dan Kursus live yang membantu kamu berkembang.</p>
 
                 <div class="flex flex-wrap gap-3">
-                    <a href="#" class="inline-flex min-w-[140px] flex-1 items-center justify-center gap-2 rounded-[10px] bg-gradient-to-r from-[#ffd89b] to-[#19547b] px-4 py-2.5 font-bold text-[#072033] shadow-[0_8px_20px_rgba(25,84,123,0.08)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] active:translate-y-0.5">Jelajahi Kelas</a>
+                    <a href="#" class="inline-flex min-w-[140px] flex-1 items-center justify-center gap-2 rounded-[10px] bg-gradient-to-r from-[#ffd89b] to-[#19547b] px-4 py-2.5 font-bold text-[#072033] shadow-[0_8px_20px_rgba(25,84,123,0.08)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] active:translate-y-0.5">Jelajahi Kursus</a>
                     <a href="#" class="inline-flex min-w-[140px] flex-1 items-center justify-center gap-2 rounded-[10px] border border-[rgba(7,32,51,0.08)] bg-transparent px-4 py-2.5 font-bold text-[#072033] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] active:translate-y-0.5">Mulai Latihan Soal</a>
                 </div>
 
@@ -36,20 +36,20 @@
             </div>
 
             <div>
-                <img src="/images/hero-illustration.png" alt="Ilustrasi hero" class="h-auto w-full max-w-[420px] flex-shrink-0 rounded-[12px] object-contain shadow-[0_6px_20px_rgba(15,23,42,0.06)]">
+                <img src="{{ asset('asset/2324550.png') }}" alt="Ilustrasi hero" class="h-auto w-full max-w-[420px] flex-shrink-0 rounded-[12px] object-contain shadow-[0_6px_20px_rgba(15,23,42,0.06)]">
             </div>
         </section>
 
-        <!-- KELAS POPULER -->
+        <!-- Kursus POPULER -->
         <section class="mt-8.5" aria-labelledby="popular-classes">
             <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <h3 id="popular-classes" class="text-base font-medium">Kelas Populer</h3>
+                <h3 id="popular-classes" class="text-base font-medium">Kursus Populer</h3>
                 <a href="#" class="inline-flex items-center justify-center gap-2 rounded-[10px] border-none bg-transparent px-4 py-2.5 font-bold text-[#19547b] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] active:translate-y-0.5">Lihat semua</a>
             </div>
 
             <div class="grid grid-cols-3 gap-4" role="list">
                 <article class="flex flex-col overflow-hidden rounded-[12px] bg-white shadow-[0_6px_20px_rgba(15,23,42,0.06)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:translate-y-[-6px] hover:shadow-[0_12px_40px_rgba(15,23,42,0.09)]" role="listitem" aria-label="Naratif Teknis">
-                    <img src="/images/class-placeholder.png" alt="Naratif Teknis" class="block h-40 w-full object-cover">
+                    <img src="{{ asset('asset/kjl.jpg') }}" alt="Naratif Teknis" class="block h-40 w-full object-cover">
                     <div class="flex flex-1 flex-col gap-2 p-3.5">
                         <h4 class="m-0 text-base font-bold">Naratif Teknis</h4>
                         <div class="text-sm text-[#6c757d]">Mentor: Gilung Ramadhan</div>
@@ -60,10 +60,10 @@
                     </div>
                 </article>
 
-                <article class="flex flex-col overflow-hidden rounded-[12px] bg-white shadow-[0_6px_20px_rgba(15,23,42,0.06)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:translate-y-[-6px] hover:shadow-[0_12px_40px_rgba(15,23,42,0.09)]" role="listitem" aria-label="Kelas Contoh">
-                    <img src="/images/class-placeholder.png" alt="Kelas Contoh" class="block h-40 w-full object-cover">
+                <article class="flex flex-col overflow-hidden rounded-[12px] bg-white shadow-[0_6px_20px_rgba(15,23,42,0.06)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:translate-y-[-6px] hover:shadow-[0_12px_40px_rgba(15,23,42,0.09)]" role="listitem" aria-label="Kursus Contoh">
+                    <img src="{{ asset('asset/hh.jpg') }}" alt="Kursus Contoh" class="block h-40 w-full object-cover">
                     <div class="flex flex-1 flex-col gap-2 p-3.5">
-                        <h4 class="m-0 text-base font-bold">Kelas Contoh</h4>
+                        <h4 class="m-0 text-base font-bold">Kursus Contoh</h4>
                         <div class="text-sm text-[#6c757d]">Mentor: Mentor Contoh</div>
                         <div class="mt-auto flex items-center justify-between gap-3">
                             <div class="text-sm text-[#6c757d]">Durasi: 3 minggu</div>
@@ -72,10 +72,10 @@
                     </div>
                 </article>
 
-                <article class="flex flex-col overflow-hidden rounded-[12px] bg-white shadow-[0_6px_20px_rgba(15,23,42,0.06)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:translate-y-[-6px] hover:shadow-[0_12px_40px_rgba(15,23,42,0.09)]" role="listitem" aria-label="Kelas Lainnya">
-                    <img src="/images/class-placeholder.png" alt="Kelas Lainnya" class="block h-40 w-full object-cover">
+                <article class="flex flex-col overflow-hidden rounded-[12px] bg-white shadow-[0_6px_20px_rgba(15,23,42,0.06)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:translate-y-[-6px] hover:shadow-[0_12px_40px_rgba(15,23,42,0.09)]" role="listitem" aria-label="Kursus Lainnya">
+                    <img src="{{ asset('asset/yy.jpg') }}" alt="Kursus Lainnya" class="block h-40 w-full object-cover">
                     <div class="flex flex-1 flex-col gap-2 p-3.5">
-                        <h4 class="m-0 text-base font-bold">Kelas Lainnya</h4>
+                        <h4 class="m-0 text-base font-bold">Kursus Lainnya</h4>
                         <div class="text-sm text-[#6c757d]">Mentor: Mentor Lain</div>
                         <div class="mt-auto flex items-center justify-between gap-3">
                             <div class="text-sm text-[#6c757d]">Durasi: 2 minggu</div>
@@ -86,7 +86,7 @@
             </div>
 
             <div class="mt-3.5 text-center">
-                <a href="#" class="mt-3.5 inline-block rounded-[10px] bg-black px-4 py-2.5 font-bold text-white no-underline">Lihat Kelas Lainnya</a>
+                <a href="{{ route('listkelas') }}" class="mt-3.5 inline-block rounded-[10px] bg-black px-4 py-2.5 font-bold text-white no-underline">Lihat Kursus Lainnya</a>
             </div>
         </section>
 
@@ -94,7 +94,7 @@
         <section class="mt-8.5" aria-labelledby="categories">
             <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <h3 id="categories" class="text-base font-medium">Kategori Populer</h3>
-                <small class="text-sm text-[#6c757d]">Kelas berdasarkan kategori</small>
+                <small class="text-sm text-[#6c757d]">Kursus berdasarkan kategori</small>
             </div>
 
             <div class="mt-3 grid grid-cols-3 gap-3" role="list">
@@ -102,7 +102,7 @@
                     <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full font-bold text-white" style="background:#8EE4AF;">🎓</div>
                     <div class="flex flex-col gap-1">
                         <strong>Pendidikan</strong>
-                        <div class="text-sm text-[#6c757d]">Kelas & materi</div>
+                        <div class="text-sm text-[#6c757d]">Kursus & materi</div>
                     </div>
                 </a>
 
@@ -110,7 +110,7 @@
                     <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full font-bold text-white" style="background:#FFD166;">🗣️</div>
                     <div class="flex flex-col gap-1">
                         <strong>Bahasa</strong>
-                        <div class="text-sm text-[#6c757d]">Kelas & materi</div>
+                        <div class="text-sm text-[#6c757d]">Kursus & materi</div>
                     </div>
                 </a>
 
@@ -118,7 +118,7 @@
                     <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full font-bold text-white" style="background:#89C2D9;">🔬</div>
                     <div class="flex flex-col gap-1">
                         <strong>Sains</strong>
-                        <div class="text-sm text-[#6c757d]">Kelas & materi</div>
+                        <div class="text-sm text-[#6c757d]">Kursus & materi</div>
                     </div>
                 </a>
             </div>
@@ -133,7 +133,7 @@
 
             <div class="mt-3 grid grid-cols-2 gap-4">
                 <div class="rounded-[12px] bg-gradient-to-b from-white to-[#f8fbff] p-4 shadow-[0_6px_20px_rgba(15,23,42,0.06)]">
-                    <p class="m-0 mb-3">“Kelasnya sangat membantu, pengajar jelas dan materi terstruktur.”</p>
+                    <p class="m-0 mb-3">“Kursusnya sangat membantu, pengajar jelas dan materi terstruktur.”</p>
                     <div class="flex items-center gap-3">
                         <div class="flex h-11 w-11 items-center justify-center rounded-full bg-[#0f5132] font-bold text-white">S</div>
                         <div>
@@ -169,7 +169,7 @@
         <!-- CTA AKHIR -->
         <section class="p-6.5 mt-7 rounded-[12px] bg-gradient-to-r from-[#ffd89b] to-[#19547b] text-center text-[#072033]" role="region" aria-label="Daftar sekarang">
             <h3 class="m-0 mb-2">Ayo Daftar Sekarang, tunggu apa lagi?</h3>
-            <p class="m-0 mb-3 text-[rgba(7,32,51,0.9)]">Dapatkan akses ke kelas populer, materi terstruktur, dan komunitas belajar.</p>
+            <p class="m-0 mb-3 text-[rgba(7,32,51,0.9)]">Dapatkan akses ke Kursus populer, materi terstruktur, dan komunitas belajar.</p>
             <a href="#" class="inline-flex min-w-[140px] flex-1 items-center justify-center gap-2 rounded-[10px] bg-gradient-to-r from-[#ffd89b] to-[#19547b] px-4 py-2.5 font-bold text-[#072033] shadow-[0_8px_20px_rgba(25,84,123,0.08)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] active:translate-y-0.5">Daftar Sekarang</a>
         </section>
     </div>
