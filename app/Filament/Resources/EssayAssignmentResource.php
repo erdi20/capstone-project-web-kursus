@@ -46,6 +46,11 @@ class EssayAssignmentResource extends Resource
                     ->description('Tentukan kelas tujuan, judul, dan batas waktu pengumpulan.')
                     ->columns(2)
                     ->schema([
+                        Hidden::make('material_id')
+                            ->default(function () {
+                                $materialId = app('request')->query('material_id');
+                                return is_numeric($materialId) ? (int) $materialId : null;
+                            }),
                         TextInput::make('title')
                             ->label('Judul Tugas')
                             ->required()
@@ -53,13 +58,6 @@ class EssayAssignmentResource extends Resource
                             ->autofocus()
                             ->columnSpanFull()
                             ->placeholder('Contoh: Analisis Kebutuhan Sistem'),
-                        Select::make('course_class_id')
-                            ->label('Kelas Tujuan')
-                            ->relationship('courseClass', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->required()
-                            ->live(),  // untuk trigger dependensi jika diperlukan
                         DateTimePicker::make('due_date')
                             ->label('Batas Waktu Pengumpulan')
                             ->required()

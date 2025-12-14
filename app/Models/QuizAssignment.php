@@ -11,13 +11,13 @@ class QuizAssignment extends Model
     protected $table = 'quiz_assignments';
 
     protected $fillable = [
-        'course_class_id',
         'title',
         'description',
         'due_date',
         'duration_minutes',
         'is_published',
         'created_by',
+        'material_id',
     ];
 
     // Relasi ke kelas
@@ -42,6 +42,11 @@ class QuizAssignment extends Model
     public function submissions(): HasMany
     {
         return $this->hasMany(QuizSubmission::class);
+    }
+
+    public function material()
+    {
+        return $this->belongsTo(Material::class, 'material_id');
     }
 
     protected $titleAttribute = 'question_text_clean';

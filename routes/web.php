@@ -1,22 +1,22 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\QuizController;
-use App\Http\Controllers\EssayController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\CertificateController;
+use App\Http\Controllers\CourseClassController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\EssayController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\MaterialController;
-use App\Http\Controllers\AttendanceController;
-use App\Http\Controllers\CourseClassController;
+use App\Http\Controllers\QuizController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('guest');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/payment', function () {
@@ -47,6 +47,9 @@ Route::middleware('auth')->group(function () {
     // ---------------------
     // Absensi
     Route::post('/kelas/{classId}/absen', [AttendanceController::class, 'store'])->name('attendance.store');
+
+    // sertifikat
+    Route::get('/kelas/{classId}/sertifikat', [CertificateController::class, 'download'])->name('certificates.download');
     // ---------------------
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

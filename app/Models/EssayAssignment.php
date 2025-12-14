@@ -11,13 +11,13 @@ class EssayAssignment extends Model
     protected $table = 'essay_assignments';
 
     protected $fillable = [
-        'course_class_id',
         'title',
         'description',
         'due_date',
         'is_published',
         'allow_file_upload',
         'created_by',
+        'material_id',
     ];
 
     // Relasi ke kelas
@@ -38,5 +38,10 @@ class EssayAssignment extends Model
         return $this->hasMany(EssaySubmission::class);
     }
 
-   
+    // app/Models/EssayAssignment.php
+
+    public function material()
+    {
+        return $this->belongsTo(Material::class, 'material_id');
+    }
 }

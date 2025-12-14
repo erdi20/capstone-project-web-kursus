@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\ClassEnrollment;
 use App\Models\CourseClass;
+use App\Models\EssaySubmission;
 use App\Models\Material;
+use App\Models\QuizSubmission;
+use App\Services\MaterialCompletionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -37,30 +40,121 @@ class MaterialController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id, string $materialId)
+    // public function show(string $classId, string $materialId)
+    // {
+    //     $user = Auth::user();
+    //     $enrollment = ClassEnrollment::where('student_id', $user->id)
+    //         ->where('class_id', $classId)
+    //         ->firstOrFail();
+    //     $class = CourseClass::with('course')->findOrFail($classId);
+    //     // ✅ Hapus filter course_class_id
+    //     $material = Material::with([
+    //         'essayAssignments' => fn($q) => $q->where('is_published', true),
+    //         'quizAssignments' => fn($q) => $q->where('is_published', true),
+    //     ])->findOrFail($materialId);
+    //     // Validasi materi ada di kelas
+    //     $isMaterialInClass = $class->materials()->where('materials.id', $materialId)->exists();
+    //     if (!$isMaterialInClass) {
+    //         abort(403);
+    //     }
+    //     // Ambil submission user
+    //     $userEssaySubmissions = EssaySubmission::where('student_id', $user->id)
+    //         ->whereIn('essay_assignment_id', $material->essayAssignments->pluck('id'))
+    //         ->pluck('essay_assignment_id')
+    //         ->toArray();
+    //     $userQuizSubmissions = QuizSubmission::where('student_id', $user->id)
+    //         ->whereIn('quiz_assignment_id', $material->quizAssignments->pluck('id'))
+    //         ->pluck('quiz_assignment_id')
+    //         ->toArray();
+    //     $today = now()->startOfDay();
+    //     $todayMaterial = $class
+    //         ->classMaterials()
+    //         ->with('material')
+    //         ->get()
+    //         ->first(function ($cm) {
+    //             return $cm->schedule_date &&
+    //                 \Carbon\Carbon::parse($cm->schedule_date)->startOfDay()->isSameDay(now()->startOfDay());
+    //         });
+    //     $hasAttended = $todayMaterial && $todayMaterial->attendances()->where('student_id', Auth::id())->exists();
+    //     app(MaterialCompletionService::class)->checkAndMarkAsCompleted(Auth::id(), $classId, $materialId);
+    //     return view('student.material.materi', compact(
+    //         'class', 'material', 'enrollment', 'userEssaySubmissions', 'userQuizSubmissions', 'todayMaterial', 'hasAttended'
+    //     ));
+    // }
+    public function show(string $classId, string $materialId)
     {
         $user = Auth::user();
 
+        // Validasi: user terdaftar di kelas
         $enrollment = ClassEnrollment::where('student_id', $user->id)
-            ->where('class_id', $id)
+            ->where('class_id', $classId)
             ->firstOrFail();
 
-        $class = CourseClass::with('course')->findOrFail($id);
-        $material = Material::findOrFail($materialId);
+        // Load kelas dengan relasi yang dibutuhkan
+        $class = CourseClass::with([
+            'course',
+            'classMaterials.material'  // penting untuk sidebar & absensi
+        ])->findOrFail($classId);
 
+        // Ambil materi dengan tugas
+        $material = Material::with([
+            'essayAssignments' => fn($q) => $q->where('is_published', true),
+            'quizAssignments' => fn($q) => $q->where('is_published', true),
+        ])->findOrFail($materialId);
+
+        // Validasi: materi ada di kelas
         $isMaterialInClass = $class->materials()->where('materials.id', $materialId)->exists();
         if (!$isMaterialInClass) {
-            abort(403, 'Materi ini tidak termasuk dalam kelas yang Anda ikuti.');
+            abort(403);
         }
 
-        $classMaterial = $class->classMaterials()->where('material_id', $materialId)->first();
-        $isLocked = $classMaterial && $classMaterial->schedule_date && now() < $classMaterial->schedule_date;
+        // Ambil submission user untuk tugas di materi ini
+        $userEssaySubmissions = EssaySubmission::where('student_id', $user->id)
+            ->whereIn('essay_assignment_id', $material->essayAssignments->pluck('id'))
+            ->pluck('essay_assignment_id')
+            ->toArray();
 
-        if ($isLocked) {
-            return view('student.material.locked', compact('class', 'material', 'classMaterial'));
+        $userQuizSubmissions = QuizSubmission::where('student_id', $user->id)
+            ->whereIn('quiz_assignment_id', $material->quizAssignments->pluck('id'))
+            ->pluck('quiz_assignment_id')
+            ->toArray();
+
+        // === LOGIKA ABSENSI: HANYA UNTUK MATERI INI ===
+        $isCurrentMaterialForAttendance = false;
+        $hasAttended = false;
+
+        // Cari sesi absen hari ini
+        $todayClassMaterial = $class
+            ->classMaterials
+            ->first(function ($cm) {
+                return $cm->schedule_date &&
+                    \Carbon\Carbon::parse($cm->schedule_date)->startOfDay()->isSameDay(now()->startOfDay());
+            });
+
+        // Jika ada sesi hari ini & materi ini adalah sesinya & memerlukan absen
+        if ($todayClassMaterial &&
+                $todayClassMaterial->material_id == $materialId &&
+                $todayClassMaterial->material->is_attendance_required) {
+            $isCurrentMaterialForAttendance = true;
+            $hasAttended = $todayClassMaterial
+                ->attendances()
+                ->where('student_id', Auth::id())
+                ->exists();
         }
 
-        return view('student.material.materi', compact('class', 'material', 'enrollment'));
+        // Tandai materi sebagai selesai jika semua tugas dikumpulkan
+        app(\App\Services\MaterialCompletionService::class)
+            ->checkAndMarkAsCompleted(Auth::id(), $classId, $materialId);
+
+        return view('student.material.materi', compact(
+            'class',
+            'material',
+            'enrollment',
+            'userEssaySubmissions',
+            'userQuizSubmissions',
+            'isCurrentMaterialForAttendance',  // ✅ untuk absensi spesifik
+            'hasAttended'  // ✅ status absen
+        ));
     }
 
     /**

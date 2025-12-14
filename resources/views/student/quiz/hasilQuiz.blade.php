@@ -50,9 +50,9 @@
         </div>
 
         <div class="mt-8 text-center">
-            <a href="{{ route('kelas', $assignment->course_class_id) }}"
+            <a href="{{ route('materials.show', ['classId' => $classId, 'materialId' => $materialId]) }}"
                class="inline-block rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700">
-                Kembali ke Kelas
+                Kembali ke materi
             </a>
         </div>
     </div>

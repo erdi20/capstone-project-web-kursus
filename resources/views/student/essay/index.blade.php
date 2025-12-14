@@ -1,11 +1,11 @@
 <x-app-layout>
     <div class="mx-auto max-w-4xl px-4 py-8">
         <div class="mb-6">
-            <a href="{{ route('kelas', $assignment->course_class_id) }}" class="inline-flex items-center text-blue-600 hover:underline">
+            <a href="{{ route('materials.show', ['classId' => $classId, 'materialId' => $materialId]) }}" class="inline-flex items-center text-blue-600 hover:underline">
                 <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                Kembali ke Kelas
+                Kembali ke Materi
             </a>
         </div>
 
@@ -17,10 +17,10 @@
             @endif
 
             <div class="prose prose-slate mb-8 max-w-none">
-                {!! ($assignment->description) !!}
+                {!! $assignment->description !!}
             </div>
 
-            <form method="POST" action="{{ route('essay.submit', ['classId' => $assignment->course_class_id, 'assignmentId' => $assignment->id]) }}">
+            <form method="POST" action="{{ route('essay.submit', ['classId' => $classId, 'assignmentId' => $assignment->id]) }}">
                 @csrf
                 <div class="mb-6">
                     <label for="essay_answer" class="mb-2 block text-sm font-medium text-gray-700">Jawaban Anda</label>
@@ -28,7 +28,7 @@
                 </div>
 
                 <div class="flex justify-end gap-3">
-                    <a href="{{ route('kelas', $assignment->course_class_id) }}" class="rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-100">Batal</a>
+                    <a href="{{ route('materials.show', ['classId' => $classId, 'materialId' => $materialId]) }}" class="rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-100">Batal</a>
                     <button type="submit" class="rounded-lg bg-gradient-to-r from-[#20C896] to-[#259D7A] px-6 py-2 font-semibold text-white hover:opacity-90">
                         {{ $submission ? 'Perbarui Jawaban' : 'Kirim Jawaban' }}
                     </button>

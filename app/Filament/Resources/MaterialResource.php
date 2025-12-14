@@ -10,8 +10,11 @@ use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Table;
 use Filament\Forms;
 use Filament\Tables;
@@ -60,6 +63,9 @@ class MaterialResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required(),
+                        Toggle::make('is_attendance_required')
+                            ->label('Aktifkan Absensi untuk Materi Ini')
+                            ->helperText('Jika diaktifkan, siswa harus absen saat mengakses materi ini.'),
                     ]),
                 // ---
                 // 2. SECTION: Konten Utama (Menggunakan Rich Editor)
@@ -69,21 +75,6 @@ class MaterialResource extends Resource
                         // Mengganti Textarea biasa dengan RichEditor (Tiptap)
                         Forms\Components\RichEditor::make('content')
                             ->label('Isi Materi')
-                            // ->toolbar([
-                            //     'heading',
-                            //     'bold',
-                            //     'italic',
-                            //     'strike',
-                            //     'blockquote',
-                            //     'hr',
-                            //     '|',
-                            //     'bulletList',
-                            //     'orderedList',
-                            //     '|',
-                            //     'link',
-                            //     'code',
-                            //     'codeBlock',
-                            // ])
                             ->required()
                             ->columnSpanFull(),
                     ]),
@@ -149,7 +140,21 @@ class MaterialResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
+                    Action::make('create_essay')
+                        ->label('Buat Tugas Essay')
+                        ->color('success')
+                        ->icon('heroicon-o-document-text')
+                        ->url(fn(Material $record): string => EssayAssignmentResource::getUrl('create') . '?material_id=' . $record->id)
+                        ->openUrlInNewTab(false),  // atau true jika ingin di tab baru
+                    Action::make('create_quiz')
+                        ->label('Buat Tugas Quiz')
+                        ->color('info')
+                        ->icon('heroicon-o-clipboard-document-check')
+                        ->url(fn(Material $record): string => QuizAssignmentResource::getUrl('create') . '?material_id=' . $record->id)
+                        ->openUrlInNewTab(false),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

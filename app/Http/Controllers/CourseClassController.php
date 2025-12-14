@@ -94,53 +94,21 @@ class CourseClassController extends Controller
         $enrollment = ClassEnrollment::where('student_id', $user->id)
             ->where('class_id', $classId)
             ->firstOrFail();
+        $progress = ClassEnrollment::where('class_id', $classId)
+            ->where('student_id', Auth::id())
+            ->first();
         // absen
         $today = now()->startOfDay();
         $todayMaterial = $class
             ->classMaterials()
             ->whereDate('schedule_date', $today)
             ->first();
-        // Ambil Essay Assignments
-        $essayAssignments = EssayAssignment::where('course_class_id', $classId)
-            ->where('is_published', true)
-            ->get()
-            ->map(function ($item) {
-                $item->type = 'essay';
-                return $item;
-            });
-
-        // Ambil Quiz Assignments
-        $quizAssignments = QuizAssignment::where('course_class_id', $classId)
-            ->where('is_published', true)
-            ->get()
-            ->map(function ($item) {
-                $item->type = 'quiz';
-                return $item;
-            });
-
-        // Gabung dan urutkan berdasarkan due_date (opsional)
-        $allAssignments = $essayAssignments
-            ->merge($quizAssignments)
-            ->sortBy('due_date');
-
-        // Ambil submission IDs
-        $userEssaySubmissions = EssaySubmission::where('student_id', $user->id)
-            ->whereIn('essay_assignment_id', $essayAssignments->pluck('id'))
-            ->pluck('essay_assignment_id')
-            ->toArray();
-
-        $userQuizSubmissions = QuizSubmission::where('student_id', $user->id)
-            ->whereIn('quiz_assignment_id', $quizAssignments->pluck('id'))
-            ->pluck('quiz_assignment_id')
-            ->toArray();
 
         return view('student.class.class', compact(
             'class',
             'enrollment',
-            'allAssignments',
-            'userEssaySubmissions',
-            'userQuizSubmissions',
-            'todayMaterial'
+            'todayMaterial',
+            'progress'
         ));
     }
 

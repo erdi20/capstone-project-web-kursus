@@ -18,6 +18,14 @@ class RevenueReport extends Page implements Tables\Contracts\HasTable
     protected static ?string $navigationLabel = 'Pendapatan Kursus';
     protected static string $view = 'filament.pages.revenue-report';
 
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+
+        // Izinkan akses jika user adalah admin atau mentor
+        return $user->isAdmin();
+    }
+
     // Judul halaman
     public function getHeading(): string
     {

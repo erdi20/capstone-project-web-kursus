@@ -48,18 +48,20 @@
                                 @if ($class->materialsFE->count())
                                     @foreach ($class->materialsFE as $material)
                                         @php
-                                            $isScheduled = $material->pivot->schedule_date && now() < $material->pivot->schedule_date;
-                                            $isVisible = $material->pivot->visibility === 'visible' && !$isScheduled;
-                                            $isActive = $isVisible; // Gunakan isVisible untuk menentukan status aktif/bisa diakses
+                                            // ✅ HANYA cek visibility, abaikan schedule_date
+                                            $service = app(\App\Services\MaterialCompletionService::class);
+                                            $currentOrder = $material->pivot->order;
+                                            $canAccess = $service->arePreviousMaterialsCompleted(Auth::id(), $class->id, $currentOrder);
+                                            $isActive = $canAccess && $material->pivot->visibility === 'visible';
+                                            $isVisible = $material->pivot->visibility === 'visible';
+                                            $isActive = $canAccess && $isVisible;
 
                                             // Styling
                                             $linkClass = $isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-300' : 'bg-gray-50 text-gray-800 hover:bg-gray-100 border border-gray-200 opacity-70 cursor-not-allowed';
-
                                             $iconColor = $isActive ? 'text-white' : 'text-gray-400';
                                             $counterColor = $isActive ? 'text-indigo-200' : 'text-indigo-500';
                                         @endphp
-
-                                        <a href="{{ $isVisible ? route('materials.show', ['classId' => $class->id, 'materialId' => $material->id]) : '#' }}" class="{{ $linkClass }} flex items-center justify-between rounded-xl p-4 transition duration-200">
+                                        <a href="{{ $isActive ? route('materials.show', ['classId' => $class->id, 'materialId' => $material->id]) : '#' }}" class="{{ $linkClass }} flex items-center justify-between rounded-xl p-4 transition duration-200">
 
                                             <div class="flex items-start space-x-3">
                                                 <span class="{{ $counterColor }} flex-shrink-0 font-bold">
@@ -69,11 +71,7 @@
                                                     <span class="font-medium">
                                                         {{ $material->name }}
                                                     </span>
-                                                    @if ($isScheduled)
-                                                        <span class="{{ $isActive ? 'text-indigo-200' : 'text-orange-600' }} mt-1 text-xs font-semibold">
-                                                            🕒 Tersedia {{ \Carbon\Carbon::parse($material->pivot->schedule_date)->translatedFormat('d F Y') }}
-                                                        </span>
-                                                    @endif
+
                                                 </div>
                                             </div>
 
@@ -101,75 +99,11 @@
                     <!-- KOLOM KANAN: TUGAS DAN AKSI (4/12) -->
                     <div class="lg:col-span-4">
                         <section class="rounded-xl border border-gray-200 bg-gray-50 p-6 shadow-inner">
-                            <!-- Daftar Tugas Essay -->
-                            <!-- Daftar Semua Tugas (Essay + Quiz) -->
-                            <h3 class="mb-4 border-b pb-2 text-xl font-bold text-gray-900">Daftar Tugas</h3>
-                            <div id="daftar-tugas" class="space-y-3">
-                                @forelse ($allAssignments as $assignment)
-                                    @php
-                                        // Tentukan jenis tugas
-                                        $isEssay = $assignment->type === 'essay';
-                                        $isQuiz = $assignment->type === 'quiz';
 
-                                        // Cek apakah sudah dikerjakan
-                                        $isSubmitted = false;
-                                        if ($isEssay) {
-                                            $isSubmitted = in_array($assignment->id, $userEssaySubmissions);
-                                        } elseif ($isQuiz) {
-                                            $isSubmitted = in_array($assignment->id, $userQuizSubmissions);
-                                        }
-
-                                        $status = $isSubmitted ? 'Selesai' : 'Belum Dikerjakan';
-                                        $statusColor = $isSubmitted ? 'bg-green-100 text-green-700 border-green-300' : 'bg-red-100 text-red-700 border-red-300';
-                                        $icon = $isSubmitted
-                                            ? '<svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
-                                            : '<svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
-
-                                        // Tentukan route berdasarkan jenis
-                                        if ($isEssay) {
-                                            $routeUrl = route('essay.show', ['classId' => $class->id, 'assignmentId' => $assignment->id]);
-                                        } elseif ($isQuiz) {
-                                            $routeUrl = route('quiz.show', ['classId' => $class->id, 'assignmentId' => $assignment->id]);
-                                        } else {
-                                            $routeUrl = '#';
-                                        }
-                                    @endphp
-
-                                    <a href="{{ $routeUrl }}" class="{{ $statusColor }} block rounded-lg border bg-white p-3 shadow-sm transition duration-150 hover:bg-gray-50">
-                                        <div class="flex items-start justify-between">
-                                            <div class="flex flex-col">
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-sm font-semibold">{{ $assignment->title }}</span>
-                                                    @if ($isEssay)
-                                                        <span class="rounded bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-700">Essay</span>
-                                                    @elseif ($isQuiz)
-                                                        <span class="rounded bg-purple-100 px-1.5 py-0.5 text-xs font-medium text-purple-700">Quiz</span>
-                                                    @endif
-                                                </div>
-                                                <div class="mt-1 flex items-center text-xs">
-                                                    {!! $icon !!}
-                                                    <span class="font-medium">{{ $status }}</span>
-                                                </div>
-                                                @if ($assignment->due_date)
-                                                    <span class="mt-1 text-xs text-gray-500">Batas: {{ \Carbon\Carbon::parse($assignment->due_date)->translatedFormat('d M Y') }}</span>
-                                                @endif
-                                            </div>
-                                            <div class="flex-shrink-0 text-xl font-extrabold text-indigo-600">
-                                                {{ $isSubmitted ? '✓' : '-' }}
-                                            </div>
-                                        </div>
-                                    </a>
-                                @empty
-                                    <p class="italic text-gray-500">Belum ada tugas untuk kelas ini.</p>
-                                @endforelse
-                            </div>
-
-                            <p class="mb-6 mt-6 text-xs italic text-gray-600">
-                                *Daftar ini hanyalah simulasi. Klik pada tugas untuk melihat detail, petunjuk pengiriman, atau hasil penilaian.
-                            </p>
 
                             <!-- Progress & Sertifikat (Menggunakan data $enrollment Anda) -->
                             <div class="mt-8 space-y-4 border-t border-gray-300 pt-4">
+                                <!-- Progres Kelas -->
                                 <h4 class="font-semibold text-gray-700">Kemajuan Kelas</h4>
                                 <div class="mb-4">
                                     <div class="mb-1 flex justify-between text-sm text-gray-600">
@@ -181,17 +115,47 @@
                                     </div>
                                 </div>
 
-                                <button class="w-full transform rounded-lg bg-indigo-600 px-6 py-3 font-bold text-white shadow-lg transition duration-200 hover:scale-[1.01] hover:bg-indigo-700">
-                                    Lihat Nilai Rata-Rata
-                                </button>
+                                <!-- Nilai Akhir & Status -->
+                                @if ($enrollment?->grade !== null)
+                                    <div class="rounded-lg bg-gray-50 p-4">
+                                        <div class="flex justify-between">
+                                            <span class="text-sm font-medium text-gray-700">Nilai Akhir</span>
+                                            <span class="text-lg font-bold text-indigo-700">{{ $enrollment->grade }}/100</span>
+                                        </div>
+                                        <div class="mt-2 flex items-center justify-between">
+                                            <span class="text-sm font-medium text-gray-700">Status</span>
+                                            {{-- @if ($enrollment->status === 'completed')
+                                                <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                                                    <svg class="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                    Lulus
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
+                                                    <svg class="mr-1 h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z" />
+                                                    </svg>
+                                                    Belum Lulus
+                                                </span>
+                                            @endif --}}
+                                        </div>
+                                    </div>
+                                @endif
 
-                                @if (($enrollment->progress_percentage ?? 0) >= 100)
+                                <!-- Tombol Lihat Nilai (opsional: bisa dihapus jika sudah ditampilkan) -->
+                                {{-- <button class="w-full transform rounded-lg bg-indigo-600 px-6 py-3 font-bold text-white shadow-lg transition duration-200 hover:scale-[1.01] hover:bg-indigo-700">
+                                        Lihat Nilai Rata-Rata
+                                    </button> --}}
+
+                                <!-- Sertifikat -->
+                                @if ($enrollment?->status === 'completed')
                                     <a href="{{ route('certificates.download', $class->id) }}" class="inline-block w-full rounded-lg border-2 border-green-500 bg-white px-6 py-3 text-center font-bold text-gray-800 shadow-md transition duration-200 hover:bg-green-500 hover:text-white">
                                         Unduh Sertifikat
                                     </a>
                                 @else
                                     <button disabled class="w-full cursor-not-allowed rounded-lg bg-gray-200 px-4 py-2.5 font-semibold text-gray-500 shadow-md">
-                                        Selesaikan Kelas untuk Mendapat Sertifikat
+                                        {{ $enrollment?->grade !== null ? 'Belum Memenuhi Syarat Kelulusan' : 'Selesaikan Kelas untuk Mendapat Sertifikat' }}
                                     </button>
                                 @endif
                             </div>
@@ -204,7 +168,7 @@
         </div>
     </div>
     <!-- ABSISI HARI INI -->
-    @if ($todayMaterial)
+    {{-- @if ($todayMaterial)
         @php
             $hasAttended = $todayMaterial->attendances()->where('student_id', Auth::id())->exists();
         @endphp
@@ -352,5 +316,5 @@
                 });
             }
         });
-    </script>
+    </script> --}}
 </x-app-layout>

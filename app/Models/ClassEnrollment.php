@@ -36,4 +36,100 @@ class ClassEnrollment extends Model
     {
         return $this->belongsTo(Course::class, 'course_id');
     }
+
+    protected $casts = [
+        'enrolled_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'issued_at' => 'datetime',
+    ];
+
+    public function updateProgress(): void
+    {
+        $classId = $this->class_id;
+        $studentId = $this->student_id;
+
+        // 1. Ambil semua material_id yang ada di kelas ini
+        $materialIds = ClassMaterial::where('course_class_id', $classId)
+            ->pluck('material_id')
+            ->toArray();
+
+        if (empty($materialIds)) {
+            $this->update(['progress_percentage' => 0]);
+            return;
+        }
+
+        // 2. Hitung total aktivitas
+        $totalEssays = EssayAssignment::whereIn('material_id', $materialIds)->count();
+        $totalQuizzes = QuizAssignment::whereIn('material_id', $materialIds)->count();
+        $totalMeetings = count($materialIds);  // 1 materi = 1 pertemuan
+
+        $totalActivities = $totalEssays + $totalQuizzes + $totalMeetings;
+
+        if ($totalActivities === 0) {
+            $this->update(['progress_percentage' => 0]);
+            return;
+        }
+
+        // 3. Hitung aktivitas yang sudah dilakukan
+        $completedEssays = EssaySubmission::where('student_id', $studentId)
+            ->whereIn('essay_assignment_id', EssayAssignment::whereIn('material_id', $materialIds)->pluck('id'))
+            ->count();
+
+        $completedQuizzes = QuizSubmission::where('student_id', $studentId)
+            ->whereIn('quiz_assignment_id', QuizAssignment::whereIn('material_id', $materialIds)->pluck('id'))
+            ->count();
+
+        $completedAttendances = Attendance::where('student_id', $studentId)
+            ->whereIn('class_material_id', ClassMaterial::where('course_class_id', $classId)->pluck('id'))
+            ->count();
+
+        $completed = $completedEssays + $completedQuizzes + $completedAttendances;
+
+        // 4. Hitung persentase
+        $progress = min(100, round(($completed / $totalActivities) * 100, 2));
+
+        $this->update(['progress_percentage' => $progress]);
+    }
+
+    // Cek apakah materi selesai
+
+    public function isMaterialCompleted(int $classMaterialId): bool
+    {
+        $completion = MaterialCompletion::where('student_id', $this->student_id)
+            ->where('class_material_id', $classMaterialId)
+            ->first();
+
+        if ($completion && $completion->completed_at) {
+            return true;
+        }
+
+        // Cek: apakah semua tugas sudah dikerjakan?
+        $classMaterial = ClassMaterial::findOrFail($classMaterialId);
+        $materialId = $classMaterial->material_id;
+
+        $totalEssays = EssayAssignment::where('material_id', $materialId)->count();
+        $totalQuizzes = QuizAssignment::where('material_id', $materialId)->count();
+
+        if ($totalEssays === 0 && $totalQuizzes === 0) {
+            // Jika tidak ada tugas, cukup akses = selesai
+            return $this->hasAccessedMaterial($classMaterialId);
+        }
+
+        $completedEssays = EssaySubmission::where('student_id', $this->student_id)
+            ->whereIn('essay_assignment_id', EssayAssignment::where('material_id', $materialId)->pluck('id'))
+            ->count();
+
+        $completedQuizzes = QuizSubmission::where('student_id', $this->student_id)
+            ->whereIn('quiz_assignment_id', QuizAssignment::where('material_id', $materialId)->pluck('id'))
+            ->count();
+
+        return ($completedEssays >= $totalEssays) && ($completedQuizzes >= $totalQuizzes);
+    }
+
+    // Cek apakah pernah akses (opsional, bisa pakai log atau asumsi saat buka halaman)
+    private function hasAccessedMaterial(int $classMaterialId): bool
+    {
+        // Anda bisa buat log saat buka materi, atau asumsikan "selesai" jika tidak ada tugas
+        return true;  // atau implementasi log akses
+    }
 }

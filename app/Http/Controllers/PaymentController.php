@@ -23,7 +23,26 @@ class PaymentController extends Controller
             'course_class_id' => ['required', 'exists:course_classes,id'],
             'course_id' => ['required', 'exists:courses,id'],
         ]);
+        // Tambahkan di awal logika setelah validasi input
+        $class = CourseClass::with('course')->findOrFail($request->course_class_id);
+        $course = $class->course;
+        $user = Auth::user();
 
+        // ✅ CEK 1: Apakah kelas sudah ditutup?
+        if ($class->status !== 'open') {
+            return back()->with('error', 'Kelas yang Anda pilih sudah ditutup.');
+        }
+
+        // ✅ CEK 2: Apakah masa pendaftaran sudah berakhir?
+        if ($class->enrollment_end && now()->greaterThan($class->enrollment_end)) {
+            return back()->with('error', 'Pendaftaran untuk kelas ini telah ditutup pada ' . $class->enrollment_end->translatedFormat('d F Y, H:i') . '.');
+        }
+
+        // ✅ CEK 3: Apakah pendaftaran belum dibuka? (opsional, tapi direkomendasikan)
+        if ($class->enrollment_start && now()->lessThan($class->enrollment_start)) {
+            return back()->with('error', 'Pendaftaran untuk kelas ini belum dibuka. Akan dibuka pada ' . $class->enrollment_start->translatedFormat('d F Y, H:i') . '.');
+        }
+        // -----
         try {
             $class = CourseClass::with('course')->findOrFail($request->course_class_id);
             $course = $class->course;

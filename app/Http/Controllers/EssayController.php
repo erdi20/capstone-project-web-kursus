@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+use App\Models\ClassMaterial;
 use App\Models\ClassEnrollment;
 use App\Models\EssayAssignment;
 use App\Models\EssaySubmission;
-use Illuminate\Http\Request;
+use App\Services\GradingService;
 use Illuminate\Support\Facades\Auth;
+use App\Services\MaterialCompletionService;
 
 class EssayController extends Controller
 {
@@ -27,33 +30,50 @@ class EssayController extends Controller
             ->where('class_id', $classId)
             ->firstOrFail();
 
-        // Ambil assignment
         $assignment = EssayAssignment::where('id', $assignmentId)
-            ->where('course_class_id', $classId)
             ->where('is_published', true)
             ->firstOrFail();
 
-        // Cek apakah sudah pernah submit
+        // ✅ Ambil material_id dari assignment
+        $materialId = $assignment->material_id;
+
+        // ✅ Validasi: materi ini ada di kelas ini
+        $isMaterialInClass = ClassMaterial::where('course_class_id', $classId)
+            ->where('material_id', $materialId)
+            ->exists();
+        if (!$isMaterialInClass) {
+            abort(403);
+        }
+
         $submission = EssaySubmission::where('essay_assignment_id', $assignmentId)
             ->where('student_id', $user->id)
             ->first();
 
-        return view('student.essay.index', compact('assignment', 'submission', 'classId'));
+        return view('student.essay.index', compact(
+            'assignment', 'submission', 'classId', 'materialId'  // ← tambahkan ini
+        ));
     }
 
     public function submit(Request $request, string $classId, string $assignmentId)
     {
         $request->validate([
             'essay_answer' => 'required|string|max:10000',
-            // 'file' => 'nullable|file|max:5120', // jika izinkan upload file
         ]);
 
         $user = Auth::user();
 
-        // Pastikan assignment valid
-        $assignment = EssayAssignment::where('id', $assignmentId)
-            ->where('course_class_id', $classId)
-            ->firstOrFail();
+        // ✅ Ambil assignment tanpa course_class_id
+        $assignment = EssayAssignment::findOrFail($assignmentId);
+
+        // ✅ Validasi: pastikan tugas ini ada di kelas ini
+        $materialId = $assignment->material_id;
+        $isValid = ClassMaterial::where('course_class_id', $classId)
+            ->where('material_id', $materialId)
+            ->exists();
+
+        if (!$isValid) {
+            abort(403, 'Tugas tidak valid untuk kelas ini.');
+        }
 
         // Simpan jawaban
         EssaySubmission::updateOrCreate(
@@ -68,6 +88,18 @@ class EssayController extends Controller
             ]
         );
 
+        // ✅ Gunakan $classId langsung (bukan dari assignment)
+        $enrollment = ClassEnrollment::where('class_id', $classId)
+            ->where('student_id', Auth::id())
+            ->first();
+
+        if ($enrollment) {
+            $enrollment->updateProgress();
+            app(GradingService::class)->updateEnrollmentGrade($enrollment);
+        }
+        // -----------------------------------------------------
+app(MaterialCompletionService::class)
+    ->checkAndMarkAsCompleted(Auth::id(), $classId, $assignment->material_id);
         return redirect()->route('kelas', ['id' => $classId]);
     }
 }

@@ -39,6 +39,11 @@ class QuizSubmission extends Model
         return $this->hasMany(QuizAnswer::class);
     }
 
+    public function assignment(): BelongsTo
+    {
+        return $this->belongsTo(QuizAssignment::class, 'quiz_assignment_id');
+    }
+
     // apakah sudah terlambat
 
     public function isLate(): bool

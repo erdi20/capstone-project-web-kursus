@@ -25,4 +25,8 @@ class ClassMaterial extends Model
     {
         return $this->belongsTo(Material::class, 'material_id');
     }
+
+    protected $casts = [
+        'schedule_date' => 'datetime',
+    ];
 }

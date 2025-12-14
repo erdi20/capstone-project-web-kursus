@@ -54,12 +54,11 @@ class QuizAssignmentResource extends Resource
                     ->description('Tentukan judul, kelas, dan instruksi dasar untuk kuis ini.')
                     ->columns(2)
                     ->schema([
-                        Select::make('course_class_id')
-                            ->label('Kelas Tujuan')
-                            ->relationship('courseClass', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->required(),
+                        Hidden::make('material_id')
+                            ->default(function () {
+                                $materialId = app('request')->query('material_id');
+                                return is_numeric($materialId) ? (int) $materialId : null;
+                            }),
                         TextInput::make('title')
                             ->label('Judul Kuis')
                             ->required()

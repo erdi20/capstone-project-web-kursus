@@ -18,11 +18,15 @@ class Course extends Model
         'thumbnail',
         'price',
         'status',
-        'enrollment_start',
-        'enrollment_end',
         'created_by',
         'discount_price',
         'discount_end_date',
+        // ✅ Pengaturan penilaian (berlaku untuk semua kelas)
+        'essay_weight',
+        'quiz_weight',
+        'attendance_weight',
+        'min_attendance_percentage',
+        'min_final_score',
     ];
 
     public function user(): BelongsTo

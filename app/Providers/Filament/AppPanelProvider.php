@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Auth\RegisterMentor;
+use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\MyModernProfile;
 use App\Filament\Pages\RevenueReport;
 use App\Livewire\MyCustomComponent;
@@ -32,7 +33,11 @@ class AppPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('app')
+            ->brandLogo('asset/logo.png')
             ->path('app')
+            ->pages([
+                // ... halaman lain
+            ])
             ->login()
             ->registration(RegisterMentor::class)
             ->brandName('web kursus')
@@ -44,14 +49,11 @@ class AppPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                Dashboard::class,  // ← ganti default dashboard
                 RevenueReport::class,  // ← tambahkan ini
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets([
-                Widgets\AccountWidget::class,
-                // Widgets\FilamentInfoWidget::class,
-            ])
+
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
