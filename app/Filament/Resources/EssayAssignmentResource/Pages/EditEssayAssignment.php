@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\EssayAssignmentResource\Pages;
 
-use App\Filament\Resources\EssayAssignmentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use App\Filament\Resources\CourseResource;
+use App\Filament\Resources\MaterialResource;
+use App\Filament\Resources\EssayAssignmentResource;
 
 class EditEssayAssignment extends EditRecord
 {
@@ -13,7 +15,10 @@ class EditEssayAssignment extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            
             Actions\DeleteAction::make(),
         ];
     }
+
+
 }

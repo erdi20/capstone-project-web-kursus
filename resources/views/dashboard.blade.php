@@ -134,36 +134,63 @@
         </section>
 
         <!-- KATEGORI POPULER -->
-        <section class="mt-8.5" aria-labelledby="categories">
-            <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <h3 id="categories" class="text-base font-medium">Kategori Populer</h3>
-                <small class="text-sm text-[#6c757d]">Kursus berdasarkan kategori</small>
+        {{-- Kursus Terbaik Berdasarkan Ulasan --}}
+        <section class="mt-12" aria-labelledby="top-courses">
+            <div class="mb-5 flex items-center justify-between">
+                <h3 id="top-courses" class="text-2xl font-bold text-gray-900">Kursus Terbaik</h3>
+                <a href="{{ route('listkursus') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">
+                    Lihat Semua →
+                </a>
             </div>
 
-            <div class="mt-3 grid grid-cols-3 gap-3" role="list">
-                <a class="flex min-h-[84px] items-center gap-3 rounded-[12px] bg-white p-3.5 text-inherit no-underline shadow-[0_6px_20px_rgba(15,23,42,0.06)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:translate-y-[-6px] hover:shadow-[0_12px_40px_rgba(15,23,42,0.09)]" role="listitem" href="#">
-                    <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full font-bold text-white" style="background:#8EE4AF;">🎓</div>
-                    <div class="flex flex-col gap-1">
-                        <strong>Pendidikan</strong>
-                        <div class="text-sm text-[#6c757d]">Kursus & materi</div>
-                    </div>
-                </a>
+            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                @forelse($topRatedCourses as $course)
+                    @php
+                        $avgRating = $course->avg_rating ?? 0;
+                        $reviewCount = $course->review_count ?? 0;
+                    @endphp
 
-                <a class="flex min-h-[84px] items-center gap-3 rounded-[12px] bg-white p-3.5 text-inherit no-underline shadow-[0_6px_20px_rgba(15,23,42,0.06)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:translate-y-[-6px] hover:shadow-[0_12px_40px_rgba(15,23,42,0.09)]" role="listitem" href="#">
-                    <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full font-bold text-white" style="background:#FFD166;">🗣️</div>
-                    <div class="flex flex-col gap-1">
-                        <strong>Bahasa</strong>
-                        <div class="text-sm text-[#6c757d]">Kursus & materi</div>
-                    </div>
-                </a>
+                    <a href="{{ route('detailkursus', $course->slug) }}" class="group block rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md">
+                        <div class="relative">
+                            <img src="{{ asset('storage/' . ($course->thumbnail ?? 'default-course.jpg')) }}" alt="{{ $course->name }}" class="h-48 w-full rounded-t-2xl object-cover">
+                            @if ($reviewCount > 0)
+                                <div class="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2 py-1 shadow-sm">
+                                    <svg class="h-4 w-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path
+                                            d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                    <span class="text-sm font-bold text-gray-800">{{ number_format($avgRating, 1) }}</span>
+                                </div>
+                            @endif
+                        </div>
 
-                <a class="flex min-h-[84px] items-center gap-3 rounded-[12px] bg-white p-3.5 text-inherit no-underline shadow-[0_6px_20px_rgba(15,23,42,0.06)] transition-transform duration-100 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:translate-y-[-6px] hover:shadow-[0_12px_40px_rgba(15,23,42,0.09)]" role="listitem" href="#">
-                    <div class="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full font-bold text-white" style="background:#89C2D9;">🔬</div>
-                    <div class="flex flex-col gap-1">
-                        <strong>Sains</strong>
-                        <div class="text-sm text-[#6c757d]">Kursus & materi</div>
+                        <div class="p-4">
+                            <h4 class="line-clamp-2 text-lg font-bold text-gray-900 group-hover:text-indigo-700">
+                                {{ $course->name }}
+                            </h4>
+
+                            @if ($reviewCount > 0)
+                                <div class="mt-2 flex items-center justify-between">
+                                    <div class="flex">
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            <svg class="{{ $i <= floor($avgRating) ? 'text-amber-500' : ($i - 0.5 <= $avgRating ? 'text-amber-400' : 'text-gray-300') }} h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                                <path
+                                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                        @endfor
+                                    </div>
+                                    <span class="text-sm text-gray-500">({{ $reviewCount }} ulasan)</span>
+                                </div>
+                            @else
+                                <p class="mt-2 text-sm italic text-gray-500">Belum ada ulasan</p>
+                            @endif
+                        </div>
+                    </a>
+                @empty
+                    <div class="col-span-full py-8 text-center">
+                        <p class="text-gray-500">Belum ada kursus dengan ulasan.</p>
                     </div>
-                </a>
+                @endforelse
             </div>
         </section>
 

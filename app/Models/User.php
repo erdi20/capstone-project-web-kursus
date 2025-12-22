@@ -31,6 +31,8 @@ class User extends Authenticatable implements HasAvatar
         'birth_date',
         'gender',
         'education_level',
+        'role',
+        'bio',
     ];
 
     /**
@@ -99,5 +101,10 @@ class User extends Authenticatable implements HasAvatar
     public function attendances()
     {
         return $this->hasMany(Attendance::class, 'student_id');
+    }
+
+    public function withdrawals()
+    {
+        return $this->hasMany(Withdrawal::class, 'mentor_id');
     }
 }

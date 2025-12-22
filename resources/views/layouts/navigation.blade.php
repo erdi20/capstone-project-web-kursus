@@ -1,24 +1,26 @@
+@php
+    $setting = \App\Models\Setting::first();
+@endphp
+
 <nav x-data="{ open: false }" class="border-b border-gray-200 dark:border-gray-700">
-    <!-- BARIS 1: Logo + Search + Profil (Background Hijau Tua) -->
-    <div class="w-full bg-[#20C896] py-3 px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-7xl flex h-12 items-center justify-between">
+    <!-- BARIS 1: Logo + Search + Profil -->
+    <div class="w-full bg-[#20C896] px-4 py-3 sm:px-6 lg:px-8">
+        <div class="mx-auto flex h-12 max-w-7xl items-center justify-between">
             <!-- Logo -->
             <div class="flex shrink-0 items-center">
-                <a href="{{ route('dashboard') }}" class="text-white">
-                    <x-application-logo class="block h-8 w-auto fill-current" />
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-2 text-white">
+                    <x-application-logo :logo-path="$setting?->logo" :site-name="$setting?->site_name" class="block h-8 w-auto fill-current" />
+                    <span class="hidden text-lg font-bold md:inline">
+                        {{ $setting?->site_name ?: 'Qualitative Research Class' }}
+                    </span>
                 </a>
             </div>
 
             <!-- Search Bar -->
-            <div class="hidden md:block w-full max-w-md mx-4">
+            <div class="mx-4 hidden w-full max-w-md md:block">
                 <form method="GET" action="" class="relative">
                     <div class="relative">
-                        <input
-                            type="text"
-                            name="q"
-                            placeholder="Cari kursus, materi, atau tugas..."
-                            class="w-full rounded-full border border-gray-300 bg-white/90 px-4 py-2 pl-10 text-sm text-gray-800 placeholder-gray-500 shadow-sm transition focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
-                        />
+                        <input type="text" name="q" placeholder="Cari kursus, materi, atau tugas..." class="w-full rounded-full border border-gray-300 bg-white/90 px-4 py-2 pl-10 text-sm text-gray-800 placeholder-gray-500 shadow-sm transition focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400" />
                         <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
@@ -33,19 +35,17 @@
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
                                 <button class="ml-2 inline-flex items-center rounded-full border-2 border-white/30 transition hover:scale-105 focus:outline-none">
-                                    @if(Auth::user()->avatar_url)
-                                        <img src="{{ asset('storage/' . Auth::user()->avatar_url) }}"
-                                             alt="{{ Auth::user()->name }}"
-                                             class="h-8 w-8 rounded-full object-cover">
+                                    @if (Auth::user()->avatar_url)
+                                        <img src="{{ asset('storage/' . Auth::user()->avatar_url) }}" alt="{{ Auth::user()->name }}" class="h-8 w-8 rounded-full object-cover">
                                     @else
-                                        <div class="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">
+                                        <div class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 font-bold text-white">
                                             {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                                         </div>
                                     @endif
                                 </button>
                             </x-slot>
 
-                            <x-slot name="content" class="bg-white dark:bg-gray-800 shadow-lg rounded-lg">
+                            <x-slot name="content" class="rounded-lg bg-white shadow-lg dark:bg-gray-800">
                                 <div class="px-4 py-3">
                                     <p class="text-sm font-semibold text-gray-900 dark:text-gray-200">{{ Auth::user()->name }}</p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ Auth::user()->email }}</p>
@@ -66,7 +66,7 @@
                                         {{ __('Kelas Saya') }}
                                     </div>
                                 </x-dropdown-link>
-                                <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                                <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
@@ -81,15 +81,15 @@
                             </x-slot>
                         </x-dropdown>
                     @else
-                        <a href="{{ route('login') }}" class="text-gray-800 hover:text-gray-600 font-medium">Login</a>
+                        <a href="{{ route('login') }}" class="font-medium text-gray-800 hover:text-gray-600">Login</a>
                         @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="ml-4 text-gray-800 hover:text-gray-600 font-medium">Daftar</a>
+                            <a href="{{ route('register') }}" class="ml-4 font-medium text-gray-800 hover:text-gray-600">Daftar</a>
                         @endif
                     @endauth
                 @endif
 
                 <!-- Hamburger -->
-                <button @click="open = !open" class="ml-4 inline-flex items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100 focus:outline-none dark:text-gray-200 dark:hover:bg-gray-700 sm:hidden">
+                <button @click="open = !open" class="ml-4 inline-flex items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100 focus:outline-none sm:hidden dark:text-gray-200 dark:hover:bg-gray-700">
                     <svg :class="{ 'hidden': open, 'block': !open }" class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
@@ -101,36 +101,21 @@
         </div>
     </div>
 
-    <!-- BARIS 2: Menu Navigasi Utama (Latar Belakang Putih) -->
-    <div class="w-full bg-white py-2 px-4 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-7xl flex h-10 items-center justify-center">
+    <!-- BARIS 2: Menu Navigasi Utama -->
+    <div class="w-full bg-white px-4 py-2 sm:px-6 lg:px-8">
+        <div class="mx-auto flex h-10 max-w-7xl items-center justify-center">
             <div class="hidden space-x-6 sm:flex">
-                <x-nav-link
-                    :href="route('dashboard')"
-                    :active="request()->routeIs('dashboard')"
-                    class="px-3 py-1.5 text-sm font-medium rounded-lg transition hover:bg-green-50 hover:text-green-700"
-                >
+                <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="rounded-lg px-3 py-1.5 text-sm font-medium transition hover:bg-green-50 hover:text-green-700">
                     {{ __('Beranda') }}
                 </x-nav-link>
-                <x-nav-link
-                    :href="route('listkursus')"
-                    :active="request()->routeIs('listkursus')"
-                    class="px-3 py-1.5 text-sm font-medium rounded-lg transition hover:bg-green-50 hover:text-green-700"
-                >
+                <x-nav-link :href="route('listkursus')" :active="request()->routeIs('listkursus')" class="rounded-lg px-3 py-1.5 text-sm font-medium transition hover:bg-green-50 hover:text-green-700">
                     {{ __('Kursus') }}
                 </x-nav-link>
-                {{-- <x-nav-link
-                    :href="route('listkelas')"
-                    :active="request()->routeIs('listkelas')"
-                    class="px-3 py-1.5 text-sm font-medium rounded-lg transition hover:bg-green-50 hover:text-green-700"
-                >
-                    {{ __('Kelas Saya') }}
-                </x-nav-link> --}}
             </div>
 
             <!-- Responsif: dropdown di mobile -->
-            <div :class="{ 'block': open, 'hidden': !open }" class="sm:hidden w-full">
-                <div class="space-y-1 py-2 px-4">
+            <div :class="{ 'block': open, 'hidden': !open }" class="w-full sm:hidden">
+                <div class="space-y-1 px-4 py-2">
                     <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Beranda') }}
                     </x-responsive-nav-link>

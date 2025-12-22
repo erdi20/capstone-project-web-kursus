@@ -2,10 +2,13 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\CourseResource\Pages\ListCourseMaterials;
 use App\Filament\Resources\MaterialResource\Pages;
 use App\Filament\Resources\MaterialResource\RelationManagers;
 use App\Models\Material;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -40,6 +43,14 @@ class MaterialResource extends Resource
     // 5. Mengatur Urutan Navigasi (misalnya, di urutan ke-2 setelah Course)
     protected static ?int $navigationSort = 2;
 
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+
+        // Izinkan akses jika user adalah admin atau mentor
+        return $user->isMentor();
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -49,6 +60,11 @@ class MaterialResource extends Resource
                     ->description('Tentukan nama materi, urutan, dan kursus induknya.')
                     ->columns(2)
                     ->schema([
+                        Hidden::make('course_id')
+                            ->default(function () {
+                                $courseId = app('request')->query('course_id');
+                                return is_numeric($courseId) ? (int) $courseId : null;
+                            }),
                         // Kolom Kiri
                         Forms\Components\TextInput::make('name')
                             ->label('Judul Materi')
@@ -56,16 +72,22 @@ class MaterialResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->autofocus(),
-                        // Kolom Kanan
-                        Select::make('course_id')
-                            ->label('Relasi Kursus Induk')
-                            ->relationship('course', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->required(),
                         Toggle::make('is_attendance_required')
                             ->label('Aktifkan Absensi untuk Materi Ini')
                             ->helperText('Jika diaktifkan, siswa harus absen saat mengakses materi ini.'),
+                        // Di dalam form Attach/Edit action
+                        Forms\Components\DateTimePicker::make('attendance_start')
+                            ->label('Waktu Mulai Absen')
+                            ->timezone('Asia/Jakarta')
+                            ->seconds(false)
+                            ->required(fn($get) => $get('is_attendance_required'))
+                            ->columnSpan(1),
+                        Forms\Components\DateTimePicker::make('attendance_end')
+                            ->label('Waktu Selesai Absen')
+                            ->timezone('Asia/Jakarta')
+                            ->seconds(false)
+                            ->required(fn($get) => $get('is_attendance_required'))
+                            ->columnSpan(1),
                     ]),
                 // ---
                 // 2. SECTION: Konten Utama (Menggunakan Rich Editor)
@@ -142,6 +164,11 @@ class MaterialResource extends Resource
             ->actions([
                 ActionGroup::make([
                     Tables\Actions\EditAction::make(),
+                    Tables\Actions\Action::make('attendances')
+                        ->label('Lihat Absensi')
+                        ->icon('heroicon-o-calendar-days')
+                        ->url(fn(Material $record) => static::getUrl('attendances', ['record' => $record->id]))
+                        ->color('primary'),
                     Action::make('create_essay')
                         ->label('Buat Tugas Essay')
                         ->color('success')
@@ -176,6 +203,7 @@ class MaterialResource extends Resource
             'index' => Pages\ListMaterials::route('/'),
             'create' => Pages\CreateMaterial::route('/create'),
             'edit' => Pages\EditMaterial::route('/{record}/edit'),
+            'attendances' => Pages\ViewMaterialAttendances::route('/{record}/attendances'),
         ];
     }
 }

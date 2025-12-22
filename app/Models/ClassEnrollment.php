@@ -20,6 +20,7 @@ class ClassEnrollment extends Model
         'issued_at',
         'is_verified',
         'review',
+        'rating',
     ];
 
     public function user()
@@ -48,7 +49,7 @@ class ClassEnrollment extends Model
         $classId = $this->class_id;
         $studentId = $this->student_id;
 
-        // 1. Ambil semua material_id yang ada di kelas ini
+        // 1. Ambil semua material_id di kelas ini
         $materialIds = ClassMaterial::where('course_class_id', $classId)
             ->pluck('material_id')
             ->toArray();
@@ -58,12 +59,14 @@ class ClassEnrollment extends Model
             return;
         }
 
-        // 2. Hitung total aktivitas
+        // 2. Hitung total aktivitas yang ADA
         $totalEssays = EssayAssignment::whereIn('material_id', $materialIds)->count();
         $totalQuizzes = QuizAssignment::whereIn('material_id', $materialIds)->count();
-        $totalMeetings = count($materialIds);  // 1 materi = 1 pertemuan
+        $totalAttendances = ClassMaterial::whereIn('material_id', $materialIds)
+            ->whereHas('material', fn($q) => $q->where('is_attendance_required', true))
+            ->count();
 
-        $totalActivities = $totalEssays + $totalQuizzes + $totalMeetings;
+        $totalActivities = $totalEssays + $totalQuizzes + $totalAttendances;
 
         if ($totalActivities === 0) {
             $this->update(['progress_percentage' => 0]);
@@ -71,21 +74,22 @@ class ClassEnrollment extends Model
         }
 
         // 3. Hitung aktivitas yang sudah dilakukan
-        $completedEssays = EssaySubmission::where('student_id', $studentId)
-            ->whereIn('essay_assignment_id', EssayAssignment::whereIn('material_id', $materialIds)->pluck('id'))
-            ->count();
+        $completedEssays = EssaySubmission::whereIn('essay_assignment_id',
+            EssayAssignment::whereIn('material_id', $materialIds)->pluck('id'))->where('student_id', $studentId)->count();
 
-        $completedQuizzes = QuizSubmission::where('student_id', $studentId)
-            ->whereIn('quiz_assignment_id', QuizAssignment::whereIn('material_id', $materialIds)->pluck('id'))
-            ->count();
+        $completedQuizzes = QuizSubmission::whereIn('quiz_assignment_id',
+            QuizAssignment::whereIn('material_id', $materialIds)->pluck('id'))->where('student_id', $studentId)->count();
 
         $completedAttendances = Attendance::where('student_id', $studentId)
-            ->whereIn('class_material_id', ClassMaterial::where('course_class_id', $classId)->pluck('id'))
+            ->whereIn('class_material_id',
+                ClassMaterial::whereIn('material_id', $materialIds)
+                    ->whereHas('material', fn($q) => $q->where('is_attendance_required', true))
+                    ->pluck('id'))
             ->count();
 
         $completed = $completedEssays + $completedQuizzes + $completedAttendances;
 
-        // 4. Hitung persentase
+        // 4. Hitung progres
         $progress = min(100, round(($completed / $totalActivities) * 100, 2));
 
         $this->update(['progress_percentage' => $progress]);

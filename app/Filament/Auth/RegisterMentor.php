@@ -17,7 +17,6 @@ class RegisterMentor extends Register
                 $this->getPasswordConfirmationFormComponent(),
                 Hidden::make('role')
                     ->default('mentor')
-                // ->dehydrated(false)
             ])
             ->statePath('data');
     }

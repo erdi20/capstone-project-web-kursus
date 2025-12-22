@@ -38,6 +38,14 @@ class EssayAssignmentResource extends Resource
 
     protected static ?int $navigationSort = 1;  // Menentukan urutan di dalam group (opsional)
 
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+
+        // Izinkan akses jika user adalah admin atau mentor
+        return $user->isMentor();
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -60,6 +68,7 @@ class EssayAssignmentResource extends Resource
                             ->placeholder('Contoh: Analisis Kebutuhan Sistem'),
                         DateTimePicker::make('due_date')
                             ->label('Batas Waktu Pengumpulan')
+                            ->timezone('Asia/Jakarta')
                             ->required()
                             ->minDate(now()->addHour())
                             ->closeOnDateSelection()
@@ -138,6 +147,7 @@ class EssayAssignmentResource extends Resource
                 Tables\Columns\TextColumn::make('due_date')
                     ->label('Batas Waktu')
                     ->dateTime('d M Y H:i')
+                    ->timezone('Asia/Jakarta')
                     ->sortable()
                     ->color(fn(string $state): string => match (true) {
                         now()->gt($state) => 'danger',  // Merah jika sudah melewati deadline
@@ -159,6 +169,7 @@ class EssayAssignmentResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Tanggal')
                     ->dateTime('d/m/Y H:i')
+                    ->timezone('Asia/Jakarta')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

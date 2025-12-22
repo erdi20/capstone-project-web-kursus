@@ -62,6 +62,7 @@ class ViewClassAttendances extends Page implements HasTable
                     ->circular(),
                 TextColumn::make('attended_at')
                     ->label('Waktu Absen')
+                    ->timezone('Asia/Jakarta')
                     ->dateTime('d M Y H:i'),
             ])
             ->filters([

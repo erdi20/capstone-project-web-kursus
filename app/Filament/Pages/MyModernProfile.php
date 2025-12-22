@@ -2,38 +2,93 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Pages\Page;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\Action;
-use Filament\Pages\Dashboard;
-use App\Livewire\MyModernProfile\UpdatePasswordForm;
-use App\Livewire\MyModernProfile\TwoFactorAuthenticationForm;
-use App\Livewire\MyModernProfile\UpdatePersonalInfoForm;  // Import Livewire components Anda
-// Anda bisa menambahkan Livewire components lain di sini
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
-class MyModernProfile extends Page
+class MyModernProfile extends Page implements HasActions
 {
+    use InteractsWithActions;
+
     protected static ?string $navigationIcon = 'heroicon-o-user';
-    protected static ?string $title = 'Profil Pengguna Saya';  // Judul di breadcrumbs dan browser
-    protected static string $view = 'filament.pages.my-modern-profile';  // View Blade untuk halaman ini
-    // Opsional: Sembunyikan dari navigasi utama jika hanya ingin diakses via user menu
+    protected static ?string $title = 'Profil Pengguna Saya';
+    protected static string $view = 'filament.pages.my-modern-profile';
     protected static bool $shouldRegisterNavigation = false;
 
-    // Tambahkan action di header halaman jika perlu
-    protected function getHeaderActions(): array
+    /**
+     * Daftarkan Action di sini agar mountAction() bisa menemukannya
+     */
+    protected function getActions(): array
     {
         return [
-            // Contoh: Action untuk kembali ke dashboard
-            Action::make('backToDashboard')
-                ->label('Kembali ke Dashboard')
-                ->url(fn (): string => Dashboard::getUrl()),
+            $this->deleteAccountAction(),
         ];
     }
 
-    // Metode untuk passing data ke view jika diperlukan
-    public function getHeaderWidgets(): array
+    /**
+     * Definisi Action Hapus Akun
+     */
+    // public function deleteAccountAction(): Action
+    // {
+    //     return Action::make('deleteAccount')
+    //         ->label('Hapus Akun')
+    //         ->color('danger')
+    //         ->requiresConfirmation()
+    //         ->modalHeading('Konfirmasi Hapus Akun')
+    //         ->modalDescription('Apakah Anda yakin? Semua data Anda akan dihapus permanen. Anda akan langsung dikeluarkan dari sistem.')
+    //         ->modalSubmitActionLabel('Ya, Hapus Sekarang')
+    //         ->modalIcon('heroicon-o-trash')
+    //         ->action(function () {
+    //             $user = Auth::user();
+    //             // Proses Logout
+    //             Auth::logout();
+    //             request()->session()->invalidate();
+    //             request()->session()->regenerateToken();
+    //             // Proses Hapus
+    //             $user->delete();
+    //             Notification::make()
+    //                 ->title('Akun Berhasil Dihapus')
+    //                 ->success()
+    //                 ->send();
+    //             return redirect()->to(filament()->getLoginUrl());
+    //         });
+    // }
+    public function deleteAccountAction(): Action
     {
-        return [
-            // Anda bisa menaruh widget di sini jika ingin
-        ];
+        return Action::make('deleteAccount')
+            ->label('Hapus Akun')
+            ->color('danger')
+            ->requiresConfirmation()
+            ->modalHeading('Konfirmasi Hapus Akun')
+            ->modalDescription('Apakah Anda yakin? Semua data Anda akan dihapus permanen.')
+            ->modalSubmitActionLabel('Ya, Hapus Sekarang')
+            ->action(function () {
+                $user = Auth::user();
+
+                // 1. Proses Logout
+                Auth::logout();
+
+                // 2. Gunakan Facade Session untuk menghindari error 'Expected object'
+                Session::invalidate();
+                Session::regenerateToken();
+
+                // 3. Proses Hapus User
+                if ($user) {
+                    $user->delete();
+                }
+
+                Notification::make()
+                    ->title('Akun Berhasil Dihapus')
+                    ->success()
+                    ->send();
+
+                return redirect()->to(filament()->getLoginUrl());
+            });
+
     }
+
 }

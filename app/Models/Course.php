@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Model;
 
 class Course extends Model
@@ -44,10 +45,28 @@ class Course extends Model
         return $this->hasMany(CourseClass::class, 'course_id');
     }
 
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'course_id');
+    }
+
     // ---------
     public function scopeOpen($query)
     {
         return $query->where('status', 'open');
+    }
+
+    // app/Models/Course.php
+    public function enrollments(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            ClassEnrollment::class,
+            CourseClass::class,
+            'course_id',  // course_classes.course_id → courses.id
+            'class_id',  // class_enrollments.class_id → course_classes.id
+            'id',
+            'id'
+        )->whereNotNull('rating');  // ← tambahkan ini agar hanya hitung yang punya rating
     }
 
     public function classEnrollments(): HasMany

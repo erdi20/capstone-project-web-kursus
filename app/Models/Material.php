@@ -18,6 +18,8 @@ class Material extends Model
         'course_id',
         'created_by',
         'is_attendance_required',
+        'attendance_start',
+        'attendance_end',
     ];
 
     public function Course(): BelongsTo
@@ -47,5 +49,7 @@ class Material extends Model
 
     protected $casts = [
         'is_attendance_required' => 'boolean',
+        'attendance_start' => 'datetime',
+        'attendance_end' => 'datetime',
     ];
 }

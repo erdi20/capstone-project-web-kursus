@@ -46,6 +46,14 @@ class QuizAssignmentResource extends Resource
 
     protected static ?int $navigationSort = 2;  // Urutan setelah Tugas Esai (jika Esai = 3)
 
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+
+        // Izinkan akses jika user adalah admin atau mentor
+        return $user->isMentor();
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -79,6 +87,7 @@ class QuizAssignmentResource extends Resource
                             ->label('Batas Waktu Pengumpulan')
                             ->minDate(now())
                             ->required()
+                            ->timezone('Asia/Jakarta')
                             ->columnSpan(2),
                         TextInput::make('duration_minutes')
                             ->label('Durasi Kuis (Menit)')
@@ -124,6 +133,7 @@ class QuizAssignmentResource extends Resource
                 Tables\Columns\TextColumn::make('due_date')
                     ->label('Batas Waktu')
                     ->dateTime('d M Y H:i')
+                    ->timezone('Asia/Jakarta')
                     ->sortable()
                     ->color(fn(string $state): string => match (true) {
                         now()->gt($state) => 'danger',  // Merah jika sudah melewati deadline
@@ -148,6 +158,7 @@ class QuizAssignmentResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Tanggal')
                     ->dateTime('d/m/Y H:i')
+                    ->timezone('Asia/Jakarta')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])

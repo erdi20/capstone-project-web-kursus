@@ -10,20 +10,23 @@ use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuizController;
+use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('guest');
-});
+// Route::get('/', function () {
+//     return view('guest');
+// });
 
+Route::get('/', [HomeController::class, 'index']);
 Route::get('/dashboard', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
-
+// web.php
+// Route::delete('/profile', [ProfileController::class, 'destroyUserFilament'])->name('profile.delete');
+Route::get('/listkursus', [CourseController::class, 'index'])->name('listkursus');
 Route::middleware('auth')->group(function () {
     Route::get('/payment', function () {
         return view('student.payment');
     });
     // ---------------------
-    Route::get('/listkursus', [CourseController::class, 'index'])->name('listkursus');
     Route::get('/detailkursus/{slug}', [CourseController::class, 'show'])->name('detailkursus');
     // ---------------------
     Route::get('listkelas', [CourseClassController::class, 'index'])->name('listkelas');  // [Route::get('/listkelas', [CourseClassController::class, 'index'])->name('listkelas'] )
@@ -50,6 +53,10 @@ Route::middleware('auth')->group(function () {
 
     // sertifikat
     Route::get('/kelas/{classId}/sertifikat', [CertificateController::class, 'download'])->name('certificates.download');
+    // ---------------------
+
+    // review
+    Route::post('/kelas/{classId}/review', [ReviewController::class, 'store'])->name('reviews.store');
     // ---------------------
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

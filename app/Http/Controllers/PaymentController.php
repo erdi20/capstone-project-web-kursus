@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClassEnrollment;
+use App\Models\Commission;
 use App\Models\CourseClass;
 use App\Models\Payment;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -34,13 +36,32 @@ class PaymentController extends Controller
         }
 
         // ✅ CEK 2: Apakah masa pendaftaran sudah berakhir?
-        if ($class->enrollment_end && now()->greaterThan($class->enrollment_end)) {
-            return back()->with('error', 'Pendaftaran untuk kelas ini telah ditutup pada ' . $class->enrollment_end->translatedFormat('d F Y, H:i') . '.');
+        // if ($class->enrollment_end && now()->greaterThan($class->enrollment_end)) {
+        //     return back()->with('error', 'Pendaftaran untuk kelas ini telah ditutup pada ' . $class->enrollment_end->translatedFormat('d F Y, H:i') . '.');
+        // }
+
+        if ($class->enrollment_end) {
+            $enrollmentEndJakarta = \Carbon\Carbon::parse($class->enrollment_end)->setTimezone('Asia/Jakarta');
+            $nowJakarta = now()->setTimezone('Asia/Jakarta');
+
+            if ($nowJakarta->greaterThan($enrollmentEndJakarta)) {
+                return back()->with('error', 'Pendaftaran untuk kelas ini telah ditutup pada ' . $enrollmentEndJakarta->translatedFormat('d F Y, H:i') . '.');
+            }
         }
 
         // ✅ CEK 3: Apakah pendaftaran belum dibuka? (opsional, tapi direkomendasikan)
-        if ($class->enrollment_start && now()->lessThan($class->enrollment_start)) {
-            return back()->with('error', 'Pendaftaran untuk kelas ini belum dibuka. Akan dibuka pada ' . $class->enrollment_start->translatedFormat('d F Y, H:i') . '.');
+        // if ($class->enrollment_start && now()->lessThan($class->enrollment_start)) {
+        //     return back()->with('error', 'Pendaftaran untuk kelas ini belum dibuka. Akan dibuka pada ' . $class->enrollment_start->translatedFormat('d F Y, H:i') . '.');
+        // }
+
+        // ✅ CEK 3: Bandingkan dalam timezone Jakarta
+        if ($class->enrollment_start) {
+            $enrollmentStartJakarta = \Carbon\Carbon::parse($class->enrollment_start)->setTimezone('Asia/Jakarta');
+            $nowJakarta = now()->setTimezone('Asia/Jakarta');
+
+            if ($nowJakarta->lessThan($enrollmentStartJakarta)) {
+                return back()->with('error', 'Pendaftaran untuk kelas ini belum dibuka. Akan dibuka pada ' . $enrollmentStartJakarta->translatedFormat('d F Y, H:i') . '.');
+            }
         }
         // -----
         try {
@@ -197,6 +218,7 @@ class PaymentController extends Controller
 
                     Log::info("ClassEnrollment created for student $studentId in class $courseClassId");
                 }
+                $this->processCommission($payment);
             }
 
             return response('OK', 200);
@@ -204,5 +226,28 @@ class PaymentController extends Controller
             Log::error('Midtrans notification error: ' . $e->getMessage() . ' | Order ID: ' . ($orderId ?? 'unknown'));
             return response('OK', 200);
         }
+    }
+
+    private function processCommission(Payment $payment)
+    {
+        // Ambil kursus untuk dapat mentor
+        $course = $payment->course;  // pastikan ada relasi 'course'
+        $mentorId = $course->created_by;
+
+        // Ambil persentase global
+        $setting = Setting::first();
+        $percent = $setting->mentor_commission_percent ?? 70;
+
+        // Hitung komisi
+        $commissionAmount = ($payment->gross_amount * $percent) / 100;
+
+        // Simpan riwayat
+        Commission::create([
+            'payment_id' => $payment->id,
+            'mentor_id' => $mentorId,
+            'amount' => $commissionAmount,
+            'percentage' => $percent,
+            'paid_at' => now(),  // atau null jika nanti dibayar manual
+        ]);
     }
 }

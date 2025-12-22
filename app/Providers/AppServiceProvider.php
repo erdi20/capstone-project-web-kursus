@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use Livewire\Livewire;
 use App\Models\CourseClass;
+use App\Http\Livewire\DeleteUser;
 use App\Observers\CourseClassObserver;
 use Illuminate\Support\ServiceProvider;
 

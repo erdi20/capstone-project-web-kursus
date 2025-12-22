@@ -2,38 +2,43 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CourseResource\RelationManagers\ClassesRelationManager;
-use App\Filament\Resources\CourseResource\Pages;
-use App\Filament\Resources\CourseResource\RelationManagers;
-use App\Models\Course;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
-use Filament\Resources\Resource;
-use Filament\Tables\Columns\BadgeColumn;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\SelectColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Closure;
 use Filament\Forms;
 use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Models\Course;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use App\Models\CourseClass;
 use Illuminate\Support\Str;
-use Closure;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Tabs;
+use Filament\Tables\Actions\Action;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Section;
+use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Model;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
+use Filament\Tables\Columns\SelectColumn;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\DateTimePicker;
+use App\Filament\Resources\CourseResource\Pages;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\CourseResource\RelationManagers;
+use App\Filament\Resources\CourseResource\Pages\MaterialAttendances;
+use App\Filament\Resources\MaterialResource\Pages\ViewMaterialAttendances;
+use App\Filament\Resources\CourseResource\RelationManagers\ClassesRelationManager;
 
 class CourseResource extends Resource
 {
@@ -52,6 +57,14 @@ class CourseResource extends Resource
 
     // 5. Mengatur Urutan Navigasi menjadi yang paling atas (0)
     protected static ?int $navigationSort = 0;
+
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+
+        // Izinkan akses jika user adalah admin atau mentor
+        return $user->isMentor();
+    }
 
     public static function form(Form $form): Form
     {
@@ -164,6 +177,7 @@ class CourseResource extends Resource
                                                     ->label('Diskon Berakhir Pada')
                                                     ->helperText('Tanggal dan waktu diskon akan berakhir.')
                                                     ->nullable()
+                                                    ->timezone('Asia/Jakarta')
                                                     ->minDate(now())
                                                     ->required(fn(Get $get): bool => $get('is_on_sale') && $get('discount_price') !== null),
                                             ]),
@@ -319,7 +333,27 @@ class CourseResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                ActionGroup::make([
+                    Tables\Actions\EditAction::make(),
+                    Tables\Actions\DeleteAction::make(),
+                    Tables\Actions\Action::make('create_class')
+                        ->label('Buat Kelas')
+                        ->color('info')
+                        ->icon('heroicon-o-plus-circle')
+                        ->url(fn(Course $record): string => CourseClassResource::getUrl('create') . '?course_id=' . $record->id)
+                        ->openUrlInNewTab(false),
+                    Tables\Actions\Action::make('view_materials')
+                        ->label('Lihat Materi')
+                        ->icon('heroicon-o-book-open')
+                        ->url(fn(\App\Models\Course $record) => static::getUrl('materials', ['record' => $record->id]))
+                        ->color('primary'),
+                    Action::make('create_material')
+                        ->label('Buat materi')
+                        ->color('info')
+                        ->icon('heroicon-o-clipboard-document-check')
+                        ->url(fn(Course $record): string => MaterialResource::getUrl('create') . '?course_id=' . $record->id)
+                        ->openUrlInNewTab(false),
+                ])
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -341,6 +375,8 @@ class CourseResource extends Resource
             'index' => Pages\ListCourses::route('/'),
             'create' => Pages\CreateCourse::route('/create'),
             'edit' => Pages\EditCourse::route('/{record}/edit'),
+            'materials' => Pages\ListCourseMaterials::route('/{record}/materials'),
+            'attendances' => MaterialAttendances::route('/{record}/materials/{material}/attendances'),
         ];
     }
 }

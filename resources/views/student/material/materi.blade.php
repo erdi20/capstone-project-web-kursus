@@ -201,7 +201,7 @@
             // Buat modal popup
             const modal = document.createElement('div');
             modal.innerHTML = `
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div class="w-full max-w-md rounded-xl bg-white p-6">
                 <h3 class="text-lg font-bold text-gray-800">Ambil Foto Absensi</h3>
                 <p class="mt-1 text-sm text-gray-600">Pastikan wajah terlihat jelas dan sedang membaca materi.</p>
@@ -227,8 +227,8 @@
                     </button>
                 </div>
             </div>
-        </div>
-    `;
+            </div>
+            `;
             document.body.appendChild(modal);
 
             const video = document.getElementById('video');
@@ -273,6 +273,7 @@
                 const formData = new FormData();
                 const blob = dataURLtoBlob(photoPreview.src);
                 formData.append('photo', blob, 'absensi_' + Date.now() + '.jpg');
+                formData.append('material_id', '{{ $material->id }}');
                 formData.append('_token', '{{ csrf_token() }}');
 
                 fetch('{{ route('attendance.store', ['classId' => $class->id]) }}', {

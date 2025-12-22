@@ -158,6 +158,12 @@
                                         {{ $enrollment?->grade !== null ? 'Belum Memenuhi Syarat Kelulusan' : 'Selesaikan Kelas untuk Mendapat Sertifikat' }}
                                     </button>
                                 @endif
+                                @if ($enrollment?->status === 'completed')
+                                    <button id="open-review-btn" class="w-full rounded-lg bg-amber-500 px-4 py-2.5 font-semibold text-white shadow-md transition hover:bg-amber-600">
+                                        Beri Ulasan untuk Kursus Ini
+                                    </button>
+                                @endif
+
                             </div>
                         </section>
                     </div>
@@ -167,154 +173,90 @@
             </div>
         </div>
     </div>
-    <!-- ABSISI HARI INI -->
-    {{-- @if ($todayMaterial)
-        @php
-            $hasAttended = $todayMaterial->attendances()->where('student_id', Auth::id())->exists();
-        @endphp
+    <div id="review-modal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-black bg-opacity-50">
+        <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <h3 class="text-lg font-bold text-gray-800">Bagikan Pengalaman Belajar Anda</h3>
+            <p class="mt-1 text-sm text-gray-600">
+                Ulasan Anda akan membantu kami meningkatkan kualitas kursus.
+            </p>
+           <form action="{{ route('reviews.store', $class->id) }}" method="POST" class="mt-4">
+    @csrf
 
-        <div class="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
-            <div class="flex items-start justify-between">
-                <div>
-                    <h4 class="font-bold text-blue-800">Absensi Hari Ini</h4>
-                    <p class="text-sm text-blue-700">Pertemuan: {{ $todayMaterial->material->name ?? 'Materi ' . $todayMaterial->order }}</p>
+    <!-- Rating 1-5 dengan penjelasan -->
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Beri Penilaian:</label>
+        <div class="space-y-2">
+            @php
+                $ratings = [
+                    1 => 'Kurang Baik',
+                    2 => 'Cukup Baik',
+                    3 => 'Baik',
+                    4 => 'Sangat Baik',
+                    5 => 'Luar Biasa'
+                ];
+            @endphp
+
+            @foreach($ratings as $value => $label)
+                <div class="flex items-center">
+                    <input
+                        type="radio"
+                        id="rating_{{ $value }}"
+                        name="rating"
+                        value="{{ $value }}"
+                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500"
+                        required
+                        {{ old('rating', $enrollment->rating) == $value ? 'checked' : '' }}
+                    />
+                    <label for="rating_{{ $value }}" class="ml-2 text-sm text-gray-700">
+                        <span class="font-medium">{{ $value }}</span> - {{ $label }}
+                    </label>
                 </div>
-                @if ($hasAttended)
-                    <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                        <svg class="mr-1 h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        Hadir
-                    </span>
-                @else
-                    <button type="button" id="absen-btn" class="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700">
-                        Absen Sekarang
-                    </button>
-                @endif
-            </div>
+            @endforeach
         </div>
-    @endif
+    </div>
+
+    <!-- Text Review -->
+    <textarea
+        name="review"
+        rows="4"
+        placeholder="Ceritakan pengalaman Anda mengikuti kursus ini..."
+        class="w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        required
+    >{{ old('review', $enrollment->review) }}</textarea>
+
+    <div class="mt-4 flex justify-end gap-3">
+        <button type="button" id="close-review-modal" class="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50">
+            Nanti Saja
+        </button>
+        <button type="submit" class="rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">
+            Kirim Ulasan
+        </button>
+    </div>
+</form>
+            {{-- <form action="{{ route('reviews.store', $class->id) }}" method="POST" class="mt-4">
+                @csrf
+                <textarea name="review" rows="4" placeholder="Ceritakan pengalaman Anda mengikuti kursus ini..." class="w-full rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>{{ old('review', $enrollment->review) }}</textarea>
+
+                <div class="mt-4 flex justify-end gap-3">
+                    <button type="button" id="close-review-modal" class="rounded-lg border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50">
+                        Nanti Saja
+                    </button>
+                    <button type="submit" class="rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700">
+                        Kirim Ulasan
+                    </button>
+                </div>
+            </form> --}}
+        </div>
+    </div>
+
     <script>
-        document.getElementById('absen-btn')?.addEventListener('click', function() {
-            // Buat modal popup
-            const modal = document.createElement('div');
-            modal.innerHTML = `
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="w-full max-w-md rounded-xl bg-white p-6">
-                <h3 class="text-lg font-bold text-gray-800">Ambil Foto Absensi</h3>
-                <p class="mt-1 text-sm text-gray-600">Pastikan wajah terlihat jelas dan sedang membaca materi.</p>
-
-                <div class="mt-4 flex justify-center">
-                    <video id="video" class="w-full rounded-lg border" autoplay playsinline></video>
-                </div>
-
-                <div class="mt-4 flex justify-center">
-                    <canvas id="canvas" class="hidden"></canvas>
-                    <img id="photo-preview" class="hidden max-h-40 rounded-lg" />
-                </div>
-
-                <div class="mt-6 flex gap-3">
-                    <button type="button" id="close-modal" class="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        Batal
-                    </button>
-                    <button type="button" id="capture-btn" class="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-                        Ambil Foto
-                    </button>
-                    <button type="button" id="submit-btn" class="hidden flex-1 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white">
-                        Kirim Absen
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-            document.body.appendChild(modal);
-
-            const video = document.getElementById('video');
-            const canvas = document.getElementById('canvas');
-            const photoPreview = document.getElementById('photo-preview');
-            const captureBtn = document.getElementById('capture-btn');
-            const submitBtn = document.getElementById('submit-btn');
-            const closeModal = document.getElementById('close-modal');
-
-            let stream;
-
-            // Akses kamera
-            navigator.mediaDevices.getUserMedia({
-                    video: true,
-                    audio: false
-                })
-                .then(function(s) {
-                    stream = s;
-                    video.srcObject = s;
-                })
-                .catch(function(err) {
-                    alert('Gagal mengakses kamera: ' + err.message);
-                    modal.remove();
-                });
-
-            // Ambil foto
-            captureBtn.addEventListener('click', function() {
-                const ctx = canvas.getContext('2d');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const dataUrl = canvas.toDataURL('image/jpeg');
-
-                photoPreview.src = dataUrl;
-                photoPreview.classList.remove('hidden');
-                submitBtn.classList.remove('hidden');
-                captureBtn.classList.add('hidden');
-            });
-
-            // Kirim absen
-            submitBtn.addEventListener('click', function() {
-                const formData = new FormData();
-                const blob = dataURLtoBlob(photoPreview.src);
-                formData.append('photo', blob, 'absensi_' + Date.now() + '.jpg');
-                formData.append('_token', '{{ csrf_token() }}');
-
-                fetch('{{ route('attendance.store', ['classId' => $class->id]) }}', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Absensi berhasil!');
-                            location.reload(); // refresh halaman
-                        } else {
-                            alert('Gagal: ' + data.error);
-                            modal.remove();
-                        }
-                    })
-                    .catch(err => {
-                        alert('Error: ' + err.message);
-                        modal.remove();
-                    });
-            });
-
-            // Tutup modal
-            closeModal.addEventListener('click', function() {
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                }
-                modal.remove();
-            });
-
-            // Helper: convert data URL to Blob
-            function dataURLtoBlob(dataurl) {
-                const arr = dataurl.split(',');
-                const mime = arr[0].match(/:(.*?);/)[1];
-                const bstr = atob(arr[1]);
-                let n = bstr.length;
-                const u8arr = new Uint8Array(n);
-                while (n--) {
-                    u8arr[n] = bstr.charCodeAt(n);
-                }
-                return new Blob([u8arr], {
-                    type: mime
-                });
-            }
+        document.getElementById('open-review-btn').addEventListener('click', function() {
+            document.getElementById('review-modal').classList.remove('hidden');
         });
-    </script> --}}
+
+        document.getElementById('close-review-modal').addEventListener('click', function() {
+            document.getElementById('review-modal').classList.add('hidden');
+        });
+    </script>
+
 </x-app-layout>

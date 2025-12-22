@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\ClassMaterial;
 use App\Models\ClassEnrollment;
+use App\Models\ClassMaterial;
 use App\Models\EssayAssignment;
 use App\Models\EssaySubmission;
 use App\Services\GradingService;
-use Illuminate\Support\Facades\Auth;
 use App\Services\MaterialCompletionService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class EssayController extends Controller
 {
@@ -95,11 +95,11 @@ class EssayController extends Controller
 
         if ($enrollment) {
             $enrollment->updateProgress();
-            app(GradingService::class)->updateEnrollmentGrade($enrollment);
+            // app(GradingService::class)->updateEnrollmentGrade($enrollment);
         }
         // -----------------------------------------------------
-app(MaterialCompletionService::class)
-    ->checkAndMarkAsCompleted(Auth::id(), $classId, $assignment->material_id);
+        app(MaterialCompletionService::class)
+            ->checkAndMarkAsCompleted(Auth::id(), $classId, $assignment->material_id);
         return redirect()->route('kelas', ['id' => $classId]);
     }
 }

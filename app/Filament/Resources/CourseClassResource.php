@@ -2,32 +2,32 @@
 
 namespace App\Filament\Resources;
 
-use Closure;
-use Filament\Forms;
-use Filament\Tables;
-use Filament\Forms\Get;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
+use App\Filament\Resources\CourseClassResource\RelationManagers\MaterialsRelationManager;
+use App\Filament\Resources\CourseClassResource\Pages;
+use App\Filament\Resources\CourseClassResource\RelationManagers;
 use App\Models\CourseClass;
 use App\Services\GradingService;
-use Filament\Resources\Resource;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Resources\Resource;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\BadgeColumn;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Filament\Forms;
+use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Forms\Components\DateTimePicker;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\CourseClassResource\Pages;
-use App\Filament\Resources\CourseClassResource\RelationManagers;
-use App\Filament\Resources\CourseClassResource\RelationManagers\MaterialsRelationManager;
+use Closure;
 
 class CourseClassResource extends Resource
 {
@@ -43,6 +43,14 @@ class CourseClassResource extends Resource
 
     protected static ?int $navigationSort = 1;  // Urutan sebelum Materi (2)
 
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+
+        // Izinkan akses jika user adalah admin atau mentor
+        return $user->isMentor();
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -55,6 +63,11 @@ class CourseClassResource extends Resource
                         Group::make()
                             ->columns(2)
                             ->schema([
+                                Hidden::make('course_id')
+                                    ->default(function () {
+                                        $courseId = app('request')->query('course_id');
+                                        return is_numeric($courseId) ? (int) $courseId : null;
+                                    }),
                                 FileUpload::make('thumbnail')
                                     ->label('Foto Kelas (Thumbnail)')
                                     ->disk('public')
@@ -63,13 +76,13 @@ class CourseClassResource extends Resource
                                     ->imageEditor()
                                     ->required(false)
                                     ->helperText('Unggah gambar representatif untuk kelas ini (misal: ilustrasi sesi, grup belajar, dll.)'),
-                                Select::make('course_id')
-                                    ->label('Kursus Induk')
-                                    ->relationship('course', 'name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->required()
-                                    ->helperText('Kelas ini akan berada di bawah kursus utama yang dipilih.'),
+                                // Select::make('course_id')
+                                //     ->label('Kursus Induk')
+                                //     ->relationship('course', 'name')
+                                //     ->searchable()
+                                //     ->preload()
+                                //     ->required()
+                                //     ->helperText('Kelas ini akan berada di bawah kursus utama yang dipilih.'),
                                 TextInput::make('name')
                                     ->label('Nama Sesi Kelas')
                                     ->placeholder('Contoh: Sesi 1: Pengenalan PHP dan Laravel')
@@ -122,12 +135,14 @@ class CourseClassResource extends Resource
                                     // Coba hapus ->seconds(false) atau set ke true
                                     ->seconds(true)  // <-- UBAH KE TRUE ATAU HAPUS SAJA
                                     ->required()
+                                    ->timezone('Asia/Jakarta')
                                     ->live(onBlur: true),
                                 DateTimePicker::make('enrollment_end')
                                     ->label('Akhir Pendaftaran')
                                     // Coba hapus ->seconds(false) atau set ke true
                                     ->seconds(true)  // <-- UBAH KE TRUE ATAU HAPUS SAJA
                                     ->required()
+                                    ->timezone('Asia/Jakarta')
                                     ->minDate(fn(Get $get) => $get('enrollment_start') ?? now())
                                     // Rule validasi tetap dipertahankan
                                     ->rule(fn(Get $get, $state): Closure => function (string $attribute, $value, Closure $fail) use ($get) {

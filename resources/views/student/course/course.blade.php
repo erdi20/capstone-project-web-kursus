@@ -83,24 +83,50 @@
                         <img src="{{ asset('storage/' . $course->user->avatar_url) }}" alt="Mentor" class="h-16 w-16 rounded-full border-2 border-indigo-500 object-cover p-0.5" loading="lazy">
                         <div>
                             <div class="text-lg font-bold text-gray-800">{{ $course->user->name }}</div>
-                            <p class="mt-1 text-sm text-gray-500">Gregorius adalah penulis teknis berpengalaman dengan latar belakang teknik dan komunikasi. Ia membimbing peserta melalui contoh nyata dan tugas praktik.</p>
+                            <p class="mt-1 text-sm text-gray-500">{{ $course->user->bio }}</p>
                         </div>
                     </div>
                 </section>
 
                 <section class="mt-8">
-                    <h3 class="mb-4 text-2xl font-bold text-gray-800">Testimoni Siswa</h3>
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div class="rounded-lg border border-amber-200 bg-amber-50 p-5 shadow-sm">
-                            <p class="italic text-gray-700">"Kelas ini membantu saya menyusun laporan teknis dengan lebih profesional."</p>
-                            <div class="mt-3 text-sm font-semibold text-gray-600">— Alumni, Universitas X</div>
-                        </div>
+                    <h3 class="mb-4 text-2xl font-bold text-gray-800">Ulasan Siswa</h3>
 
-                        <div class="rounded-lg border border-amber-200 bg-amber-50 p-5 shadow-sm">
-                            <p class="italic text-gray-700">"Instruktur sangat jelas menjelaskan konsep dan memberikan contoh nyata."</p>
-                            <div class="mt-3 text-sm font-semibold text-gray-600">— Alumni, Perusahaan Y</div>
+                    @if ($topReviews->isEmpty())
+                        <p class="rounded-lg border border-gray-200 bg-gray-50 p-5 italic text-gray-500">
+                            Belum ada ulasan untuk kursus ini.
+                        </p>
+                    @else
+                        <div class="grid grid-cols-1 gap-4">
+                            @foreach ($topReviews as $review)
+                                <div class="rounded-lg border border-amber-200 bg-amber-50 p-5 shadow-sm">
+                                    <div class="flex items-center">
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            <span class="text-amber-500">
+                                                @if ($i <= $review->rating)
+                                                    ⭐
+                                                @else
+                                                    ☆
+                                                @endif
+                                            </span>
+                                        @endfor
+                                        <span class="ml-2 text-sm font-medium text-gray-600">
+                                            ({{ $review->rating }})
+                                        </span>
+                                    </div>
+                                    <p class="mt-2 italic text-gray-700">"{{ $review->review }}"</p>
+                                    <div class="mt-3 text-sm text-gray-600">
+                                        — {{ $review->user->name }}
+                                        @if ($review->courseClass)
+                                            <span class="ml-2">| Kelas: {{ $review->courseClass->name }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="mt-1 text-xs text-gray-500">
+                                        {{ $review->completed_at->translatedFormat('d F Y') }}
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
-                    </div>
+                    @endif
                 </section>
 
             </article>

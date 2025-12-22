@@ -59,6 +59,20 @@ class CourseController extends Controller
                 $eligibleClassIds = $emptyClasses;
             }
         }
+        $topReviews = ClassEnrollment::whereHas('courseClass', function ($query) use ($course) {
+            $query->where('course_id', $course->id);
+        })
+            ->whereNotNull('review')
+            ->where('review', '<>', '')  // gunakan '<>' bukan '!=' untuk string
+            ->where('rating', '>=', 3)
+            ->with([
+                'user' => fn($q) => $q->select('id', 'name'),
+                'courseClass' => fn($q) => $q->select('id', 'name')
+            ])
+            ->orderBy('rating', 'desc')
+            ->orderBy('completed_at', 'desc')
+            ->limit(5)
+            ->get(['student_id', 'class_id', 'review', 'rating', 'completed_at']);
 
         // Pilih kelas pertama (ID terkecil)
         $selectedClassId = !empty($eligibleClassIds) ? min($eligibleClassIds) : null;
@@ -72,6 +86,6 @@ class CourseController extends Controller
             $query->where('course_id', $course->id);
         })->where('student_id', auth()->id())->exists();
 
-        return view('student.course.course', compact('course', 'selectedClassId', 'isAlreadyEnrolled'));
+        return view('student.course.course', compact('course', 'selectedClassId', 'isAlreadyEnrolled', 'topReviews'));
     }
 }
