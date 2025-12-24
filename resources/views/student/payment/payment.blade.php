@@ -113,7 +113,7 @@
             e.preventDefault();
             snap.pay('{{ $snapToken }}', {
                 onSuccess: function(result) {
-                    window.location.href = "{{ route('dashboard') }}";
+                    window.location.href = "{{ route('payment.success') }}";
                 },
                 onError: function(result) {
                     alert('Pembayaran gagal.');

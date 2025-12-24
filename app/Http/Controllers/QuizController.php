@@ -18,10 +18,10 @@ class QuizController extends Controller
     {
         $user = Auth::user();
 
-        // ✅ Ambil assignment tanpa course_class_id
+        //  Ambil assignment tanpa course_class_id
         $assignment = QuizAssignment::findOrFail($assignmentId);
 
-        // ✅ Validasi: pastikan material tugas ini ada di kelas ini
+        //  Validasi: pastikan material tugas ini ada di kelas ini
         $materialId = $assignment->material_id;
         $isValid = ClassMaterial::where('course_class_id', $classId)
             ->where('material_id', $materialId)
@@ -43,7 +43,7 @@ class QuizController extends Controller
     {
         $user = Auth::user();
 
-        // ✅ Validasi assignment dan konteks kelas
+        //  Validasi assignment dan konteks kelas
         $assignment = QuizAssignment::findOrFail($assignmentId);
         $materialId = $assignment->material_id;
         $isValid = ClassMaterial::where('course_class_id', $classId)
@@ -125,16 +125,36 @@ class QuizController extends Controller
         ])->with('success', 'Quiz berhasil dikirim!');
     }
 
+    // public function result(string $classId, string $assignmentId)
+    // {
+    //     $user = Auth::user();
+
+    //     //  Tidak perlu filter course_class_id
+    //     $assignment = QuizAssignment::with('questions')->findOrFail($assignmentId);
+    //     $submission = QuizSubmission::where('quiz_assignment_id', $assignmentId)
+    //         ->where('student_id', $user->id)
+    //         ->firstOrFail();
+    //     $materialId = $assignment->material_id;
+    //     $answers = QuizAnswer::with('question')
+    //         ->where('quiz_submission_id', $submission->id)
+    //         ->get();
+
+    //     return view('student.quiz.hasilquiz', compact('assignment', 'submission', 'answers', 'classId', 'materialId'));
+    // }
     public function result(string $classId, string $assignmentId)
     {
         $user = Auth::user();
 
-        // ✅ Tidak perlu filter course_class_id
-        $assignment = QuizAssignment::with('questions')->findOrFail($assignmentId);
+        $assignment = QuizAssignment::with('questions')  // ✅ ini sudah cukup jika kolom benar
+            ->findOrFail($assignmentId);
+
         $submission = QuizSubmission::where('quiz_assignment_id', $assignmentId)
             ->where('student_id', $user->id)
             ->firstOrFail();
+
         $materialId = $assignment->material_id;
+
+        // ✅ Pastikan relasi 'question' dimuat
         $answers = QuizAnswer::with('question')
             ->where('quiz_submission_id', $submission->id)
             ->get();

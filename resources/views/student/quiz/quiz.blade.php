@@ -75,45 +75,41 @@
                                 @csrf
                                 <div id="quiz-questions" class="space-y-10">
                                     @foreach ($questions as $index => $question)
-                                        <div id="question-{{ $question->id }}" class="question-item rounded-xl border border-gray-200 p-6 transition hover:shadow-md">
-                                            <div class="flex items-start gap-4">
-                                                <span class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-indigo-500 text-lg font-bold text-white">
-                                                    {{ $loop->iteration }}
-                                                </span>
-                                                <div>
-                                                    <h3 class="mb-5 text-lg font-semibold text-gray-900">{!! $question->question_text !!}</h3>
+                                        <div id="question-{{ $question->id }}" class="question-item ...">
+                                            {{-- ... kode nomor dan teks soal ... --}}
 
-                                                    <div class="space-y-3">
-                                                        {{-- Perbaikan utama: value dikirim sebagai 'A', 'B', 'C', 'D' --}}
-                                                        @if ($question->option_a)
-                                                            <label class="flex cursor-pointer items-start gap-4 rounded-lg border border-gray-200 bg-white p-4 transition duration-150 hover:bg-indigo-50 peer-checked:border-indigo-500 peer-checked:bg-indigo-50">
-                                                                <input type="radio" name="question_{{ $question->id }}" value="A" class="peer mt-1 h-5 w-5 flex-shrink-0 text-indigo-600 focus:ring-indigo-500" required data-question-id="{{ $question->id }}">
-                                                                <span class="prose font-medium leading-relaxed text-gray-700">A. {!! $question->option_a !!}</span>
-                                                            </label>
-                                                        @endif
+                                            <div class="space-y-3">
+                                                @php
+                                                    // 1. Masukkan semua pilihan yang ada ke dalam array
+                                                    $options = [];
+                                                    if ($question->option_a) {
+                                                        $options[] = ['key' => 'A', 'text' => $question->option_a];
+                                                    }
+                                                    if ($question->option_b) {
+                                                        $options[] = ['key' => 'B', 'text' => $question->option_b];
+                                                    }
+                                                    if ($question->option_c) {
+                                                        $options[] = ['key' => 'C', 'text' => $question->option_c];
+                                                    }
+                                                    if ($question->option_d) {
+                                                        $options[] = ['key' => 'D', 'text' => $question->option_d];
+                                                    }
 
-                                                        @if ($question->option_b)
-                                                            <label class="flex cursor-pointer items-start gap-4 rounded-lg border border-gray-200 bg-white p-4 transition duration-150 hover:bg-indigo-50 peer-checked:border-indigo-500 peer-checked:bg-indigo-50">
-                                                                <input type="radio" name="question_{{ $question->id }}" value="B" class="peer mt-1 h-5 w-5 flex-shrink-0 text-indigo-600 focus:ring-indigo-500" required data-question-id="{{ $question->id }}">
-                                                                <span class="prose font-medium leading-relaxed text-gray-700">B. {!! $question->option_b !!}</span>
-                                                            </label>
-                                                        @endif
+                                                    // 2. Acak urutan array tersebut
+                                                    shuffle($options);
+                                                @endphp
 
-                                                        @if ($question->option_c)
-                                                            <label class="flex cursor-pointer items-start gap-4 rounded-lg border border-gray-200 bg-white p-4 transition duration-150 hover:bg-indigo-50 peer-checked:border-indigo-500 peer-checked:bg-indigo-50">
-                                                                <input type="radio" name="question_{{ $question->id }}" value="C" class="peer mt-1 h-5 w-5 flex-shrink-0 text-indigo-600 focus:ring-indigo-500" required data-question-id="{{ $question->id }}">
-                                                                <span class="prose font-medium leading-relaxed text-gray-700">C. {!! $question->option_c !!}</span>
-                                                            </label>
-                                                        @endif
+                                                @foreach ($options as $opt)
+                                                    <label class="flex cursor-pointer items-start gap-4 rounded-lg border border-gray-200 bg-white p-4 transition duration-150 hover:bg-indigo-50 peer-checked:border-indigo-500">
+                                                        {{-- Value tetap menggunakan key asli (A, B, C, atau D) agar validasi di Controller tidak berubah --}}
+                                                        <input type="radio" name="question_{{ $question->id }}" value="{{ $opt['key'] }}" class="peer mt-1 h-5 w-5 text-indigo-600" required data-question-id="{{ $question->id }}">
 
-                                                        @if ($question->option_d)
-                                                            <label class="flex cursor-pointer items-start gap-4 rounded-lg border border-gray-200 bg-white p-4 transition duration-150 hover:bg-indigo-50 peer-checked:border-indigo-500 peer-checked:bg-indigo-50">
-                                                                <input type="radio" name="question_{{ $question->id }}" value="D" class="peer mt-1 h-5 w-5 flex-shrink-0 text-indigo-600 focus:ring-indigo-500" data-question-id="{{ $question->id }}">
-                                                                <span class="prose font-medium leading-relaxed text-gray-700">D. {!! $question->option_d !!}</span>
-                                                            </label>
-                                                        @endif
-                                                    </div>
-                                                </div>
+                                                        <span class="prose font-medium text-gray-700">
+                                                            {{-- Kita tidak menampilkan huruf A/B/C/D di sini agar tidak membingungkan karena sudah diacak --}}
+                                                            {!! $opt['text'] !!}
+                                                        </span>
+                                                    </label>
+                                                @endforeach
                                             </div>
                                         </div>
                                     @endforeach

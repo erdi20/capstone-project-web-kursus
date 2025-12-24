@@ -80,4 +80,23 @@ class MaterialCompletionService
 
         return $completedCount === $previousMaterialIds->count();
     }
+
+    public function markAsAccessed(int $studentId, int $classId, int $materialId): void
+    {
+        $classMaterialId = ClassMaterial::where('course_class_id', $classId)
+            ->where('material_id', $materialId)
+            ->value('id');
+
+        if ($classMaterialId) {
+            // Gunakan updateOrCreate tapi jangan timpa completed_at jika sudah ada
+            // agar timestamp awal selesai tidak berubah-ubah
+            MaterialCompletion::firstOrCreate(
+                [
+                    'student_id' => $studentId,
+                    'class_material_id' => $classMaterialId,
+                ],
+                ['completed_at' => now()]
+            );
+        }
+    }
 }

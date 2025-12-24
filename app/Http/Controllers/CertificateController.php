@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 
 class CertificateController extends Controller
 {
-    // ✅ Route download PDF (hanya generate PDF, tanpa session)
+    //  Route download PDF (hanya generate PDF, tanpa session)
     // public function download(string $classId)
     // {
     //     $enrollment = ClassEnrollment::where('class_id', $classId)

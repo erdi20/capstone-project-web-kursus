@@ -44,3 +44,5 @@ class WithdrawalHistory extends BaseWidget
             ->defaultPaginationPageOption(5);
     }
 }
+
+

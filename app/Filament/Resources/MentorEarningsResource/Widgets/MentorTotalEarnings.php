@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\MentorEarningsResource\Widgets;
 
 use App\Models\Commission;
+use App\Models\Payment;
+use App\Models\Setting;
 use App\Models\Withdrawal;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;

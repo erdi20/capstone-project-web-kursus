@@ -33,6 +33,9 @@ class User extends Authenticatable implements HasAvatar
         'education_level',
         'role',
         'bio',
+        'account_name',
+        'account_number',
+        'bank_name',
     ];
 
     /**

@@ -1,221 +1,329 @@
 <x-app-layout>
-    <div class="mx-auto max-w-6xl px-4 py-10">
+    <div class="relative overflow-hidden bg-slate-900 py-16 lg:py-20">
+        <div class="absolute right-0 top-0 -mr-20 -mt-20 h-96 w-96 rounded-full bg-green-500/10 blur-3xl"></div>
+        <div class="absolute bottom-0 left-0 -mb-20 -ml-20 h-80 w-80 rounded-full bg-indigo-500/10 blur-3xl"></div>
 
-        @if ($errors->any())
-            <div class="mx-auto mb-4 rounded-lg border border-red-400 bg-red-100 px-4 py-3 text-red-700">
-                <strong class="font-bold">Gagal Mendaftar!</strong>
-                <ul class="mt-1 list-inside list-disc">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="mx-auto mb-4 rounded-lg border border-yellow-400 bg-yellow-100 px-4 py-3 text-yellow-700">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        <section class="grid grid-cols-1 items-center gap-6 rounded-lg bg-white p-6 shadow-xl md:grid-cols-2 md:p-10">
-            <div class="order-2 w-full md:order-2">
-                <img src="{{ asset('storage/' . $course->thumbnail) }}" alt="Ilustrasi kursus" class="h-64 w-full rounded-lg object-cover shadow-md md:h-56 lg:h-72">
-            </div>
-            <div class="rounded-lg bg-white">
-                <h2 class="mb-3 text-3xl font-extrabold text-gray-900">{{ $course->name }}</h2>
-                <div class="prose prose-sm max-w-none text-gray-700 sm:prose-base">
-                    {!! $course->short_description !!}
+        <div class="relative mx-auto max-w-7xl px-4">
+            <div class="flex flex-col gap-12 lg:flex-row lg:items-center">
+                <div class="lg:w-7/12">
+                    <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-green-500/20 bg-green-500/10 px-4 py-1.5">
+                        <span class="flex h-2 w-2 animate-pulse rounded-full bg-green-500"></span>
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-green-400">Kursus Terverifikasi</span>
+                    </div>
+                    <h1 class="mb-6 text-4xl font-black leading-tight text-white md:text-6xl">
+                        {{ $course->name }}
+                    </h1>
+                    <div class="flex flex-wrap items-center gap-6 text-slate-400">
+                        <div class="flex items-center gap-3">
+                            <img src="{{ $course->user->avatar_url ? asset('storage/' . $course->user->avatar_url) : 'https://ui-avatars.com/api/?name=' . urlencode($course->user->name) }}" class="h-10 w-10 rounded-full border-2 border-slate-700 object-cover">
+                            <div>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Instruktur</p>
+                                <p class="text-sm font-bold text-white">{{ $course->user->name }}</p>
+                            </div>
+                        </div>
+                        <div class="hidden h-8 w-px bg-slate-800 md:block"></div>
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Alumni</p>
+                            <p class="text-sm font-bold text-white">{{ number_format($course->enrollment_count ?? 0) }} Siswa</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Rating</p>
+                            <p class="text-sm font-bold text-white">⭐ {{ number_format($course->avg_rating ?? 0, 1) }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:w-5/12">
+                    <div class="relative">
+                        <div class="absolute -inset-1 rounded-[3rem] bg-gradient-to-tr from-green-500 to-indigo-600 opacity-30 blur-2xl"></div>
+                        <img src="{{ asset('storage/' . $course->thumbnail) }}" class="relative aspect-video w-full rounded-[2.5rem] object-cover shadow-2xl">
+                    </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </div>
 
-        <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <div class="mx-auto max-w-7xl px-4 py-12">
+        <div class="flex flex-col gap-12 lg:flex-row">
 
-            <article class="lg:col-span-2">
-                <div class="rounded-lg bg-white p-6 shadow-xl">
-                    <h3 class="mb-3 text-2xl font-bold text-gray-800">Deskripsi Lengkap</h3>
-                    <div class="prose max-w-none text-gray-700">
+            <div class="space-y-12 lg:w-8/12">
+                <section>
+                    <div class="mb-6 flex items-center gap-4">
+                        <h3 class="text-2xl font-black text-slate-900">Deskripsi Kursus</h3>
+                        <div class="h-px flex-1 bg-slate-100"></div>
+                    </div>
+                    <article class="prose prose-slate max-w-none leading-relaxed text-slate-600 prose-headings:text-slate-900 prose-strong:text-slate-900">
                         {!! $course->description !!}
-                    </div>
-                </div>
-                @if ($isAlreadyEnrolled)
-                    <div class="mt-8 rounded-lg bg-white p-6 shadow-xl">
-                        <h3 class="mb-4 text-2xl font-bold text-gray-800">Anda telah mendaftar dalam kursus ini!</h3>
-                    </div>
-                @else
-                    <div class="mt-8 rounded-lg bg-white p-6 shadow-xl">
-                        <h3 class="mb-4 text-2xl font-bold text-gray-800">Kelas yang Tersedia</h3>
+                    </article>
+                </section>
 
-                        @if ($course->classes->isEmpty())
-                            <p class="rounded-lg border border-gray-100 p-4 italic text-gray-500">Saat ini tidak ada kelas yang dibuka untuk pendaftaran.</p>
-                        @else
-                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                @foreach ($course->classes as $class)
-                                    <div class="rounded-lg border border-indigo-200 bg-indigo-50 p-5 shadow-sm transition duration-150 hover:shadow-md">
-                                        <h4 class="mb-2 text-lg font-bold text-indigo-700">{{ $class->name }}</h4>
-                                        <p class="mt-1 text-sm text-gray-600">
-                                            {!! Str::limit($class->description, 80) !!}
-                                        </p>
-                                        <div class="mt-3 text-xs font-semibold text-indigo-500">
-                                            Kode: #{{ $class->id }}
+                <section>
+                    <div class="mb-10 flex items-center gap-4">
+                        <div>
+                            <h3 class="text-2xl font-black text-slate-900">Pilih Batch Kelas</h3>
+                            <p class="mt-1 text-xs font-bold uppercase tracking-widest text-slate-400">Tersedia beberapa jadwal untuk Anda</p>
+                        </div>
+                        <div class="h-px flex-1 bg-slate-100"></div>
+                    </div>
+
+                    @if ($isAlreadyEnrolled)
+                        <div class="rounded-[2.5rem] border-2 border-dashed border-slate-200 p-10 text-center">
+                            <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <h4 class="text-lg font-black text-slate-900">Akses Terbuka</h4>
+                            <p class="text-sm text-slate-500">Anda telah menjadi bagian dari kursus ini. Silakan cek kurikulum di dashboard.</p>
+                        </div>
+                    @else
+                        <div class="grid gap-8 sm:grid-cols-2">
+                            @foreach ($course->classes as $class)
+                                @php
+                                    $tz = 'Asia/Jakarta';
+                                    $now = now($tz);
+
+                                    $isFull = $class->enrollments_count >= $class->max_quota;
+                                    $quotaPercentage = ($class->enrollments_count / $class->max_quota) * 100;
+
+                                    /** * KUNCI PERBAIKAN:
+                                     * Kita beri tahu Carbon bahwa data dari DB adalah UTC,
+                                     * lalu kita ubah (setTimezone) ke Asia/Jakarta.
+                                     */
+                                    $startDate = \Carbon\Carbon::parse($class->enrollment_start, 'UTC')->setTimezone($tz);
+                                    $endDate = \Carbon\Carbon::parse($class->enrollment_end, 'UTC')->setTimezone($tz);
+
+                                    // Hitung sisa waktu dalam jam/menit jika hari ini adalah hari terakhir
+                                    $diffInHours = $now->diffInHours($endDate, false);
+                                    $daysLeft = ceil($now->diffInDays($endDate, false));
+
+                                    $isUpcoming = $now->lt($startDate);
+                                    $isClosed = $now->gt($endDate);
+                                @endphp
+
+                                <div class="group relative flex flex-col rounded-[2.5rem] border border-slate-100 bg-white p-4 transition-all duration-500 hover:border-transparent hover:shadow-[0_30px_60px_rgba(0,0,0,0.08)]">
+
+                                    <div class="relative mb-5 h-44 w-full overflow-hidden rounded-[2rem]">
+                                        <img src="{{ $class->thumbnail ? asset('storage/' . $class->thumbnail) : asset('storage/' . $course->thumbnail) }}" class="h-full w-full object-cover transition duration-700 group-hover:scale-110">
+
+                                        <div class="absolute left-4 top-4 flex gap-2">
+                                            @if ($isUpcoming)
+                                                <span class="rounded-xl bg-amber-500 px-3 py-1.5 text-[10px] font-black uppercase text-white shadow-lg">Segera Hadir</span>
+                                            @elseif ($isClosed)
+                                                <span class="rounded-xl bg-slate-500 px-3 py-1.5 text-[10px] font-black uppercase text-white shadow-lg">Ditutup</span>
+                                            @elseif ($isFull)
+                                                <span class="rounded-xl bg-red-500 px-3 py-1.5 text-[10px] font-black uppercase text-white shadow-lg">Penuh</span>
+                                            @else
+                                                <span class="rounded-xl bg-green-500 px-3 py-1.5 text-[10px] font-black uppercase text-white shadow-lg">Tersedia</span>
+                                            @endif
                                         </div>
 
-                                        {{-- ✅ TOMBOL DAFTAR DI SETIAP CARD --}}
-                                        <form action="{{ route('payment.initiate') }}" method="POST" class="mt-4">
+                                        <div class="absolute bottom-4 left-4 right-4">
+                                            <div class="flex items-center justify-between rounded-2xl border border-white/50 bg-white/90 p-3 backdrop-blur-md">
+                                                <div class="flex flex-col">
+                                                    <span class="text-[9px] font-black uppercase tracking-tighter text-slate-400">Status Pendaftaran</span>
+                                                    <span class="text-[11px] font-bold italic text-slate-900">
+                                                        @if ($isUpcoming)
+                                                            Mulai {{ $startDate->translatedFormat('d F') }}
+                                                        @else
+                                                            Tutup {{ $endDate->translatedFormat('d F Y') }}
+                                                        @endif
+                                                    </span>
+                                                </div>
+                                                <div class="text-right">
+                                                    <span class="{{ $isClosed ? 'bg-slate-500' : 'bg-red-600' }} inline-block rounded-lg px-2 py-1 text-[10px] font-bold uppercase tracking-tighter text-white">
+                                                        @if ($isUpcoming)
+                                                            Belum Buka
+                                                        @elseif ($isClosed)
+                                                            Ditutup
+                                                        @elseif ($diffInHours < 1)
+                                                            Berakhir Segera!
+                                                        @elseif ($diffInHours < 24)
+                                                            Tutup Hari Ini
+                                                        @else
+                                                            {{ $daysLeft }} Hari Lagi
+                                                        @endif
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-1 flex-col px-2 pb-2">
+                                        <h4 class="text-xl font-black text-slate-900 transition-colors group-hover:text-green-600">{{ $class->name }}</h4>
+
+                                        <div class="mt-3 flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
+                                            <div class="flex-1 text-center">
+                                                <p class="text-[9px] font-bold uppercase tracking-widest text-slate-400">Buka (WIB)</p>
+                                                <p class="text-[10px] font-black text-slate-700">
+                                                    {{ $startDate->translatedFormat('d M Y') }}
+                                                    <span class="block text-indigo-600">{{ $startDate->format('H:i') }}</span>
+                                                </p>
+                                            </div>
+                                            <div class="h-6 w-px bg-slate-200"></div>
+                                            <div class="flex-1 text-center">
+                                                <p class="text-[9px] font-bold uppercase tracking-widest text-slate-400">Tutup (WIB)</p>
+                                                <p class="text-[10px] font-black text-slate-700">
+                                                    {{ $endDate->translatedFormat('d M Y') }}
+                                                    <span class="block text-red-600">{{ $endDate->format('H:i') }}</span>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <p class="mt-4 line-clamp-2 text-xs italic leading-relaxed text-slate-500">
+                                            {{ $class->description ? strip_tags($class->description) : 'Bergabunglah di batch ini untuk pengalaman belajar yang intensif dan terarah.' }}
+                                        </p>
+
+                                        <div class="mb-6 mt-6">
+                                            <div class="mb-2 flex items-end justify-between">
+                                                <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Kapasitas Kelas</span>
+                                                <span class="text-xs font-black text-slate-900">{{ $class->enrollments_count }}/{{ $class->max_quota }}</span>
+                                            </div>
+                                            <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                                                <div class="{{ $isFull ? 'bg-red-500' : 'bg-green-500' }} h-full rounded-full transition-all duration-1000" style="width: {{ $quotaPercentage }}%"></div>
+                                            </div>
+                                        </div>
+
+                                        <form action="{{ route('payment.initiate') }}" method="POST" class="mt-auto">
                                             @csrf
                                             <input type="hidden" name="course_id" value="{{ $course->id }}">
                                             <input type="hidden" name="course_class_id" value="{{ $class->id }}">
-                                            <button type="submit" class="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white shadow transition hover:bg-indigo-700">
-                                                Daftar & Bayar
-                                            </button>
+
+                                            @if ($isFull || $isClosed || $isUpcoming)
+                                                <button type="button" disabled class="w-full cursor-not-allowed rounded-2xl bg-slate-100 py-4 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
+                                                    @if ($isUpcoming)
+                                                        Belum Dibuka
+                                                    @elseif($isFull)
+                                                        Kuota Penuh
+                                                    @else
+                                                        Pendaftaran Ditutup
+                                                    @endif
+                                                </button>
+                                            @else
+                                                <button class="group relative w-full overflow-hidden rounded-2xl bg-slate-900 py-4 text-[11px] font-black uppercase tracking-[0.2em] text-white transition-all hover:-translate-y-1 hover:bg-green-600 hover:shadow-xl hover:shadow-green-200">
+                                                    Daftar Batch Ini
+                                                </button>
+                                            @endif
                                         </form>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-                @endif
-                {{-- Bagian Mentor --}}
-                <section class="mt-8 rounded-lg bg-white p-6 shadow-xl">
-                    <h3 class="mb-3 text-2xl font-bold text-gray-800">Mentor Kelas</h3>
-                    <div class="flex items-start gap-4">
-                        <img src="{{ asset('storage/' . $course->user->avatar_url) }}" alt="Mentor" class="h-16 w-16 rounded-full border-2 border-indigo-500 object-cover p-0.5" loading="lazy">
-                        <div>
-                            <div class="text-lg font-bold text-gray-800">{{ $course->user->name }}</div>
-                            <p class="mt-1 text-sm text-gray-500">{{ $course->user->bio }}</p>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="mt-8">
-                    <h3 class="mb-4 text-2xl font-bold text-gray-800">Ulasan Siswa</h3>
-
-                    @if ($topReviews->isEmpty())
-                        <p class="rounded-lg border border-gray-200 bg-gray-50 p-5 italic text-gray-500">
-                            Belum ada ulasan untuk kursus ini.
-                        </p>
-                    @else
-                        <div class="grid grid-cols-1 gap-4">
-                            @foreach ($topReviews as $review)
-                                <div class="rounded-lg border border-amber-200 bg-amber-50 p-5 shadow-sm">
-                                    <div class="flex items-center">
-                                        @for ($i = 1; $i <= 5; $i++)
-                                            <span class="text-amber-500">
-                                                @if ($i <= $review->rating)
-                                                    ⭐
-                                                @else
-                                                    ☆
-                                                @endif
-                                            </span>
-                                        @endfor
-                                        <span class="ml-2 text-sm font-medium text-gray-600">
-                                            ({{ $review->rating }})
-                                        </span>
-                                    </div>
-                                    <p class="mt-2 italic text-gray-700">"{{ $review->review }}"</p>
-                                    <div class="mt-3 text-sm text-gray-600">
-                                        — {{ $review->user->name }}
-                                        @if ($review->courseClass)
-                                            <span class="ml-2">| Kelas: {{ $review->courseClass->name }}</span>
-                                        @endif
-                                    </div>
-                                    <div class="mt-1 text-xs text-gray-500">
-                                        {{ $review->completed_at->translatedFormat('d F Y') }}
                                     </div>
                                 </div>
                             @endforeach
                         </div>
                     @endif
                 </section>
+                <section class="mt-16">
+                    <div class="mb-10 flex items-center gap-4">
+                        <div>
+                            <h3 class="text-2xl font-black text-slate-900">Ulasan Alumni</h3>
+                            <p class="mt-1 text-xs font-bold uppercase tracking-widest text-slate-400">Apa kata mereka yang sudah belajar</p>
+                        </div>
+                        <div class="h-px flex-1 bg-slate-100"></div>
+                    </div>
 
-            </article>
-
-            <div class="lg:col-span-1">
-                <div class="space-y-6 self-start lg:sticky lg:top-4">
-                    @if ($isAlreadyEnrolled)
-                        <aside class="rounded-lg border border-green-200 bg-green-50 p-6 shadow-xl">
-                            <div class="text-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <h3 class="mt-3 text-lg font-bold text-green-700">Anda Sudah Terdaftar!</h3>
-                                <p class="mt-2 text-gray-600">
-                                    Anda telah terdaftar di salah satu kelas kursus ini. Silakan akses kelas Anda di halaman <strong>"Kelas Saya"</strong>.
-                                </p>
-                                <a href="{{ route('listkelas') }}" class="mt-4 inline-block rounded-lg bg-green-600 px-4 py-2 font-semibold text-white hover:bg-green-700">
-                                    Lihat Kelas Saya
-                                </a>
-                            </div>
-                        </aside>
+                    @if ($topReviews->isEmpty())
+                        <div class="rounded-[2.5rem] bg-slate-50 p-10 text-center">
+                            <p class="text-sm font-medium text-slate-400">Belum ada ulasan untuk kursus ini.</p>
+                        </div>
                     @else
-                        <aside class="rounded-lg border border-indigo-200 bg-white p-6 shadow-xl">
-                            <h3 class="mb-4 text-xl font-bold text-indigo-600">Informasi & Harga</h3>
-
-                            <div class="mb-5 border-b pb-4">
-                                <div class="text-sm text-gray-500">Harga Kursus</div>
-                                @php
-                                    $isDiscountActive = $course->discount_price !== null && ($course->discount_end_date === null || now()->lessThan($course->discount_end_date));
-                                    $finalPrice = $isDiscountActive ? $course->discount_price : $course->price;
-                                @endphp
-
-                                @if ($isDiscountActive)
-                                    <p class="text-base text-gray-400 line-through">
-                                        Rp {{ number_format($course->price, 0, ',', '.') }}
-                                    </p>
-                                    <p class="text-3xl font-extrabold text-indigo-700">
-                                        Rp {{ number_format($finalPrice, 0, ',', '.') }}
-                                    </p>
-                                    <span class="mt-1 inline-block rounded bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-600">
-                                        Diskon Aktif!
-                                    </span>
-                                @else
-                                    <p class="text-3xl font-extrabold text-gray-900">
-                                        Rp {{ number_format($finalPrice, 0, ',', '.') }}
-                                    </p>
-                                @endif
-                            </div>
-
-                            @if ($selectedClassId)
-                                <form action="{{ route('payment.initiate') }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="course_id" value="{{ $course->id }}">
-                                    <input type="hidden" name="course_class_id" value="{{ $selectedClassId }}">
-                                    <button type="submit" class="w-full rounded-lg bg-indigo-600 px-6 py-3 text-lg font-bold text-white shadow-lg transition duration-200 hover:bg-indigo-700">
-                                        Daftar & Bayar Sekarang
-                                    </button>
-                                </form>
-                            @else
-                                <button disabled class="w-full cursor-not-allowed rounded-lg bg-gray-300 px-4 py-2 font-semibold text-white">
-                                    Kelas Penuh atau Belum Dibuka
-                                </button>
-                            @endif
-                        </aside>
+                        <div class="grid gap-6">
+                            @foreach ($topReviews as $review)
+                                <div class="relative rounded-[2rem] border border-slate-100 bg-white p-8 transition-all hover:shadow-xl hover:shadow-slate-100">
+                                    <div class="flex items-start gap-4">
+                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($review->user->name) }}&background=random" class="h-12 w-12 rounded-2xl object-cover">
+                                        <div class="flex-1">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <h4 class="font-black text-slate-900">{{ $review->user->name }}</h4>
+                                                    <p class="text-[10px] font-bold uppercase tracking-tighter text-green-600">Alumni {{ $review->courseClass->name }}</p>
+                                                </div>
+                                                <div class="flex gap-0.5 text-amber-400">
+                                                    @for ($i = 1; $i <= 5; $i++)
+                                                        <svg class="{{ $i <= $review->rating ? 'fill-current' : 'text-slate-200' }} h-4 w-4" viewBox="0 0 20 20">
+                                                            <path
+                                                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                        </svg>
+                                                    @endfor
+                                                </div>
+                                            </div>
+                                            <blockquote class="mt-4 text-sm leading-relaxed text-slate-600">
+                                                "{{ $review->review }}"
+                                            </blockquote>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     @endif
-                    <div class="rounded-lg bg-white p-6 shadow-xl">
-                        <div class="mb-4">
-                            <div class="text-sm text-gray-500">Durasi</div>
-                            <div class="font-semibold text-gray-700">16 Minggu</div>
+                </section>
+            </div>
+
+            <div class="lg:w-4/12">
+                <div class="sticky top-24 space-y-6">
+                    <div class="rounded-[2.5rem] border border-slate-100 bg-white p-8 shadow-2xl shadow-slate-200/60">
+                        @php
+                            $isDiscountActive = $course->discount_price && (!$course->discount_end_date || now()->lt($course->discount_end_date));
+                            $finalPrice = $isDiscountActive ? $course->discount_price : $course->price;
+                        @endphp
+
+                        <div class="mb-8">
+                            <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Total Investasi</p>
+                            <div class="mt-2 flex items-baseline gap-2">
+                                <h2 class="text-4xl font-black text-slate-900">Rp{{ number_format($finalPrice, 0, ',', '.') }}</h2>
+                            </div>
+                            @if ($isDiscountActive)
+                                <div class="mt-1 flex items-center gap-2">
+                                    <span class="text-sm font-bold text-slate-300 line-through">Rp{{ number_format($course->price, 0, ',', '.') }}</span>
+                                    <span class="rounded-md bg-red-50 px-1.5 py-0.5 text-[10px] font-black text-red-600">PROMO</span>
+                                </div>
+                            @endif
                         </div>
 
-                        <div class="mb-4">
-                            <div class="text-sm text-gray-500">Level</div>
-                            <div class="font-semibold text-gray-700">Pemula - Menengah</div>
+                        <div class="mb-8 space-y-4 rounded-3xl bg-slate-50 p-5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold uppercase text-slate-400">Materi</span>
+                                <span class="text-xs font-black uppercase text-slate-900">Lifetime Access</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold uppercase text-slate-400">Sertifikat</span>
+                                <span class="text-xs font-black uppercase text-green-600">Resmi</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold uppercase text-slate-400">Update</span>
+                                <span class="text-xs font-black uppercase text-slate-900">Gratis</span>
+                            </div>
                         </div>
 
-                        <div class="mt-6 border-t pt-4 text-sm text-gray-500">
-                            <div class="mb-2 font-bold text-gray-700">Fitur Kursus</div>
-                            <ul class="list-disc space-y-1 pl-5">
-                                <li>Akses forum diskusi</li>
-                                <li>Feedback mentor</li>
-                                <li>Materi downloadable</li>
-                                <li>Sertifikat Kelulusan</li>
-                            </ul>
+                        @if (!$isAlreadyEnrolled && $selectedClassId)
+                            <form action="{{ route('payment.initiate') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="course_id" value="{{ $course->id }}">
+                                <input type="hidden" name="course_class_id" value="{{ $selectedClassId }}">
+                                <button class="group flex w-full items-center justify-center gap-3 rounded-2xl bg-green-600 py-4 text-xs font-black uppercase tracking-[0.2em] text-white shadow-xl shadow-green-200 transition-all hover:bg-green-700 hover:shadow-green-300">
+                                    Daftar Sekarang
+                                    <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                    </svg>
+                                </button>
+                            </form>
+                        @endif
+                        <p class="mt-6 text-center text-[10px] font-medium text-slate-400">Jaminan akses selamanya setelah sekali bayar.</p>
+                    </div>
+
+                    <div class="rounded-[2.5rem] border border-indigo-100 bg-indigo-50/50 p-8">
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <img src="{{ $course->user->avatar_url ? asset('storage/' . $course->user->avatar_url) : 'https://ui-avatars.com/api/?name=' . urlencode($course->user->name) }}" class="h-14 w-14 rounded-2xl border-2 border-white object-cover shadow-sm">
+                                <span class="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-indigo-600 text-[8px] text-white">✓</span>
+                            </div>
+                            <div>
+                                <h5 class="text-sm font-black text-slate-900">{{ $course->user->name }}</h5>
+                                <p class="text-[10px] font-bold uppercase tracking-tighter text-indigo-500">Instruktur Ahli</p>
+                            </div>
                         </div>
+                        <p class="mt-4 text-[11px] italic leading-relaxed text-indigo-900/60">{{ $course->user->bio }}</p>
                     </div>
                 </div>
             </div>
 
-        </div> {{-- End Grid Container --}}
+        </div>
     </div>
 </x-app-layout>

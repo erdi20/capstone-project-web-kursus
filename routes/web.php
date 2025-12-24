@@ -18,7 +18,8 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::get('/', [HomeController::class, 'index']);
-Route::get('/dashboard', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
+// Route::get('/dashboard', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 // web.php
 // Route::delete('/profile', [ProfileController::class, 'destroyUserFilament'])->name('profile.delete');
 Route::get('/listkursus', [CourseController::class, 'index'])->name('listkursus');
@@ -33,8 +34,6 @@ Route::middleware('auth')->group(function () {
     Route::get('kelas/{id}', [CourseClassController::class, 'show'])->name('kelas');  // [Route::get('/listkelas', [CourseClassController::class, 'index'])->name('listkelas'] )
     // ---------------------
     Route::get('/kelas/{classId}/materi/{materialId}', [MaterialController::class, 'show'])->name('materials.show');
-    // Route::get('/detailmateri/{id}', [MaterialController::class, 'show'])->name('materi.show');
-    // Route::get('/certificates/{classId}/download', [CertificateController::class, 'download'])->name('certificates.download');
     // --------------------- tugas essay
     Route::get('/kelas/{classId}/essay/{assignmentId}', [EssayController::class, 'show'])->name('essay.show');
     Route::post('/kelas/{classId}/essay/{assignmentId}/submit', [EssayController::class, 'submit'])->name('essay.submit');
@@ -46,7 +45,7 @@ Route::middleware('auth')->group(function () {
         ->name('quiz.result');
     // ---------------------
     Route::post('/payment/initiate', [PaymentController::class, 'initiatePayment'])->name('payment.initiate');
-    Route::get('/payment/checkout', [PaymentController::class, 'showCheckoutPage'])->name('payment.checkout');
+    Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
     // ---------------------
     // Absensi
     Route::post('/kelas/{classId}/absen', [AttendanceController::class, 'store'])->name('attendance.store');

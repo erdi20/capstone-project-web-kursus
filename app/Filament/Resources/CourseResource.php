@@ -16,7 +16,9 @@ use Filament\Resources\Resource;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Tabs;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Group;
+use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
@@ -30,8 +32,10 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\Placeholder;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Forms\Components\DateTimePicker;
 use App\Filament\Resources\CourseResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -44,19 +48,26 @@ class CourseResource extends Resource
 {
     protected static ?string $model = Course::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';  // Ikon Topi Akademik
+    // --- Pengaturan Label ---
+    protected static ?string $navigationLabel = 'Katalog Kursus';  // Lebih elegan untuk daftar induk
 
-    // 2. Mengubah label tunggal
     protected static ?string $modelLabel = 'Program Kursus';
 
-    // 3. Mengatur label plural
-    protected static ?string $pluralModelLabel = 'Daftar Program Kursus';
+    protected static ?string $pluralModelLabel = 'Katalog Kursus';
 
-    // 4. Mengelompokkan navigasi di bawah grup yang sama
-    protected static ?string $navigationGroup = 'Akademik & Konten';
+    protected static ?string $slug = 'manajemen-kursus';
 
-    // 5. Mengatur Urutan Navigasi menjadi yang paling atas (0)
-    protected static ?int $navigationSort = 0;
+    // --- Pengaturan Navigasi & Visual ---
+    protected static ?string $navigationGroup = 'Manajemen Kursus';  // Menyatukan dengan Batch & Materi
+
+    protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+
+    protected static ?string $activeNavigationIcon = 'heroicon-s-academic-cap';
+
+    protected static ?int $navigationSort = 1;  // Start dari 1 agar angka urutan lebih natural
+
+    // --- Pengaturan UX ---
+    protected static ?string $navigationBadgeTooltip = 'Total kursus yang terpublikasi';
 
     public static function canAccess(): bool
     {
@@ -263,9 +274,115 @@ class CourseResource extends Resource
             ]);
     }
 
+    // public static function table(Table $table): Table
+    // {
+    //     return $table
+    //         ->modifyQueryUsing(function (\Illuminate\Database\Eloquent\Builder $query) {
+    //             // Hanya tampilkan kursus yang dibuat oleh user yang sedang login
+    //             $query->where('created_by', Auth::id());
+    //         })
+    //         ->columns([
+    //             ImageColumn::make('thumbnail')
+    //                 ->label('Sampul')
+    //                 ->square()
+    //                 ->size(40),
+    //             TextColumn::make('name')
+    //                 ->label('Nama Kursus')
+    //                 ->searchable()
+    //                 ->sortable()
+    //                 ->limit(35)
+    //                 ->weight('bold'),
+    //             BadgeColumn::make('status')
+    //                 ->label('Status')
+    //                 ->sortable()
+    //                 ->colors([
+    //                     'warning' => 'draft',
+    //                     'success' => 'open',
+    //                     'danger' => 'closed',
+    //                     'secondary' => 'archived',
+    //                 ]),
+    //             TextColumn::make('price_display')
+    //                 ->label('Harga Jual')
+    //                 ->getStateUsing(function (Model $record) {
+    //                     $isDiscountActive =
+    //                         $record->discount_price !== null &&
+    //                         ($record->discount_end_date === null || now()->lessThan($record->discount_end_date));
+
+    //                     if ($isDiscountActive) {
+    //                         return $record->discount_price;
+    //                     }
+    //                     return $record->price;
+    //                 })
+    //                 ->money('IDR')
+    //                 ->color(fn(Model $record) =>
+    //                     ($record->discount_price !== null && now()->lessThan($record->discount_end_date ?? now()->addDay())) ? 'danger' : 'success')  // Warna Merah jika diskon aktif
+    //                 ->description(function (Model $record) {
+    //                     $isDiscountActive =
+    //                         $record->discount_price !== null &&
+    //                         ($record->discount_end_date === null || now()->lessThan($record->discount_end_date));
+
+    //                     if ($isDiscountActive) {
+    //                         return 'Harga Normal: Rp' . number_format($record->price, 0, ',', '.');
+    //                     }
+    //                     return null;
+    //                 })
+    //                 ->sortable(),
+    //             TextColumn::make('classes_count')
+    //                 ->label('Jml. Kelas')
+    //                 ->counts('classes')
+    //                 ->alignCenter()
+    //                 ->sortable()
+    //                 ->toggleable(),
+    //             // TextColumn::make('createdBy.name')
+    //             //     ->label('Mentor')
+    //             //     ->sortable()
+    //             //     ->searchable()
+    //             //     ->toggleable(),
+    //             TextColumn::make('created_at')
+    //                 ->label('Dibuat Pada')
+    //                 ->date('d M Y H:i')
+    //                 ->sortable()
+    //                 ->toggleable(isToggledHiddenByDefault: true),
+    //         ])
+    //         ->filters([
+    //             //
+    //         ])
+    //         ->actions([
+    //             ActionGroup::make([
+    //                 Tables\Actions\EditAction::make(),
+    //                 Tables\Actions\DeleteAction::make(),
+    //                 Tables\Actions\Action::make('create_class')
+    //                     ->label('Buat Kelas')
+    //                     ->color('info')
+    //                     ->icon('heroicon-o-plus-circle')
+    //                     ->url(fn(Course $record): string => CourseClassResource::getUrl('create') . '?course_id=' . $record->id)
+    //                     ->openUrlInNewTab(false),
+    //                 Tables\Actions\Action::make('view_materials')
+    //                     ->label('Lihat Materi')
+    //                     ->icon('heroicon-o-book-open')
+    //                     ->url(fn(\App\Models\Course $record) => static::getUrl('materials', ['record' => $record->id]))
+    //                     ->color('primary'),
+    //                 Action::make('create_material')
+    //                     ->label('Buat materi')
+    //                     ->color('info')
+    //                     ->icon('heroicon-o-clipboard-document-check')
+    //                     ->url(fn(Course $record): string => MaterialResource::getUrl('create') . '?course_id=' . $record->id)
+    //                     ->openUrlInNewTab(false),
+    //             ])
+    //         ])
+    //         ->bulkActions([
+    //             Tables\Actions\BulkActionGroup::make([
+    //                 Tables\Actions\DeleteBulkAction::make(),
+    //             ]),
+    //         ]);
+    // }
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (\Illuminate\Database\Eloquent\Builder $query) {
+                // Hanya tampilkan kursus yang dibuat oleh user yang sedang login
+                $query->where('created_by', Auth::id());
+            })
             ->columns([
                 ImageColumn::make('thumbnail')
                     ->label('Sampul')
@@ -273,7 +390,7 @@ class CourseResource extends Resource
                     ->size(40),
                 TextColumn::make('name')
                     ->label('Nama Kursus')
-                    ->searchable()
+                    ->searchable()  // Mengaktifkan pencarian nama kursus
                     ->sortable()
                     ->limit(35)
                     ->weight('bold'),
@@ -293,36 +410,25 @@ class CourseResource extends Resource
                             $record->discount_price !== null &&
                             ($record->discount_end_date === null || now()->lessThan($record->discount_end_date));
 
-                        if ($isDiscountActive) {
-                            return $record->discount_price;
-                        }
-                        return $record->price;
+                        return $isDiscountActive ? $record->discount_price : $record->price;
                     })
                     ->money('IDR')
                     ->color(fn(Model $record) =>
-                        ($record->discount_price !== null && now()->lessThan($record->discount_end_date ?? now()->addDay())) ? 'danger' : 'success')  // Warna Merah jika diskon aktif
+                        ($record->discount_price !== null && now()->lessThan($record->discount_end_date ?? now()->addDay())) ? 'danger' : 'success')
                     ->description(function (Model $record) {
                         $isDiscountActive =
                             $record->discount_price !== null &&
                             ($record->discount_end_date === null || now()->lessThan($record->discount_end_date));
 
-                        if ($isDiscountActive) {
-                            return 'Harga Normal: Rp' . number_format($record->price, 0, ',', '.');
-                        }
-                        return null;
+                        return $isDiscountActive ? 'Harga Normal: Rp' . number_format($record->price, 0, ',', '.') : null;
                     })
-                    ->sortable(),
+                    ->sortable(['price']),  // Menyortir berdasarkan harga normal
                 TextColumn::make('classes_count')
                     ->label('Jml. Kelas')
                     ->counts('classes')
                     ->alignCenter()
                     ->sortable()
                     ->toggleable(),
-                // TextColumn::make('createdBy.name')
-                //     ->label('Mentor')
-                //     ->sortable()
-                //     ->searchable()
-                //     ->toggleable(),
                 TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->date('d M Y H:i')
@@ -330,7 +436,40 @@ class CourseResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                // 1. Filter Berdasarkan Status
+                SelectFilter::make('status')
+                    ->label('Status Kursus')
+                    ->options([
+                        'draft' => 'Draft',
+                        'open' => 'Buka',
+                        'closed' => 'Tutup',
+                        'archived' => 'Arsip',
+                    ]),
+                // 2. Filter Kursus Berdiskon (Ternary Filter)
+                TernaryFilter::make('is_discounted')
+                    ->label('Sedang Diskon')
+                    ->placeholder('Semua Kursus')
+                    ->trueLabel('Sedang Diskon')
+                    ->falseLabel('Harga Normal')
+                    ->queries(
+                        true: fn(Builder $query) => $query
+                            ->whereNotNull('discount_price')
+                            ->where(fn($q) => $q->whereNull('discount_end_date')->orWhere('discount_end_date', '>', now())),
+                        false: fn(Builder $query) => $query
+                            ->whereNull('discount_price')
+                            ->orWhere('discount_end_date', '<=', now()),
+                    ),
+                // 3. Filter Berdasarkan Rentang Harga
+                Filter::make('price_range')
+                    ->form([
+                        \Filament\Forms\Components\TextInput::make('min_price')->numeric()->label('Harga Minimum'),
+                        \Filament\Forms\Components\TextInput::make('max_price')->numeric()->label('Harga Maksimum'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['min_price'], fn($query, $value) => $query->where('price', '>=', $value))
+                            ->when($data['max_price'], fn($query, $value) => $query->where('price', '<=', $value));
+                    })
             ])
             ->actions([
                 ActionGroup::make([

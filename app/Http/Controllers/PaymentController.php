@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use Midtrans\Config;
 use Midtrans\Notification;
 use Midtrans\Snap;
@@ -128,6 +129,8 @@ class PaymentController extends Controller
             $payment->payment_type = 'transfer';
             $payment->save();
 
+            // Simpan course_class_id ke sesi untuk redirect setelah bayar
+            Session::put('post_payment_redirect_class_id', $request->course_class_id);
             return view('student.payment.payment', compact(
                 'class',
                 'course',
@@ -249,5 +252,21 @@ class PaymentController extends Controller
             'percentage' => $percent,
             'paid_at' => now(),  // atau null jika nanti dibayar manual
         ]);
+    }
+
+    public function paymentSuccess()
+    {
+        $classId = session('post_payment_redirect_class_id');
+
+        if ($classId) {
+            Session::forget('post_payment_redirect_class_id');
+            return redirect()
+                ->route('kelas', $classId)
+                ->with('success', 'Pembayaran berhasil! Selamat belajar di kelas ini.');
+        }
+
+        return redirect()
+            ->route('listkursus')
+            ->with('info', 'Pembayaran berhasil!');
     }
 }

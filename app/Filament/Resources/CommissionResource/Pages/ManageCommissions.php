@@ -2,10 +2,11 @@
 
 namespace App\Filament\Resources\CommissionResource\Pages;
 
-use App\Filament\Resources\CommissionResource\Widgets\TotalRevenueOverview;
-use App\Filament\Resources\CommissionResource;
-use Filament\Resources\Pages\ManageRecords;
 use Filament\Actions;
+use Filament\Resources\Pages\ManageRecords;
+use App\Filament\Resources\CommissionResource;
+use App\Filament\Resources\CommissionResource\Widgets\RevenueChart;
+use App\Filament\Resources\CommissionResource\Widgets\TotalRevenueOverview;
 
 class ManageCommissions extends ManageRecords
 {
@@ -22,6 +23,7 @@ class ManageCommissions extends ManageRecords
     {
         return [
             TotalRevenueOverview::class,
+            RevenueChart::class,
         ];
     }
 }

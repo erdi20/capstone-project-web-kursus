@@ -2,46 +2,55 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CourseResource\Pages\ListCourseMaterials;
-use App\Filament\Resources\MaterialResource\Pages;
-use App\Filament\Resources\MaterialResource\RelationManagers;
-use App\Models\Material;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Table;
 use Filament\Forms;
 use Filament\Tables;
+use App\Models\Material;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action;
+use Filament\Forms\Components\Group;
+use Illuminate\Support\Facades\Auth;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Forms\Components\DateTimePicker;
+use App\Filament\Resources\MaterialResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\MaterialResource\RelationManagers;
+use App\Filament\Resources\CourseResource\Pages\ListCourseMaterials;
 
 class MaterialResource extends Resource
 {
     protected static ?string $model = Material::class;
 
-    // 1. Ikon yang lebih spesifik dan menarik (misalnya, buku terbuka)
-    protected static ?string $navigationIcon = 'heroicon-o-book-open';  // Ikon Buku Terbuka
+    // --- Pengaturan Label ---
+    protected static ?string $navigationLabel = 'Modul & Materi';  // Mencakup bab dan isi materi
 
-    // 2. Mengubah label tunggal menjadi 'Materi Pembelajaran' agar lebih formal
-    protected static ?string $modelLabel = 'Materi Pembelajaran';
+    protected static ?string $modelLabel = 'Materi';
 
-    // 3. Mengatur label plural (digunakan di judul halaman Index)
-    protected static ?string $pluralModelLabel = 'Daftar Materi';
+    protected static ?string $pluralModelLabel = 'Konten Pembelajaran';
 
-    // 4. Mengelompokkan navigasi di bawah grup tertentu
-    protected static ?string $navigationGroup = 'Akademik & Konten';
+    protected static ?string $slug = 'materi-pembelajaran';
 
-    // 5. Mengatur Urutan Navigasi (misalnya, di urutan ke-2 setelah Course)
-    protected static ?int $navigationSort = 2;
+    // --- Pengaturan Navigasi & Visual ---
+    protected static ?string $navigationGroup = 'Manajemen Kursus';  // Disatukan dengan Katalog Kursus & Batch
+
+    protected static ?string $navigationIcon = 'heroicon-o-book-open';
+
+    protected static ?string $activeNavigationIcon = 'heroicon-s-book-open';
+
+    protected static ?int $navigationSort = 3;  // Urutan: 1. Kursus -> 2. Batch -> 3. Materi
+
+    // --- Pengaturan UX ---
+    protected static ?string $navigationBadgeTooltip = 'Total materi pembelajaran yang tersedia';
 
     public static function canAccess(): bool
     {
@@ -135,31 +144,71 @@ class MaterialResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (\Illuminate\Database\Eloquent\Builder $query) {
+                // Hanya tampilkan kursus yang dibuat oleh user yang sedang login
+                $query->where('created_by', Auth::id());
+            })
             ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('link_video')
-                    ->searchable(),
-                Tables\Columns\ImageColumn::make('image'),
-                Tables\Columns\TextColumn::make('pdf')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('course.name')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_by')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Kursus')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->searchable()
+                    ->weight('bold')
+                    ->color('primary'),
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Nama Materi')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\ImageColumn::make('image')
+                    ->label('Gambar')
+                    ->circular(),
+                Tables\Columns\IconColumn::make('link_video')
+                    ->label('Video')
+                    ->options([
+                        'heroicon-o-video-camera' => fn($state): bool => filled($state),
+                        'heroicon-o-x-circle' => fn($state): bool => blank($state),
+                    ])
+                    ->colors([
+                        'success' => fn($state): bool => filled($state),
+                        'gray' => fn($state): bool => blank($state),
+                    ]),
+                Tables\Columns\IconColumn::make('pdf')
+                    ->label('PDF')
+                    ->options([
+                        'heroicon-o-document-arrow-down' => fn($state): bool => filled($state),
+                    ])
+                    ->color('danger')
+                    ->placeholder('-'),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Tgl. Dibuat')
+                    ->date('d M Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                // 1. Filter Berdasarkan Kursus (Hanya kursus milik user login)
+                SelectFilter::make('course_id')
+                    ->label('Filter Kursus')
+                    ->relationship('course', 'name', fn(Builder $query) => $query->where('created_by', Auth::id()))
+                    ->searchable()
+                    ->preload(),
+                // 2. Filter Berdasarkan Ketersediaan Video
+                TernaryFilter::make('has_video')
+                    ->label('Memiliki Video')
+                    ->placeholder('Semua Materi')
+                    ->trueLabel('Hanya Materi Video')
+                    ->falseLabel('Tanpa Video')
+                    ->queries(
+                        true: fn(Builder $query) => $query->whereNotNull('link_video'),
+                        false: fn(Builder $query) => $query->whereNull('link_video'),
+                    ),
+                // 3. Filter Berdasarkan Ketersediaan PDF
+                TernaryFilter::make('has_pdf')
+                    ->label('Memiliki PDF')
+                    ->queries(
+                        true: fn(Builder $query) => $query->whereNotNull('pdf'),
+                        false: fn(Builder $query) => $query->whereNull('pdf'),
+                    ),
             ])
             ->actions([
                 ActionGroup::make([

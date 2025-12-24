@@ -28,15 +28,26 @@ class EssayAssignmentResource extends Resource
 {
     protected static ?string $model = EssayAssignment::class;
 
-    protected static ?string $modelLabel = 'Tugas Essay';  // Label untuk satu item (singular)
+    // --- Pengaturan Label ---
+    protected static ?string $navigationLabel = 'Penugasan Essay';
 
-    protected static ?string $pluralModelLabel = 'Manajemen Tugas Essay';  // Label untuk daftar/halaman (plural)
+    protected static ?string $modelLabel = 'Tugas Essay';
 
-    protected static ?string $navigationIcon = 'heroicon-o-pencil-square';  // Ikon yang lebih relevan untuk tugas esai
+    protected static ?string $pluralModelLabel = 'Tugas Essay';
 
-    protected static ?string $navigationGroup = 'Manajemen Kursus';  // Pengelompokan (Grouping) navigasi
+    protected static ?string $slug = 'evaluasi-essay';
 
-    protected static ?int $navigationSort = 1;  // Menentukan urutan di dalam group (opsional)
+    // --- Pengaturan Navigasi & Visual ---
+    protected static ?string $navigationGroup = 'Evaluasi & Ujian';  // Grup terpisah agar rapi
+
+    protected static ?string $navigationIcon = 'heroicon-o-pencil-square';
+
+    protected static ?string $activeNavigationIcon = 'heroicon-s-pencil-square';
+
+    protected static ?int $navigationSort = 1;  // Urutan pertama di grup Evaluasi
+
+    // --- Pengaturan UX ---
+    protected static ?string $navigationBadgeTooltip = 'Jumlah tugas essay yang perlu dinilai';
 
     public static function canAccess(): bool
     {

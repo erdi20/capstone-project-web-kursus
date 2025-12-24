@@ -1,90 +1,80 @@
 <x-app-layout>
-    <div class="mx-auto max-w-7xl px-4 py-8">
-        <!-- Header -->
-        <h1 class="mb-6 text-2xl font-bold text-gray-900">Halaman Kelas: Semua Pencarian dan Kategori</h1>
+    <div class="mx-auto max-w-7xl px-4 py-16">
 
-        <!-- Search Bar -->
-        <div class="mb-6">
-            <div class="relative mx-auto max-w-md">
-                <input type="text" placeholder="Cari kursus..." class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-cyan-500" />
-                <button class="absolute right-2 top-1/2 -translate-y-1/2 transform text-gray-500 hover:text-gray-700">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </button>
+        <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="h-1 w-8 rounded-full bg-green-500"></span>
+                    <span class="text-[10px] font-black uppercase tracking-[0.2em] text-green-600">Eksplorasi</span>
+                </div>
+                <h3 class="text-3xl font-black tracking-tight text-slate-900 md:text-4xl">Semua <span class="italic text-green-600">Kursus</span></h3>
             </div>
+            <p class="text-sm font-medium text-slate-400 max-w-xs md:text-right italic">
+                "Investasi terbaik adalah investasi pada leher ke atas."
+            </p>
         </div>
 
+        <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            @forelse($courses as $course)
+                @php
+                    $isDiscountActive = $course->discount_price !== null && ($course->discount_end_date === null || now()->lessThan($course->discount_end_date));
+                @endphp
 
+                <article class="group relative flex flex-col rounded-[2.5rem] border border-slate-100 bg-white p-3 transition-all duration-300 hover:border-transparent hover:shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
 
-        <div class="my-8 border-t border-gray-200"></div>
+                    <div class="relative h-48 w-full overflow-hidden rounded-[2rem]">
+                        <img src="{{ asset('storage/' . ($course->thumbnail ?? 'default.jpg')) }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-110">
 
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {{-- Card --}}
-            @foreach ($courses as $item)
-                <a href="{{ route('detailkursus', $item->slug) }}">
-                    <div class="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-md">
-                        <div class="relative">
-                            <img src="{{ asset('storage/' . $item->thumbnail) }}" alt="Course Image" class="h-48 w-full object-cover">
-                            {{-- <div class="absolute left-3 top-3 rounded-full bg-cyan-400 px-3 py-1 text-xs font-bold text-white">
-                        SEMUA TINGKAT
-                    </div> --}}
-                        </div>
-
-                        <div class="p-5">
-                            <h3 class="mb-2 text-lg font-bold text-cyan-500">{{ $item->name }}</h3>
-
-                            {{-- <p class="mb-4 text-sm text-gray-600">21.5 jam | 186 Video</p> --}}
-
-                            <div class="mb-4 flex items-center gap-3">
-                                <img src="{{ asset('storage/' . $item->user->avatar_url) }}" alt="Mentor" class="h-10 w-10 rounded-full border border-gray-200">
-                                <div>
-                                    <p class="font-medium text-gray-800">{{ $item->user->name }}</p>
-                                    <p class="text-xs text-gray-500">Mentor</p>
-                                </div>
+                        <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                            <div class="flex flex-col rounded-2xl bg-white/90 px-4 py-2 shadow-lg backdrop-blur-md border border-white/50">
+                                @if ($isDiscountActive)
+                                    <span class="text-[9px] font-bold text-slate-400 line-through">Rp {{ number_format($course->price, 0, ',', '.') }}</span>
+                                    <span class="text-sm font-black text-green-600">Rp {{ number_format($course->discount_price, 0, ',', '.') }}</span>
+                                @else
+                                    <span class="text-sm font-black text-slate-900">Rp {{ number_format($course->price, 0, ',', '.') }}</span>
+                                @endif
                             </div>
 
-                            <div class="mb-4 flex items-center justify-between">
-                                <div>
-                                    @php
-                                        $isDiscountActive = $item->discount_price !== null && ($item->discount_end_date === null || now()->lessThan($item->discount_end_date));
-                                    @endphp
-
-                                    @if ($isDiscountActive)
-                                        <p class="text-sm text-gray-400" style="text-decoration: line-through;">
-                                            Rp {{ number_format($item->price, 0, ',', '.') }}
-                                        </p>
-                                        <p class="text-lg font-bold text-gray-900">
-                                            Rp {{ number_format($item->discount_price, 0, ',', '.') }}
-                                        </p>
-                                    @else
-                                        {{-- Tampilan Harga Normal --}}
-                                        <p class="text-lg font-bold text-gray-900">
-                                            Rp {{ number_format($item->price, 0, ',', '.') }}
-                                        </p>
-                                    @endif
-                                </div>
-                                {{-- <div class="flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M9.049 2.917c1.927-1.927 5.07-1.927 6.998 0L22 9a2 2 0 01-2 2h-5l-5 5v-5H4a2 2 0 01-2-2V9zM18 13a2 2 0 01-2 2h-6l-2 2v-2H6a2 2 0 01-2-2v-6a2 2 0 012-2h6l2-2v2h5a2 2 0 012 2v6z" />
-                            </svg>
-                            <span class="font-medium text-gray-800">4.9 (2136)</span>
-                        </div> --}}
-                            </div>
-
-                            <!-- Label Terlaris -->
-                            <div class="mt-2">
-                                {{-- <span class="inline-block rounded-full bg-cyan-100 px-3 py-1 text-xs font-bold text-cyan-700">
-                                TERLARIS
-                            </span> --}}
+                            <div class="flex items-center gap-1 rounded-xl bg-slate-900/80 px-2.5 py-1.5 text-white backdrop-blur-md">
+                                <svg class="h-3 w-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                <span class="text-[10px] font-black">{{ number_format($course->avg_rating ?? 0, 1) }}</span>
                             </div>
                         </div>
                     </div>
-                </a>
-            @endforeach
 
+                    <div class="flex flex-1 flex-col px-3 py-4">
+                        <div class="mb-3 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <img src="{{ $course->user->avatar_url ? asset('storage/' . $course->user->avatar_url) : 'https://ui-avatars.com/api/?name=' . urlencode($course->user->name) }}" class="h-6 w-6 rounded-full border border-slate-100 object-cover">
+                                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-tight truncate max-w-[100px]">{{ $course->user->name }}</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <div class="h-1.5 w-1.5 rounded-full bg-green-500"></div>
+                                <span class="text-[10px] font-bold text-slate-400">{{ number_format($course->enrollment_count ?? 0) }} Alumni</span>
+                            </div>
+                        </div>
+
+                        <h4 class="mb-4 line-clamp-2 min-h-[2.5rem] text-[17px] font-bold leading-tight text-slate-900 group-hover:text-green-600 transition-colors">
+                            {{ $course->name }}
+                        </h4>
+
+                        <div class="mt-auto flex items-center justify-between pt-2 border-t border-slate-50">
+                            <span class="text-[10px] font-medium text-slate-400 italic">({{ $course->review_count ?? 0 }} Ulasan)</span>
+                            <a href="{{ route('detailkursus', $course->slug) }}" class="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-50 text-slate-900 transition-all duration-500 group-hover:bg-slate-900 group-hover:text-white group-hover:rotate-[360deg]">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            @empty
+                <div class="col-span-full py-20 text-center">
+                    <p class="text-slate-400 font-medium text-lg">Belum ada kursus yang tersedia saat ini.</p>
+                </div>
+            @endforelse
         </div>
 
-
+        <div class="mt-16 flex justify-center">
+            {{ $courses->links() }}
+        </div>
     </div>
 </x-app-layout>

@@ -34,10 +34,10 @@ class EssayController extends Controller
             ->where('is_published', true)
             ->firstOrFail();
 
-        // ✅ Ambil material_id dari assignment
+        //  Ambil material_id dari assignment
         $materialId = $assignment->material_id;
 
-        // ✅ Validasi: materi ini ada di kelas ini
+        //  Validasi: materi ini ada di kelas ini
         $isMaterialInClass = ClassMaterial::where('course_class_id', $classId)
             ->where('material_id', $materialId)
             ->exists();
@@ -62,10 +62,10 @@ class EssayController extends Controller
 
         $user = Auth::user();
 
-        // ✅ Ambil assignment tanpa course_class_id
+        //  Ambil assignment tanpa course_class_id
         $assignment = EssayAssignment::findOrFail($assignmentId);
 
-        // ✅ Validasi: pastikan tugas ini ada di kelas ini
+        //  Validasi: pastikan tugas ini ada di kelas ini
         $materialId = $assignment->material_id;
         $isValid = ClassMaterial::where('course_class_id', $classId)
             ->where('material_id', $materialId)
@@ -88,7 +88,7 @@ class EssayController extends Controller
             ]
         );
 
-        // ✅ Gunakan $classId langsung (bukan dari assignment)
+        //  Gunakan $classId langsung (bukan dari assignment)
         $enrollment = ClassEnrollment::where('class_id', $classId)
             ->where('student_id', Auth::id())
             ->first();
@@ -100,6 +100,9 @@ class EssayController extends Controller
         // -----------------------------------------------------
         app(MaterialCompletionService::class)
             ->checkAndMarkAsCompleted(Auth::id(), $classId, $assignment->material_id);
-        return redirect()->route('kelas', ['id' => $classId]);
+        return redirect()->route('materials.show', [
+            'classId' => $classId,
+            'materialId' => $assignment->material_id
+        ]);
     }
 }

@@ -52,7 +52,7 @@ class CourseClassController extends Controller
     // public function show(string $id)
     // {
     //     $user = Auth::user();
-    //     $class = CourseClass::with(['course', 'materialsFE'])  // ✅ eager load materials
+    //     $class = CourseClass::with(['course', 'materialsFE'])  //  eager load materials
     //         ->where('id', $id)
     //         ->firstOrFail();
     //     $enrollment = ClassEnrollment::where('student_id', $user->id)
@@ -86,6 +86,30 @@ class CourseClassController extends Controller
     //     ));
     // }
     // ------------------- refactor 3
+    // public function show(string $classId)
+    // {
+    //     $user = Auth::user();
+    //     $class = CourseClass::with('course', 'materials')->findOrFail($classId);
+    //     $enrollment = ClassEnrollment::where('student_id', $user->id)
+    //         ->where('class_id', $classId)
+    //         ->firstOrFail();
+    //     $progress = ClassEnrollment::where('class_id', $classId)
+    //         ->where('student_id', Auth::id())
+    //         ->first();
+    //     // absen
+    //     $today = now()->startOfDay();
+    //     $todayMaterial = $class
+    //         ->classMaterials()
+    //         ->whereDate('schedule_date', $today)
+    //         ->first();
+    //     return view('student.class.class', compact(
+    //         'class',
+    //         'enrollment',
+    //         'todayMaterial',
+    //         'progress'
+    //     ));
+    // }
+    // ------------------------ refactor 4
     public function show(string $classId)
     {
         $user = Auth::user();
@@ -104,11 +128,59 @@ class CourseClassController extends Controller
             ->whereDate('schedule_date', $today)
             ->first();
 
+        // === TAMBAHAN: Ambil tugas yang belum dikerjakan ===
+        $materialIds = $class->materials->pluck('id');
+
+        // Ambil semua tugas yang dipublikasikan
+        $essayAssignments = \App\Models\EssayAssignment::whereIn('material_id', $materialIds)
+            ->where('is_published', true)
+            ->with('material')
+            ->get();
+
+        $quizAssignments = \App\Models\QuizAssignment::whereIn('material_id', $materialIds)
+            ->where('is_published', true)
+            ->with('material')
+            ->get();
+
+        // Ambil submission user
+        $userEssaySubs = \App\Models\EssaySubmission::where('student_id', $user->id)
+            ->whereIn('essay_assignment_id', $essayAssignments->pluck('id'))
+            ->pluck('essay_assignment_id')
+            ->toArray();
+
+        $userQuizSubs = \App\Models\QuizSubmission::where('student_id', $user->id)
+            ->whereIn('quiz_assignment_id', $quizAssignments->pluck('id'))
+            ->pluck('quiz_assignment_id')
+            ->toArray();
+
+        // Gabungkan dan filter yang belum dikerjakan
+        $pendingTasks = [];
+        foreach ($essayAssignments as $task) {
+            if (!in_array($task->id, $userEssaySubs)) {
+                $pendingTasks[] = (object) [
+                    'title' => $task->title,
+                    'type' => 'essay',
+                    'material_name' => $task->material->name ?? 'Materi',
+                ];
+            }
+        }
+        foreach ($quizAssignments as $task) {
+            if (!in_array($task->id, $userQuizSubs)) {
+                $pendingTasks[] = (object) [
+                    'title' => $task->title,
+                    'type' => 'quiz',
+                    'material_name' => $task->material->name ?? 'Materi',
+                ];
+            }
+        }
+        // === AKHIR TAMBAHAN ===
+
         return view('student.class.class', compact(
             'class',
             'enrollment',
             'todayMaterial',
-            'progress'
+            'progress',
+            'pendingTasks'  // ← tambahkan ini
         ));
     }
 

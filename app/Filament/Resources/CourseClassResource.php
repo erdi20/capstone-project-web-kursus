@@ -22,26 +22,40 @@ use Filament\Resources\Resource;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Filament\Forms;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 use Closure;
 
 class CourseClassResource extends Resource
 {
     protected static ?string $model = CourseClass::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-calendar';  // Ikon kalender atau daftar (sesuai Kelas/Jadwal)
+    // --- Pengaturan Label ---
+    protected static ?string $navigationLabel = 'Batch & Jadwal';  // Lebih spesifik dari sekadar "Kelas"
 
-    protected static ?string $modelLabel = 'Kelas';
+    protected static ?string $modelLabel = 'Jadwal Kelas';
 
-    protected static ?string $pluralModelLabel = 'Kelas';
+    protected static ?string $pluralModelLabel = 'Jadwal Kelas';
 
-    protected static ?string $navigationGroup = 'Akademik & Konten';
+    protected static ?string $slug = 'batch-kelas';
 
-    protected static ?int $navigationSort = 1;  // Urutan sebelum Materi (2)
+    // --- Pengaturan Navigasi & Visual ---
+    protected static ?string $navigationGroup = 'Manajemen Kursus';  // Disamakan dengan CourseResource agar satu grup
+
+    protected static ?string $navigationIcon = 'heroicon-o-presentation-chart-bar';
+
+    protected static ?string $activeNavigationIcon = 'heroicon-s-presentation-chart-bar';
+
+    protected static ?int $navigationSort = 2;  // Berada tepat di bawah Course (1)
+
+    // --- Pengaturan UX ---
+    protected static ?string $navigationBadgeTooltip = 'Jumlah batch kelas yang sedang membuka pendaftaran';
 
     public static function canAccess(): bool
     {
@@ -177,16 +191,20 @@ class CourseClassResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (\Illuminate\Database\Eloquent\Builder $query) {
+                // Hanya tampilkan kursus yang dibuat oleh user yang sedang login
+                $query->where('created_by', Auth::id());
+            })
             ->columns([
                 TextColumn::make('name')
                     ->label('Nama Kelas')
-                    ->searchable()
+                    ->searchable()  // Pencarian berdasarkan nama kelas
                     ->sortable()
                     ->limit(35),
                 TextColumn::make('course.name')
                     ->label('Kursus Induk')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable(),  // Pencarian berdasarkan kursus induk
                 BadgeColumn::make('status')
                     ->label('Status')
                     ->sortable()
@@ -200,6 +218,11 @@ class CourseClassResource extends Resource
                     ->label('Kuota Maks.')
                     ->numeric()
                     ->sortable(),
+                // Tambahkan kolom jumlah siswa terdaftar (opsional tapi sangat berguna)
+                TextColumn::make('enrollments_count')
+                    ->label('Terisi')
+                    ->counts('enrollments')
+                    ->sortable(),
                 TextColumn::make('createdBy.name')
                     ->label('Mentor')
                     ->sortable()
@@ -211,7 +234,31 @@ class CourseClassResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+                // 1. Filter berdasarkan Kursus Induk (Hanya menampilkan kursus milik mentor tsb)
+                SelectFilter::make('course_id')
+                    ->label('Pilih Kursus')
+                    ->relationship('course', 'name', fn(Builder $query) => $query->where('created_by', Auth::id()))
+                    ->searchable()
+                    ->preload(),
+                // 2. Filter berdasarkan Status Kelas
+                SelectFilter::make('status')
+                    ->label('Status Kelas')
+                    ->options([
+                        'draft' => 'Draft',
+                        'open' => 'Buka (Open)',
+                        'closed' => 'Tutup (Closed)',
+                        'archived' => 'Arsip',
+                    ]),
+                // 3. Filter Kuota Penuh (Ternary Filter)
+                TernaryFilter::make('is_full')
+                    ->label('Kuota Penuh')
+                    ->placeholder('Semua Kelas')
+                    ->trueLabel('Hanya Kelas Penuh')
+                    ->falseLabel('Masih Ada Kuota')
+                    ->queries(
+                        true: fn(Builder $query) => $query->whereColumn('enrollments_count', '>=', 'max_quota'),
+                        false: fn(Builder $query) => $query->whereColumn('enrollments_count', '<', 'max_quota'),
+                    )
             ])
             ->actions([
                 ActionGroup::make([

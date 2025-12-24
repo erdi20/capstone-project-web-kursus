@@ -13,9 +13,26 @@ use Filament\Tables;
 class WithdrawalResource extends Resource
 {
     protected static ?string $model = Withdrawal::class;
+    // --- Pengaturan Label ---
+    protected static ?string $navigationLabel = 'Permintaan Pencairan';  // Lebih jelas daripada hanya "Pencairan"
+    protected static ?string $modelLabel = 'Data Pencairan';
+    protected static ?string $pluralModelLabel = 'Pencairan Dana Mentor';
+    protected static ?string $slug = 'pencairan-dana';
+    // --- Pengaturan Navigasi & Visual ---
+    protected static ?string $navigationGroup = 'Manajemen Keuangan';  // Grup yang sama dengan Skema Komisi
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
-    protected static ?string $navigationGroup = 'Keuangan';
-    protected static ?string $navigationLabel = 'Pencairan Mentor';
+    protected static ?string $activeNavigationIcon = 'heroicon-s-credit-card';
+    protected static ?int $navigationSort = 1;  // Prioritas utama di grup Keuangan
+    // --- Pengaturan UX (Sangat Penting untuk Admin) ---
+    protected static ?string $navigationBadgeTooltip = 'Jumlah permintaan pencairan yang perlu segera diproses';
+
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+
+        // Izinkan akses jika user adalah admin atau mentor
+        return $user->isAdmin();
+    }
 
     public static function form(Form $form): Form
     {
