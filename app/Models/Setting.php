@@ -25,6 +25,8 @@ class Setting extends Model
         'phone',
         'address',
         'gmaps_embed_url',
-        'mentor_commission_percent'
+        'mentor_commission_percent',
+        'privacy_policy',
+        'terms_conditions',
     ];
 }

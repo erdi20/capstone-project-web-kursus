@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -132,5 +133,25 @@ class HomeController extends Controller
         $faqs = \App\Models\Faq::where('is_active', true)->orderBy('order')->get();
 
         return view('dashboard', compact('sliders', 'topRatedCourses', 'popularCourses', 'randomCourses', 'testimonials', 'faqs'));
+    }
+
+    public function privacyPolicy()
+    {
+        $setting = Setting::first();
+        return view('privacy', compact('setting'));
+    }
+
+    // Di WebController atau SettingController
+
+    public function terms()
+    {
+        $setting = Setting::first();
+        return view('terms', compact('setting'));
+    }
+
+    public function contact()
+    {
+        $setting = Setting::first();
+        return view('contact', compact('setting'));
     }
 }

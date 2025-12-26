@@ -7,6 +7,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Split;
 use Filament\Forms\Components\Tabs;
@@ -65,105 +66,109 @@ class EditSiteSettings extends Page implements HasForms
             ->schema([
                 Tabs::make('Pengaturan Utama')
                     ->tabs([
-                        // --- TAB BRANDING & IDENTITAS ---
-                        Tab::make('Identitas Situs')  // Gunakan Tab::make jika sudah di-import
+                        // --- TAB 1: BRANDING ---
+                        Tab::make('Identitas Situs')
                             ->icon('heroicon-m-globe-alt')
                             ->schema([
                                 Split::make([
-                                    // Kolom Kiri: Informasi Utama
                                     Section::make([
                                         TextInput::make('site_name')
                                             ->label('Nama Platform')
-                                            ->placeholder('Contoh: EduTech Pro')
                                             ->required()
                                             ->maxLength(50),
                                         Textarea::make('site_description')
                                             ->label('Deskripsi Singkat (SEO)')
-                                            ->placeholder('Jelaskan platform Anda dalam beberapa kalimat...')
                                             ->rows(4)
                                             ->required(),
                                         TextInput::make('copyright_text')
                                             ->label('Teks Hak Cipta')
-                                            ->placeholder('© 2025 EduTech. All rights reserved.')
                                             ->required(),
                                     ])->grow(),
-                                    // Kolom Kanan: Aset Visual & Komisi
                                     Section::make([
                                         FileUpload::make('logo')
                                             ->label('Logo Website')
                                             ->image()
                                             ->imageEditor()
                                             ->directory('settings')
-                                            ->disk('public')
-                                            ->maxSize(1024)
-                                            ->helperText('Format PNG/JPG, Maks 1MB.'),
+                                            ->disk('public'),
                                         TextInput::make('mentor_commission_percent')
-                                            ->label('Komisi Default Mentor')
+                                            ->label('Komisi Mentor')
                                             ->numeric()
                                             ->suffix('%')
-                                            ->helperText('Persentase potongan otomatis per transaksi.')
                                             ->required(),
-                                    ])->extraAttributes(['class' => 'w-full md:w-80']),  // Mengatur lebar kanan dengan Tailwind (lebih aman)
+                                    ])->extraAttributes(['class' => 'w-full md:w-80']),
                                 ])->from('md'),
                             ]),
-                        // --- TAB KONTAK & SOSIAL MEDIA ---
+                        // --- TAB 2: KONTAK ---
                         Tab::make('Kontak & Media Sosial')
                             ->icon('heroicon-m-chat-bubble-left-right')
                             ->schema([
                                 Grid::make(3)->schema([
-                                    // Section Kontak
                                     Section::make('Informasi Kontak')
                                         ->columnSpan(2)
                                         ->columns(2)
                                         ->schema([
-                                            TextInput::make('email')
-                                                ->label('Email Support')
-                                                ->email()
-                                                ->prefixIcon('heroicon-m-envelope')
-                                                ->required(),
-                                            TextInput::make('phone')
-                                                ->label('WhatsApp/Hotline')
-                                                ->tel()
-                                                ->prefixIcon('heroicon-m-phone')
-                                                ->required(),
-                                            Textarea::make('address')
-                                                ->label('Alamat Kantor')
-                                                ->columnSpanFull()
-                                                ->rows(2),
+                                            TextInput::make('email')->email()->required()->prefixIcon('heroicon-m-envelope'),
+                                            TextInput::make('phone')->tel()->required()->prefixIcon('heroicon-m-phone'),
+                                            Textarea::make('address')->columnSpanFull()->rows(2),
                                             TextInput::make('gmaps_embed_url')
                                                 ->label('URL Google Maps (Iframe)')
-                                                ->placeholder('https://google.com/maps/embed?pb=...')
                                                 ->columnSpanFull(),
                                         ]),
-                                    // Section Sosial Media
                                     Section::make('Link Sosial Media')
                                         ->columnSpan(1)
                                         ->schema([
-                                            Grid::make(1)  // Memastikan tumpukan vertikal yang konsisten
-                                                ->schema([
-                                                    TextInput::make('facebook_url')
-                                                        ->label('Facebook')
-                                                        ->prefix('https://facebook.com/')  // Gunakan URL lengkap agar lebih jelas bagi sistem
-                                                        ->placeholder('username'),
-                                                        TextInput::make('instagram_url')
-                                                        ->label('Instagram')
-                                                        ->prefix('https://instagram.com/')
-                                                        ->placeholder('username'),
-                                                        TextInput::make('twitter_url')
-                                                        ->label('Twitter')
-                                                        ->prefix('https://x.com/')
-                                                        ->placeholder('username'),
-                                                    TextInput::make('linkedin_url')
-                                                        ->label('LinkedIn')
-                                                        ->prefix('https://linkedin.com/in/')
-                                                        ->placeholder('username'),
-                                                ]),
+                                            TextInput::make('facebook_url')->prefix('https://facebook.com/'),
+                                            TextInput::make('instagram_url')->prefix('https://instagram.com/'),
+                                            TextInput::make('twitter_url')->prefix('https://x.com/'),
+                                            TextInput::make('linkedin_url')->prefix('https://linkedin.com/in/'),
                                         ]),
                                 ]),
                             ]),
+                        // --- TAB 3: LEGAL (BARU) ---
+                        Tab::make('Halaman Hukum')
+                            ->icon('heroicon-m-shield-check')
+                            ->schema([
+                                Section::make('Kebijakan Privasi')
+                                    ->description('Isi kebijakan privasi yang akan tampil di halaman /privacy-policy')
+                                    ->schema([
+                                        RichEditor::make('privacy_policy')
+                                            ->label('')
+                                            ->toolbarButtons([
+                                                'blockquote',
+                                                'bold',
+                                                'bulletList',
+                                                'h2',
+                                                'h3',
+                                                'italic',
+                                                'link',
+                                                'orderedList',
+                                                'redo',
+                                                'undo',
+                                            ]),
+                                    ]),
+                                Section::make('Syarat & Ketentuan')
+                                    ->description('Isi aturan main platform yang akan tampil di halaman /terms')
+                                    ->schema([
+                                        RichEditor::make('terms_conditions')
+                                            ->label('')
+                                            ->toolbarButtons([
+                                                'blockquote',
+                                                'bold',
+                                                'bulletList',
+                                                'h2',
+                                                'h3',
+                                                'italic',
+                                                'link',
+                                                'orderedList',
+                                                'redo',
+                                                'undo',
+                                            ]),
+                                    ]),
+                            ]),
                     ])
                     ->columnSpanFull()
-                    ->persistTabInQueryString(),  // Bagus untuk UX agar saat refresh tetap di tab yang sama
+                    ->persistTabInQueryString(),
             ])
             ->statePath('data');
     }

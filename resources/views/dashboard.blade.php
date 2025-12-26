@@ -241,7 +241,7 @@
             </div>
         </section>
 
-        <section class="mx-auto mb-24 max-w-4xl">
+        <section id="#faq-section" class="mx-auto mb-24 max-w-4xl">
             <div class="mb-12 text-center">
                 <h3 class="text-3xl font-black text-slate-900">Masih Bingung?</h3>
                 <p class="mt-2 text-slate-500">Kami telah merangkum beberapa hal yang sering ditanyakan</p>

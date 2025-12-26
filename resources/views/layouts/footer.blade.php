@@ -51,10 +51,10 @@
             <div>
                 <h3 class="mb-4 text-lg font-semibold text-white">Bantuan</h3>
                 <ul class="space-y-2">
-                    <li><a href="#" class="text-sm transition duration-300 hover:text-white">FAQ</a></li>
-                    <li><a href="" class="text-sm transition duration-300 hover:text-white">Hubungi Kami</a></li>
-                    <li><a href="#" class="text-sm transition duration-300 hover:text-white">Kebijakan Privasi</a></li>
-                    <li><a href="#" class="text-sm transition duration-300 hover:text-white">Syarat & Ketentuan</a></li>
+                    <li><a href="{{ route('dashboard') }}#faq-section" class="text-sm transition duration-300 hover:text-white">FAQ</a></li>
+                    <li><a href="{{ route('contact.us') }}" class="text-sm transition duration-300 hover:text-white">Hubungi Kami</a></li>
+                    <li><a href="{{ route('privacy.policy') }}" class="text-sm transition duration-300 hover:text-white">Kebijakan Privasi</a></li>
+                    <li><a href="{{ route('terms') }}" class="text-sm transition duration-300 hover:text-white">Syarat & Ketentuan</a></li>
                 </ul>
             </div>
 

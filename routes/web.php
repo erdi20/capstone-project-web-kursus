@@ -19,6 +19,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
+Route::get('/privacy-policy', [HomeController::class, 'privacyPolicy'])->name('privacy.policy');
+Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
+Route::get('/contact-us', [HomeController::class, 'contact'])->name('contact.us');
 // Route::get('/dashboard', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 // web.php
 // Route::delete('/profile', [ProfileController::class, 'destroyUserFilament'])->name('profile.delete');
