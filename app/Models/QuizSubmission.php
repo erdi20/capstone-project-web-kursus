@@ -38,4 +38,27 @@ class QuizSubmission extends Model
     {
         return $this->hasMany(QuizAnswer::class);
     }
+
+    public function assignment(): BelongsTo
+    {
+        return $this->belongsTo(QuizAssignment::class, 'quiz_assignment_id');
+    }
+
+    // apakah sudah terlambat
+
+    public function isLate(): bool
+    {
+        // Jika tidak ada assignment atau tidak ada due_date, anggap tidak terlambat
+        if (!$this->quizAssignment || !$this->quizAssignment->due_date) {
+            return false;
+        }
+
+        // Jika belum submit (seharusnya tidak terjadi, tapi antisipasi)
+        if (!$this->submitted_at) {
+            return false;
+        }
+
+        // Bandingkan submitted_at dengan due_date
+        return $this->submitted_at > $this->quizAssignment->due_date;
+    }
 }

@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\QuizAssignmentResource\Pages;
 
+use App\Filament\Resources\CourseResource;
 use App\Filament\Resources\QuizAssignmentResource;
-use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Actions;
 
 class EditQuizAssignment extends EditRecord
 {

@@ -17,6 +17,9 @@ class Material extends Model
         'pdf',
         'course_id',
         'created_by',
+        'is_attendance_required',
+        'attendance_start',
+        'attendance_end',
     ];
 
     public function Course(): BelongsTo
@@ -28,4 +31,25 @@ class Material extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    public function essayAssignments()
+    {
+        return $this->hasMany(EssayAssignment::class, 'material_id');
+    }
+
+    public function classMaterials()
+    {
+        return $this->hasMany(ClassMaterial::class, 'material_id');
+    }
+
+    public function quizAssignments()
+    {
+        return $this->hasMany(QuizAssignment::class, 'material_id');
+    }
+
+    protected $casts = [
+        'is_attendance_required' => 'boolean',
+        'attendance_start' => 'datetime',
+        'attendance_end' => 'datetime',
+    ];
 }

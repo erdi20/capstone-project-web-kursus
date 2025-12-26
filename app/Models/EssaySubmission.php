@@ -30,4 +30,20 @@ class EssaySubmission extends Model
     {
         return $this->belongsTo(User::class, 'student_id');
     }
+
+    // apakah sudah terlambat
+    public function isLate(): bool
+    {
+        // Jika tidak ada due_date, anggap selalu tepat waktu
+        if (!$this->assignment?->due_date) {
+            return false;
+        }
+
+        // Jika belum submit, anggap belum terlambat (tapi ini jarang terjadi)
+        if (!$this->submitted_at) {
+            return false;
+        }
+
+        return $this->submitted_at > $this->assignment->due_date;
+    }
 }

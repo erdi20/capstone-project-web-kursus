@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CourseClassResource\RelationManagers;
 
 use App\Models\Material;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Table;
@@ -102,6 +103,7 @@ class MaterialsRelationManager extends RelationManager
                         // Field Pivot 2 & 3
                         Forms\Components\DateTimePicker::make('schedule_date')
                             ->label('Jadwal Pertemuan')
+                            ->timezone('Asia/Jakarta')
                             ->nullable()
                             ->columnSpan(1),
                         Forms\Components\Select::make('visibility')
@@ -112,50 +114,8 @@ class MaterialsRelationManager extends RelationManager
                             ->default('visible')
                             ->label('Visibilitas')
                             ->required(),
-                    ]),
+                    ])
             ])
-            // ->headerActions([
-            //     Tables\Actions\AttachAction::make()
-            //         // INJEKSI $livewire ke closure form
-            //         ->form(fn(Tables\Actions\AttachAction $action, RelationManager $livewire) => [
-            //             // FIX: Gunakan Forms\Components\Select biasa untuk mengontrol options()
-            //             Forms\Components\Select::make('material_id')
-            //                 ->label('Pilih Materi Dari Kursus Ini')
-            //                 ->searchable()
-            //                 ->required()
-            //                 // 💡 SOLUSI: FILTRASI MANUAL DI options()
-            //                 // Ambil semua materi yang course_id-nya sama dengan course_id dari Kelas induk.
-            //                 ->options(
-            //                     Material::where('course_id', $livewire->ownerRecord->course_id)
-            //                         ->pluck('name', 'id')
-            //                         ->toArray()
-            //                 ),
-            //             // Field Pivot 1: Order
-            //             Forms\Components\TextInput::make('order')
-            //                 ->numeric()
-            //                 ->default(function (RelationManager $livewire) {
-            //                     // Mengembalikan jumlah materi yang sudah ada di Kelas ini + 1
-            //                     return $livewire->ownerRecord->materials()->count() + 1;
-            //                 })
-            //                 ->label('Urutan Pertemuan')
-            //                 ->required()
-            //                 ->columnSpan(1),
-            //             // Field Pivot 2: Schedule Date
-            //             Forms\Components\DateTimePicker::make('schedule_date')
-            //                 ->label('Jadwal Pertemuan')
-            //                 ->nullable()
-            //                 ->columnSpan(1),
-            //             // Field Pivot 3: Visibility
-            //             Forms\Components\Select::make('visibility')
-            //                 ->options([
-            //                     'visible' => 'Terlihat',
-            //                     'hidden' => 'Tersembunyi',
-            //                 ])
-            //                 ->default('visible')
-            //                 ->label('Visibilitas')
-            //                 ->required(),
-            //         ]),
-            // ])
             ->actions([
                 // EditAction untuk mengedit data di tabel pivot
                 Tables\Actions\EditAction::make()

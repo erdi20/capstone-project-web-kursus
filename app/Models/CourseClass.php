@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Model;
 
 class CourseClass extends Model
 {
@@ -18,6 +19,14 @@ class CourseClass extends Model
         'created_by',
         'status',
         'max_quota',
+        'enrollment_start',
+        'enrollment_end',
+        'thumbnail'
+    ];
+
+    protected $casts = [
+        'enrollment_start' => 'datetime',
+        'enrollment_end' => 'datetime',
     ];
 
     // public function Course(): BelongsTo
@@ -33,6 +42,11 @@ class CourseClass extends Model
     public function CreatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function enrollments()
+    {
+        return $this->hasMany(ClassEnrollment::class, 'class_id');
     }
 
     public function courseClasses()
@@ -70,7 +84,28 @@ class CourseClass extends Model
     {
         return $this
             ->belongsToMany(Material::class, 'class_materials')
-            ->withPivot('order', 'schedule_date', 'visibility')
+            ->withPivot('id','order', 'schedule_date', 'visibility')
             ->orderBy('class_materials.order');
+    }
+
+    // Helper: total bobot
+
+    public function getTotalWeightAttribute(): int
+    {
+        return $this->essay_weight + $this->quiz_weight + $this->attendance_weight;
+    }
+
+    // Validasi: apakah bobot valid?
+    public function isValidWeight(): bool
+    {
+        return $this->getTotalWeightAttribute() === 100;
+    }
+
+    public function getThumbnailUrlAttribute()
+    {
+        if ($this->thumbnail && Storage::disk('public')->exists($this->thumbnail)) {
+            return Storage::url($this->thumbnail);
+        }
+        return null;
     }
 }

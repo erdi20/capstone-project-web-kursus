@@ -1,194 +1,219 @@
 <x-app-layout>
-    <div class="min-h-screen bg-gray-50 py-12">
+    <div class="min-h-screen bg-[#f8fafc] py-8">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-            <!-- KONTEN UTAMA KARTU -->
-            <div class="rounded-xl bg-white p-6 shadow-2xl sm:p-10">
+            <div class="mb-8 rounded-[2rem] border border-slate-100 bg-white p-6 shadow-sm lg:p-10">
+                <div class="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
 
-                <!-- HEADER DAN MENTOR (FULL WIDTH) -->
-                <div class="mb-8 border-b border-gray-100 pb-8">
-
-                    {{-- Bagian Mentor --}}
-                    <section class="mb-8">
-                        <h2 class="mb-2 text-lg font-bold text-gray-700">Mentor Kelas ini:</h2>
-
-                        {{-- Keterangan Mentor (Disesuaikan dengan data $class Anda) --}}
-                        <div class="flex w-fit items-center space-x-4 rounded-xl bg-gradient-to-r from-green-400 to-green-600 p-3 shadow-md">
-
-                            {{-- Gambar Mentor --}}
-                            <img alt="Mentor Kelas" src="{{ asset('storage/' . ($class->course->user?->avatar_url ?? 'default-avatar.png')) }}" class="h-10 w-10 flex-shrink-0 rounded-full border-2 border-white bg-gray-300 object-cover" />
-
-                            {{-- Detail Mentor --}}
+                    <div class="flex-1">
+                        <div class="mb-6 flex items-center space-x-4">
+                            <div class="relative">
+                                <img alt="Mentor" src="{{ $class->course->user->avatar_url ? asset('storage/' . $class->course->user->avatar_url) : 'https://ui-avatars.com/api/?name=' . urlencode($class->course->user->name) }}" class="h-16 w-16 rounded-2xl object-cover shadow-lg ring-4 ring-indigo-50" />
+                                <div class="absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-2 border-white bg-green-500"></div>
+                            </div>
                             <div>
-                                <p class="text-lg font-semibold leading-tight text-white">{{ $class->course->user?->name ?? 'Mentor tidak tersedia' }}</p>
-                                <p class="text-sm text-green-100">Mentor</p>
+                                <p class="text-xs font-black uppercase tracking-widest text-indigo-500">Mentor Kelas</p>
+                                <h2 class="text-xl font-bold text-slate-800">{{ $class->course->user?->name ?? 'Mentor tidak tersedia' }}</h2>
                             </div>
                         </div>
-                    </section>
-
-                    {{-- Deskripsi Singkat Kursus --}}
-                    <section>
-                        <h1 class="mb-3 mt-8 text-2xl font-extrabold text-gray-900">{{ $class->course->name }}</h1>
-                        <p class="text-base leading-relaxed text-gray-600">
-                            {!! $class->course->short_description ?? 'Deskripsi kursus belum tersedia.' !!}
+                        <h1 class="text-3xl font-black tracking-tight text-slate-900 md:text-4xl">
+                            {{ $class->course->name }}
+                        </h1>
+                        <p class="mt-4 max-w-2xl text-base leading-relaxed text-slate-500">
+                            {!! $class->course->short_description ?? 'Selesaikan semua modul untuk mendapatkan sertifikat kompetensi.' !!}
                         </p>
-                    </section>
-                </div>
-
-                <!-- BAGIAN UTAMA: MATERI (KIRI) dan TUGAS (KANAN) -->
-                <!-- Layout 2 Kolom: Materi (8/12) dan Tugas (4/12) di layar besar -->
-                <div class="grid grid-cols-1 gap-10 lg:grid-cols-12">
-
-                    <!-- KOLOM KIRI: MATERI PEMBELAJARAN (8/12) -->
-                    <div class="lg:col-span-8">
-                        <section>
-                            <h3 class="mb-5 border-b-2 border-indigo-100 pb-2 text-2xl font-bold text-gray-900">Daftar Materi Kelas</h3>
-
-                            <div id="daftar-kelas" class="space-y-4">
-                                @if ($class->materialsFE->count())
-                                    @foreach ($class->materialsFE as $material)
-                                        @php
-                                            $isScheduled = $material->pivot->schedule_date && now() < $material->pivot->schedule_date;
-                                            $isVisible = $material->pivot->visibility === 'visible' && !$isScheduled;
-                                            $isActive = $isVisible; // Gunakan isVisible untuk menentukan status aktif/bisa diakses
-
-                                            // Styling
-                                            $linkClass = $isActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-300' : 'bg-gray-50 text-gray-800 hover:bg-gray-100 border border-gray-200 opacity-70 cursor-not-allowed';
-
-                                            $iconColor = $isActive ? 'text-white' : 'text-gray-400';
-                                            $counterColor = $isActive ? 'text-indigo-200' : 'text-indigo-500';
-                                        @endphp
-
-                                        <a href="{{ $isVisible ? route('materials.show', ['classId' => $class->id, 'materialId' => $material->id]) : '#' }}" class="{{ $linkClass }} flex items-center justify-between rounded-xl p-4 transition duration-200">
-
-                                            <div class="flex items-start space-x-3">
-                                                <span class="{{ $counterColor }} flex-shrink-0 font-bold">
-                                                    P{{ $loop->iteration }}:
-                                                </span>
-                                                <div class="flex flex-col">
-                                                    <span class="font-medium">
-                                                        {{ $material->name }}
-                                                    </span>
-                                                    @if ($isScheduled)
-                                                        <span class="{{ $isActive ? 'text-indigo-200' : 'text-orange-600' }} mt-1 text-xs font-semibold">
-                                                            🕒 Tersedia {{ \Carbon\Carbon::parse($material->pivot->schedule_date)->translatedFormat('d F Y') }}
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                            </div>
-
-                                            @if ($isActive)
-                                                <!-- Ikon Sedang Berjalan (Play/Active) -->
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.26a1 1 0 001.555.832l3.197-2.132c.21-.14.21-.497 0-.638z"></path>
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                </svg>
-                                            @else
-                                                <!-- Ikon Kunci (Belum Aktif) -->
-                                                <svg class="{{ $iconColor }} h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                                </svg>
-                                            @endif
-                                        </a>
-                                    @endforeach
-                                @else
-                                    <p class="p-4 italic text-gray-500">Belum ada materi tersedia untuk kelas ini.</p>
-                                @endif
-                            </div>
-                        </section>
                     </div>
 
-                    <!-- KOLOM KANAN: TUGAS DAN AKSI (4/12) -->
-                    <div class="lg:col-span-4">
-                        <section class="rounded-xl border border-gray-200 bg-gray-50 p-6 shadow-inner">
-                            <h3 class="mb-4 border-b pb-2 text-xl font-bold text-gray-900">Daftar Tugas dan Penilaian</h3>
+                    <div class="flex flex-col gap-4 sm:flex-row lg:w-1/3">
+                        <div class="flex-1 rounded-2xl bg-indigo-600 p-5 text-white shadow-xl shadow-indigo-100">
+                            <p class="text-xs font-bold uppercase opacity-80">Progress Belajar</p>
+                            <div class="mt-2 flex items-end justify-between">
+                                <h3 class="text-3xl font-black">{{ $enrollment->progress_percentage ?? 0 }}%</h3>
+                                <svg class="h-8 w-8 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                            </div>
+                            <div class="mt-3 h-1.5 w-full rounded-full bg-indigo-400/30">
+                                <div class="h-full rounded-full bg-white" style="width: {{ $enrollment->progress_percentage ?? 0 }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                            <!-- Looping Daftar Tugas (Menggunakan Dummy Data karena variabel aslinya tidak ada di sini, sesuai permintaan) -->
-                            <div id="daftar-tugas" class="space-y-3">
-                                {{-- ASUMSI: Anda memiliki variabel $classAssignments yang dikirim dari controller --}}
-                                @php
-                                    // Contoh data dummy untuk simulasi loop
-                                    $classAssignments = [
-                                        (object) ['name' => 'Kuis Pendahuluan', 'status' => 'Selesai', 'score' => '100'],
-                                        (object) ['name' => 'Essai Naratif', 'status' => 'Belum Dikerjakan', 'score' => '-'],
-                                        (object) ['name' => 'Presensi Pertemuan 1', 'status' => 'Selesai', 'score' => '50'],
-                                        (object) ['name' => 'Ujian Akhir Kelas', 'status' => 'Ditunda', 'score' => '-'],
-                                    ];
-                                @endphp
+            <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
 
-                                @foreach ($classAssignments as $assignment)
+                <div class="lg:col-span-8">
+                    <div class="rounded-[2rem] border border-slate-100 bg-white p-6 shadow-sm sm:p-8">
+                        <div class="mb-6 flex items-center justify-between">
+                            <h3 class="text-xl font-extrabold text-slate-900">Kurikulum Kelas</h3>
+                            <span class="rounded-lg bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500">{{ $class->materialsFE->count() }} Modul</span>
+                        </div>
+
+                        <div class="space-y-3">
+                            @if ($class->materialsFE->count())
+                                @foreach ($class->materialsFE as $material)
                                     @php
-                                        // Menentukan warna dan ikon berdasarkan status
-                                        $statusLower = strtolower($assignment->status);
-                                        $statusColor = match ($statusLower) {
-                                            'selesai' => 'bg-green-100 text-green-700 border-green-300',
-                                            'belum dikerjakan' => 'bg-red-100 text-red-700 border-red-300',
-                                            'ditunda' => 'bg-yellow-100 text-yellow-700 border-yellow-300',
-                                            default => 'bg-gray-100 text-gray-700 border-gray-300',
-                                        };
-                                        $icon = match ($statusLower) {
-                                            'selesai' => '<svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
-                                            'belum dikerjakan'
-                                                => '<svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.3 16c-.77 1.333.192 3 1.732 3z"></path></svg>',
-                                            default
-                                                => '<svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v4m8-4v4m0 4v4m-8-4v4m9-10H3.94a1 1 0 00-.921 1.488l2.94 5.918c.288.581.85 1 1.489 1h9.043c.64 0 1.2-.419 1.489-1l2.94-5.918A1 1 0 0020.06 7H15"></path></svg>',
-                                        };
+                                        $service = app(\App\Services\MaterialCompletionService::class);
+                                        $currentOrder = $material->pivot->order;
+                                        $canAccess = $service->arePreviousMaterialsCompleted(Auth::id(), $class->id, $currentOrder);
+                                        $isVisible = $material->pivot->visibility === 'visible';
+                                        $isActive = $canAccess && $isVisible;
                                     @endphp
 
-                                    <a href="#" class="{{ $statusColor }} block rounded-lg border bg-white p-3 shadow-sm transition duration-150 hover:bg-gray-50">
-                                        <div class="flex items-start justify-between">
-                                            <div class="flex flex-col">
-                                                <span class="text-sm font-semibold">{{ $assignment->name }}</span>
-                                                <div class="mt-1 flex items-center text-xs">
-                                                    {!! $icon !!}
-                                                    <span class="font-medium">{{ $assignment->status }}</span>
+                                    <a href="{{ $isActive ? route('materials.show', [$class->id, $material->id]) : '#' }}" class="{{ $isActive ? 'border-slate-100 bg-white hover:border-indigo-500 hover:shadow-md' : 'cursor-not-allowed border-transparent bg-slate-50 opacity-60' }} group flex items-center justify-between rounded-2xl border p-4 transition-all duration-300">
+
+                                        <div class="flex items-center space-x-4">
+                                            <div class="{{ $isActive ? 'bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white' : 'bg-slate-200 text-slate-400' }} flex h-12 w-12 shrink-0 items-center justify-center rounded-xl font-bold transition-colors">
+                                                {{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}
+                                            </div>
+                                            <div>
+                                                <h4 class="{{ $isActive ? 'group-hover:text-indigo-600' : '' }} font-bold text-slate-800 transition-colors">{{ $material->name }}</h4>
+                                                <p class="text-xs text-slate-500">Materi Pembelajaran</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center">
+                                            @if ($isActive)
+                                                <div class="rounded-full bg-green-50 p-2 text-green-600">
+                                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                                    </svg>
                                                 </div>
-                                            </div>
-                                            <div class="flex-shrink-0 text-xl font-extrabold text-indigo-600">
-                                                {{ $assignment->score }}
-                                            </div>
+                                            @else
+                                                <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                </svg>
+                                            @endif
                                         </div>
                                     </a>
                                 @endforeach
-                            </div>
-
-                            <p class="mb-6 mt-6 text-xs italic text-gray-600">
-                                *Daftar ini hanyalah simulasi. Klik pada tugas untuk melihat detail, petunjuk pengiriman, atau hasil penilaian.
-                            </p>
-
-                            <!-- Progress & Sertifikat (Menggunakan data $enrollment Anda) -->
-                            <div class="mt-8 space-y-4 border-t border-gray-300 pt-4">
-                                <h4 class="font-semibold text-gray-700">Kemajuan Kelas</h4>
-                                <div class="mb-4">
-                                    <div class="mb-1 flex justify-between text-sm text-gray-600">
-                                        <span>Kemajuan</span>
-                                        <span>{{ $enrollment->progress_percentage ?? 0 }}%</span>
-                                    </div>
-                                    <div class="h-2 w-full rounded-full bg-gray-200">
-                                        <div class="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500" style="width: {{ $enrollment->progress_percentage ?? 0 }}%"></div>
-                                    </div>
+                            @else
+                                <div class="py-12 text-center">
+                                    <p class="italic text-slate-400">Belum ada materi tersedia.</p>
                                 </div>
-
-                                <button class="w-full transform rounded-lg bg-indigo-600 px-6 py-3 font-bold text-white shadow-lg transition duration-200 hover:scale-[1.01] hover:bg-indigo-700">
-                                    Lihat Nilai Rata-Rata
-                                </button>
-
-                                @if (($enrollment->progress_percentage ?? 0) >= 100)
-                                    <a href="{{ route('certificates.download', $class->id) }}" class="inline-block w-full rounded-lg border-2 border-green-500 bg-white px-6 py-3 text-center font-bold text-gray-800 shadow-md transition duration-200 hover:bg-green-500 hover:text-white">
-                                        Unduh Sertifikat
-                                    </a>
-                                @else
-                                    <button disabled class="w-full cursor-not-allowed rounded-lg bg-gray-200 px-4 py-2.5 font-semibold text-gray-500 shadow-md">
-                                        Selesaikan Kelas untuk Mendapat Sertifikat
-                                    </button>
-                                @endif
-                            </div>
-                        </section>
+                            @endif
+                        </div>
                     </div>
-
                 </div>
 
+                <div class="space-y-6 lg:col-span-4">
+
+                    <div class="rounded-[2rem] border border-slate-100 bg-white p-6 shadow-sm">
+                        <h4 class="mb-4 flex items-center text-lg font-bold text-slate-900">
+                            <span class="mr-2 flex h-2 w-2 rounded-full bg-amber-500"></span>
+                            Tugas Pending
+                        </h4>
+
+                        <div class="space-y-3">
+                            @forelse ($pendingTasks as $task)
+                                <div class="group rounded-2xl border border-slate-100 bg-slate-50 p-4 transition hover:bg-white hover:shadow-sm">
+                                    <div class="flex items-start justify-between">
+                                        <div>
+                                            <span class="text-[10px] font-black uppercase tracking-widest text-amber-600">{{ $task->type }}</span>
+                                            <h5 class="mt-1 text-sm font-bold text-slate-800">{{ $task->title }}</h5>
+                                            <p class="text-xs text-slate-500">{{ $task->material_name }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="rounded-2xl bg-green-50 p-4 text-center">
+                                    <p class="text-sm font-bold text-green-700">🎉 Semua tugas selesai!</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <div class="rounded-[2rem] bg-slate-900 p-6 text-white shadow-xl">
+                        <h4 class="mb-4 font-bold">Apresiasi Belajar</h4>
+
+                        @if ($enrollment?->status === 'completed')
+                            <div class="space-y-3">
+                                <a href="{{ route('certificates.download', $class->id) }}" class="flex w-full items-center justify-center rounded-xl bg-indigo-600 py-3 font-bold shadow-lg shadow-indigo-900/50 transition hover:bg-indigo-700">
+                                    Unduh Sertifikat
+                                </a>
+                                <button id="open-review-btn" class="w-full rounded-xl bg-white/10 py-3 font-bold text-white transition hover:bg-white/20">
+                                    Beri Ulasan Kelas
+                                </button>
+                            </div>
+                        @else
+                            <div class="rounded-xl border border-white/10 bg-white/5 p-4">
+                                <p class="text-xs italic leading-relaxed text-slate-400">
+                                    Sertifikat dan fitur ulasan akan terbuka secara otomatis setelah progres belajar Anda mencapai 100%.
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <div id="review-modal" class="fixed inset-0 z-[100] flex hidden items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+        <div class="w-full max-w-md transform overflow-hidden rounded-[2rem] bg-white shadow-2xl transition-all">
+            <div class="relative p-8">
+                <button id="close-review-modal" class="absolute right-6 top-6 text-slate-400 hover:text-slate-600">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                <div class="mb-6 text-center">
+                    <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
+                        <svg class="h-10 w-10" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-black text-slate-900">Penilaian Kelas</h3>
+                    <p class="mt-1 text-sm text-slate-500">Ulasan Anda membantu kami menjadi lebih baik.</p>
+                </div>
+
+                <form action="{{ route('reviews.store', $class->id) }}" method="POST">
+                    @csrf
+                    <div class="mb-6 space-y-2">
+                        @php
+                            $ratings = [
+                                5 => 'Luar Biasa',
+                                4 => 'Sangat Baik',
+                                3 => 'Baik',
+                                2 => 'Cukup Baik',
+                                1 => 'Kurang Baik',
+                            ];
+                        @endphp
+
+                        @foreach ($ratings as $value => $label)
+                            <label class="flex cursor-pointer items-center justify-between rounded-xl border border-slate-100 p-3 transition-colors hover:bg-indigo-50">
+                                <div class="flex items-center">
+                                    <input type="radio" name="rating" value="{{ $value }}" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500" required {{ old('rating', $enrollment->rating) == $value ? 'checked' : '' }}>
+                                    <span class="ml-3 text-sm font-bold text-slate-700">{{ $value }} Bintang</span>
+                                </div>
+                                <span class="text-xs font-medium text-slate-400">{{ $label }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+
+                    <textarea name="review" rows="3" required placeholder="Tulis masukan Anda di sini..." class="w-full rounded-2xl border-slate-200 bg-slate-50 p-4 text-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('review', $enrollment->review) }}</textarea>
+
+                    <button type="submit" class="mt-6 w-full rounded-2xl bg-slate-900 py-4 font-bold text-white transition hover:bg-black">
+                        Kirim Ulasan Sekarang
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const openBtn = document.getElementById('open-review-btn');
+        const closeBtn = document.getElementById('close-review-modal');
+        const modal = document.getElementById('review-modal');
+
+        openBtn?.addEventListener('click', () => modal.classList.remove('hidden'));
+        closeBtn?.addEventListener('click', () => modal.classList.add('hidden'));
+
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.add('hidden');
+        });
+    </script>
 </x-app-layout>

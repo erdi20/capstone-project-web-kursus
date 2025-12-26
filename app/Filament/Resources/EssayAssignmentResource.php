@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\EssayAssignmentResource\RelationManagers\SubmissionsRelationManager;
 use App\Filament\Resources\EssayAssignmentResource\Pages;
 use App\Filament\Resources\EssayAssignmentResource\RelationManagers;
 use App\Models\EssayAssignment;
@@ -27,15 +28,34 @@ class EssayAssignmentResource extends Resource
 {
     protected static ?string $model = EssayAssignment::class;
 
-    protected static ?string $modelLabel = 'Tugas Essay';  // Label untuk satu item (singular)
+    // --- Pengaturan Label ---
+    protected static ?string $navigationLabel = 'Penugasan Essay';
 
-    protected static ?string $pluralModelLabel = 'Manajemen Tugas Essay';  // Label untuk daftar/halaman (plural)
+    protected static ?string $modelLabel = 'Tugas Essay';
 
-    protected static ?string $navigationIcon = 'heroicon-o-pencil-square';  // Ikon yang lebih relevan untuk tugas esai
+    protected static ?string $pluralModelLabel = 'Tugas Essay';
 
-    protected static ?string $navigationGroup = 'Manajemen Kursus';  // Pengelompokan (Grouping) navigasi
+    protected static ?string $slug = 'evaluasi-essay';
 
-    protected static ?int $navigationSort = 1;  // Menentukan urutan di dalam group (opsional)
+    // --- Pengaturan Navigasi & Visual ---
+    protected static ?string $navigationGroup = 'Evaluasi & Ujian';  // Grup terpisah agar rapi
+
+    protected static ?string $navigationIcon = 'heroicon-o-pencil-square';
+
+    protected static ?string $activeNavigationIcon = 'heroicon-s-pencil-square';
+
+    protected static ?int $navigationSort = 1;  // Urutan pertama di grup Evaluasi
+
+    // --- Pengaturan UX ---
+    protected static ?string $navigationBadgeTooltip = 'Jumlah tugas essay yang perlu dinilai';
+
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+
+        // Izinkan akses jika user adalah admin atau mentor
+        return $user->isMentor();
+    }
 
     public static function form(Form $form): Form
     {
@@ -45,6 +65,11 @@ class EssayAssignmentResource extends Resource
                     ->description('Tentukan kelas tujuan, judul, dan batas waktu pengumpulan.')
                     ->columns(2)
                     ->schema([
+                        Hidden::make('material_id')
+                            ->default(function () {
+                                $materialId = app('request')->query('material_id');
+                                return is_numeric($materialId) ? (int) $materialId : null;
+                            }),
                         TextInput::make('title')
                             ->label('Judul Tugas')
                             ->required()
@@ -52,15 +77,9 @@ class EssayAssignmentResource extends Resource
                             ->autofocus()
                             ->columnSpanFull()
                             ->placeholder('Contoh: Analisis Kebutuhan Sistem'),
-                        Select::make('course_class_id')
-                            ->label('Kelas Tujuan')
-                            ->relationship('courseClass', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->required()
-                            ->live(),  // untuk trigger dependensi jika diperlukan
                         DateTimePicker::make('due_date')
                             ->label('Batas Waktu Pengumpulan')
+                            ->timezone('Asia/Jakarta')
                             ->required()
                             ->minDate(now()->addHour())
                             ->closeOnDateSelection()
@@ -139,6 +158,7 @@ class EssayAssignmentResource extends Resource
                 Tables\Columns\TextColumn::make('due_date')
                     ->label('Batas Waktu')
                     ->dateTime('d M Y H:i')
+                    ->timezone('Asia/Jakarta')
                     ->sortable()
                     ->color(fn(string $state): string => match (true) {
                         now()->gt($state) => 'danger',  // Merah jika sudah melewati deadline
@@ -160,6 +180,7 @@ class EssayAssignmentResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat Tanggal')
                     ->dateTime('d/m/Y H:i')
+                    ->timezone('Asia/Jakarta')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -185,8 +206,12 @@ class EssayAssignmentResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                // Menambahkan ViewAction untuk melihat detail tugas (UX yang baik)
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\Action::make('submissions')
+                    ->label('Lihat Pengumpulan')
+                    ->url(fn(EssayAssignment $record): string => static::getUrl('submissions', ['record' => $record->id]))
+                    ->button()
+                    ->color('info'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -198,8 +223,14 @@ class EssayAssignmentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            SubmissionsRelationManager::class,
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('created_by', auth()->id());  // hanya tugas yang dibuat oleh user ini
     }
 
     public static function getPages(): array
@@ -208,6 +239,7 @@ class EssayAssignmentResource extends Resource
             'index' => Pages\ListEssayAssignments::route('/'),
             'create' => Pages\CreateEssayAssignment::route('/create'),
             'edit' => Pages\EditEssayAssignment::route('/{record}/edit'),
+            'submissions' => Pages\ViewEssaySubmissions::route('/{record}/submissions'),  // ← tambahkan ini
         ];
     }
 }

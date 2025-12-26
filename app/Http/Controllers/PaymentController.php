@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\ClassEnrollment;
+use App\Models\Commission;
 use App\Models\CourseClass;
 use App\Models\Payment;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use Midtrans\Config;
 use Midtrans\Notification;
 use Midtrans\Snap;
@@ -23,7 +26,45 @@ class PaymentController extends Controller
             'course_class_id' => ['required', 'exists:course_classes,id'],
             'course_id' => ['required', 'exists:courses,id'],
         ]);
+        // Tambahkan di awal logika setelah validasi input
+        $class = CourseClass::with('course')->findOrFail($request->course_class_id);
+        $course = $class->course;
+        $user = Auth::user();
 
+        // ✅ CEK 1: Apakah kelas sudah ditutup?
+        if ($class->status !== 'open') {
+            return back()->with('error', 'Kelas yang Anda pilih sudah ditutup.');
+        }
+
+        // ✅ CEK 2: Apakah masa pendaftaran sudah berakhir?
+        // if ($class->enrollment_end && now()->greaterThan($class->enrollment_end)) {
+        //     return back()->with('error', 'Pendaftaran untuk kelas ini telah ditutup pada ' . $class->enrollment_end->translatedFormat('d F Y, H:i') . '.');
+        // }
+
+        if ($class->enrollment_end) {
+            $enrollmentEndJakarta = \Carbon\Carbon::parse($class->enrollment_end)->setTimezone('Asia/Jakarta');
+            $nowJakarta = now()->setTimezone('Asia/Jakarta');
+
+            if ($nowJakarta->greaterThan($enrollmentEndJakarta)) {
+                return back()->with('error', 'Pendaftaran untuk kelas ini telah ditutup pada ' . $enrollmentEndJakarta->translatedFormat('d F Y, H:i') . '.');
+            }
+        }
+
+        // ✅ CEK 3: Apakah pendaftaran belum dibuka? (opsional, tapi direkomendasikan)
+        // if ($class->enrollment_start && now()->lessThan($class->enrollment_start)) {
+        //     return back()->with('error', 'Pendaftaran untuk kelas ini belum dibuka. Akan dibuka pada ' . $class->enrollment_start->translatedFormat('d F Y, H:i') . '.');
+        // }
+
+        // ✅ CEK 3: Bandingkan dalam timezone Jakarta
+        if ($class->enrollment_start) {
+            $enrollmentStartJakarta = \Carbon\Carbon::parse($class->enrollment_start)->setTimezone('Asia/Jakarta');
+            $nowJakarta = now()->setTimezone('Asia/Jakarta');
+
+            if ($nowJakarta->lessThan($enrollmentStartJakarta)) {
+                return back()->with('error', 'Pendaftaran untuk kelas ini belum dibuka. Akan dibuka pada ' . $enrollmentStartJakarta->translatedFormat('d F Y, H:i') . '.');
+            }
+        }
+        // -----
         try {
             $class = CourseClass::with('course')->findOrFail($request->course_class_id);
             $course = $class->course;
@@ -88,6 +129,8 @@ class PaymentController extends Controller
             $payment->payment_type = 'transfer';
             $payment->save();
 
+            // Simpan course_class_id ke sesi untuk redirect setelah bayar
+            Session::put('post_payment_redirect_class_id', $request->course_class_id);
             return view('student.payment.payment', compact(
                 'class',
                 'course',
@@ -178,6 +221,7 @@ class PaymentController extends Controller
 
                     Log::info("ClassEnrollment created for student $studentId in class $courseClassId");
                 }
+                $this->processCommission($payment);
             }
 
             return response('OK', 200);
@@ -185,5 +229,44 @@ class PaymentController extends Controller
             Log::error('Midtrans notification error: ' . $e->getMessage() . ' | Order ID: ' . ($orderId ?? 'unknown'));
             return response('OK', 200);
         }
+    }
+
+    private function processCommission(Payment $payment)
+    {
+        // Ambil kursus untuk dapat mentor
+        $course = $payment->course;  // pastikan ada relasi 'course'
+        $mentorId = $course->created_by;
+
+        // Ambil persentase global
+        $setting = Setting::first();
+        $percent = $setting->mentor_commission_percent ?? 70;
+
+        // Hitung komisi
+        $commissionAmount = ($payment->gross_amount * $percent) / 100;
+
+        // Simpan riwayat
+        Commission::create([
+            'payment_id' => $payment->id,
+            'mentor_id' => $mentorId,
+            'amount' => $commissionAmount,
+            'percentage' => $percent,
+            'paid_at' => now(),  // atau null jika nanti dibayar manual
+        ]);
+    }
+
+    public function paymentSuccess()
+    {
+        $classId = session('post_payment_redirect_class_id');
+
+        if ($classId) {
+            Session::forget('post_payment_redirect_class_id');
+            return redirect()
+                ->route('kelas', $classId)
+                ->with('success', 'Pembayaran berhasil! Selamat belajar di kelas ini.');
+        }
+
+        return redirect()
+            ->route('listkursus')
+            ->with('info', 'Pembayaran berhasil!');
     }
 }

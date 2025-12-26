@@ -31,6 +31,11 @@ class User extends Authenticatable implements HasAvatar
         'birth_date',
         'gender',
         'education_level',
+        'role',
+        'bio',
+        'account_name',
+        'account_number',
+        'bank_name',
     ];
 
     /**
@@ -84,7 +89,6 @@ class User extends Authenticatable implements HasAvatar
     }
 
     // policy
-
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
@@ -94,5 +98,16 @@ class User extends Authenticatable implements HasAvatar
     public function isMentor(): bool
     {
         return $this->role === 'mentor';
+    }
+
+    // relasi
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'student_id');
+    }
+
+    public function withdrawals()
+    {
+        return $this->hasMany(Withdrawal::class, 'mentor_id');
     }
 }

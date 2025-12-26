@@ -1,120 +1,99 @@
 <x-app-layout>
+    <div class="mx-auto max-w-3xl px-4 py-8">
+        <div class="mb-6 text-center">
+            <h1 class="text-2xl font-bold text-gray-900">Hasil Quiz</h1>
+            <p class="mt-2 text-gray-600">{{ $assignment->title }}</p>
+        </div>
 
-    <div class="max-w-6xl mx-auto px-4">
-        <div class="pb-4 mb-6 page-container bg-white shadow-xl">
-            <div class="pt-8 px-4 pb-6 sm:px-6 mt-6 mb-6">
-                <h1 class="text-2xl font-bold text-center text-gray-900 mb-6">Quiz Assignment Result</h1>
-                <div class="my-4 mx-4 py-5 px-5 rounded-2xl bg-gradient-to-r from-[#20C896] to-[#259D7A]">
-                    <div class="text-gray-800 font-semibold mb-4 flex justify-between items-center">
-                        <p class=" m-2 ml-5 mb-3 p-2 px-6 text-2xl">Iki Judul Materi e Pling</p>
-                        <p class=" m-2 mr-8 mb-3 p-2 px-6">
-                            Time: <span id="time" class="font-bold">06:34</span>
-                        </p>
+        <div class="mb-8 rounded-xl bg-white p-6 shadow-sm">
+            <div class="flex justify-between text-lg font-bold">
+                <span>Skor Anda:</span>
+                <span class="text-indigo-600">{{ $submission->score }} poin</span>
+            </div>
+            <p class="mt-2 text-sm text-gray-500">
+                Jawaban Anda telah dinilai. Di bawah ini ditampilkan status setiap jawaban.
+            </p>
+        </div>
+
+     <div class="space-y-8">
+    @foreach($answers as $index => $answer)
+        {{-- Pastikan soal ada sebelum ditampilkan untuk menghindari error --}}
+        @if($answer->question)
+            <div class="overflow-hidden rounded-xl border bg-white shadow-sm {{ $answer->is_correct ? 'border-green-200' : 'border-red-200' }}">
+
+                <div class="{{ $answer->is_correct ? 'bg-green-50' : 'bg-red-50' }} flex items-center justify-between px-6 py-4 border-b">
+                    <span class="text-sm font-bold uppercase tracking-wider {{ $answer->is_correct ? 'text-green-700' : 'text-red-700' }}">
+                        Soal {{ $loop->iteration }}
+                    </span>
+
+                    @if($answer->is_correct)
+                        <span class="flex items-center gap-1.5 rounded-full bg-green-200 px-3 py-1 text-xs font-bold text-green-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                            </svg>
+                            BENAR
+                        </span>
+                    @else
+                        <span class="flex items-center gap-1.5 rounded-full bg-red-200 px-3 py-1 text-xs font-bold text-red-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            SALAH
+                        </span>
+                    @endif
+                </div>
+
+                <div class="p-6">
+                    <div class="prose prose-indigo max-w-none text-lg font-medium text-gray-900 mb-6">
+                        {!! $answer->question->question_text !!}
                     </div>
 
-                    <div class="mb-5 mx-12 h-3 w-auto border-b-4 border-t-2 border-slate-700"></div>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="relative rounded-lg border p-4 {{ $answer->is_correct ? 'border-green-300 bg-green-50/50' : 'border-red-300 bg-red-50/50' }}">
+                            <span class="absolute -top-3 left-3 bg-white px-2 text-xs font-bold uppercase {{ $answer->is_correct ? 'text-green-600' : 'text-red-600' }}">
+                                Jawaban Anda
+                            </span>
+                            @php
+                                // Mengambil teks jawaban berdasarkan kolom option_a, option_b, dll
+                                $userCol = 'option_' . strtolower($answer->selected_option);
+                                $userText = $answer->question->{$userCol} ?? 'Jawaban tidak ditemukan';
+                            @endphp
+                            <div class="text-gray-800 font-semibold italic mt-1">
+                                {!! $userText !!}
+                            </div>
+                        </div>
 
-                    <div class="mb-6">
-                        <fieldset>
-                            {{-- hasil quiz dan jawaban peserta --}}
-                            <div id="pilihanGanda">
-                                <div class="px-4 py-4 flex">
-                                    <div class="flex-shrink-0 w-4">
-                                        <h1 class="text-xl font-extrabold">1.</h1>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <div
-                                            class="block text-gray-800 font-semibold py-4 px-4 mb-3 mx-2 rounded-xl bg-slate-200">
-                                            Berapa waktu kompleksitas untuk mencari elemen di dalam Binary Search Tree
-                                            yang seimbang?
-                                        </div>
-
-                                        <div class="flex flex-col sm:grid sm:grid-cols-2 gap-2 gap-x-16">
-                                            
-                                            <label
-                                                class="flex items-center space-x-3 py-4 px-4 my-0 mx-2 rounded-xl bg-slate-200">
-                                                <input type="radio" name="question1" value="O(n)"
-                                                    class="form-radio h-4 w-4 text-blue-600" unchecked>
-                                                <span class="text-gray-700">O(n)</span>
-                                            </label>
-
-                                            <label
-                                                class="flex items-center space-x-3 py-4 px-4 my-0 mx-2 rounded-xl bg-slate-200">
-                                                <input type="radio" name="question1" value="O(log n)"
-                                                    class="form-radio h-4 w-4 text-blue-600" checked>
-                                                <span class="text-gray-700">O(log n)</span>
-                                            </label>
-
-                                            <label
-                                                class="flex items-center space-x-3 py-4 px-4 my-0 mx-2 rounded-xl bg-slate-200">
-                                                <input type="radio" name="question1" value="O(n²)"
-                                                    class="form-radio h-4 w-4 text-blue-600" unchecked>
-                                                <span class="text-gray-700">O(n²)</span>
-                                            </label>
-
-                                            <label
-                                                class="flex items-center space-x-3 py-4 px-4 my-0 mx-2 rounded-xl bg-slate-200">
-                                                <input type="radio" name="question1" value="O(1)"
-                                                    class="form-radio h-4 w-4 text-blue-600" unchecked>
-                                                <span class="text-gray-700">O(1)</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="px-4 py-4 flex">
-                                    <div class="flex-shrink-0 w-4">
-                                        <h1 class="text-xl font-extrabold">2.</h1>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <div
-                                            class="block text-gray-800 font-semibold py-4 px-4 mb-3 mx-2 rounded-xl bg-slate-200">
-                                            Algoritma mana yang menggunakan prinsip 'Divide and Conquer'?
-                                        </div>
-
-                                        <div class="flex flex-col sm:grid sm:grid-cols-2 gap-2 gap-x-16">
-                                            
-                                            <label
-                                                class="flex items-center space-x-3 py-4 px-4 my-0 mx-2 rounded-xl bg-slate-200">
-                                                <input type="radio" name="question2" value="Linear Search"
-                                                    class="form-radio h-4 w-4 text-blue-600" unchecked>
-                                                <span class="text-gray-700">Linear Search</span>
-                                            </label>
-
-                                            <label
-                                                class="flex items-center space-x-3 py-4 px-4 my-0 mx-2 rounded-xl bg-slate-200">
-                                                <input type="radio" name="question2" value="Bubble Sort"
-                                                    class="form-radio h-4 w-4 text-blue-600" checked>
-                                                <span class="text-gray-700">Bubble Sort</span>
-                                            </label>
-
-                                            <label
-                                                class="flex items-center space-x-3 py-4 px-4 my-0 mx-2 rounded-xl bg-slate-200">
-                                                <input type="radio" name="question2" value="Merge Sort"
-                                                    class="form-radio h-4 w-4 text-blue-600" unchecked>
-                                                <span class="text-gray-700">Merge Sort</span>
-                                            </label>
-
-                                            <label
-                                                class="flex items-center space-x-3 py-4 px-4 my-0 mx-2 rounded-xl bg-slate-200">
-                                                <input type="radio" name="question2" value="Insertion Sort"
-                                                    class="form-radio h-4 w-4 text-blue-600" unchecked>
-                                                <span class="text-gray-700">Insertion Sort</span>
-                                            </label>
-                                        </div>
-                                    </div>
+                        @if(!$answer->is_correct)
+                            <div class="relative rounded-lg border border-blue-300 bg-blue-50/50 p-4">
+                                <span class="absolute -top-3 left-3 bg-white px-2 text-xs font-bold uppercase text-blue-600">
+                                    Jawaban Yang Benar
+                                </span>
+                                @php
+                                    $correctCol = 'option_' . strtolower($answer->question->correct_option);
+                                    $correctText = $answer->question->{$correctCol} ?? 'Kunci tidak ditemukan';
+                                @endphp
+                                <div class="text-blue-900 font-bold mt-1">
+                                    {!! $correctText !!}
                                 </div>
                             </div>
-                        </fieldset>
-                    </div>
-
-                    <div id="quizResult" class=" m-2 ml-5 mb-3 p-2 px-6">
-                        <h2 class="text-xl font-bold mb-4 text-gray-900">Hasil Quiz Anda:</h2>
-                        <p class="text-lg text-gray-800 mb-2">Benar: <span class="font-semibold">0</span></p>
-                        <p class="text-lg text-gray-800 mb-2">Nilai: <span class="font-semibold">AAAA</span></p>
+                        @endif
                     </div>
                 </div>
+
+                <div class="bg-gray-50 px-6 py-3 border-t text-right">
+                    <p class="text-xs text-gray-500 font-medium">
+                        Skor: {{ $answer->is_correct ? $answer->question->points : 0 }} / {{ $answer->question->points }} Poin
+                    </p>
+                </div>
             </div>
+        @endif
+    @endforeach
+</div>
+
+        <div class="mt-8 text-center">
+            <a href="{{ route('materials.show', ['classId' => $classId, 'materialId' => $materialId]) }}" class="inline-block rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700">
+                Kembali ke materi
+            </a>
         </div>
     </div>
 </x-app-layout>

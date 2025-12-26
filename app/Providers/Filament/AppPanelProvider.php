@@ -3,8 +3,12 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Auth\RegisterMentor;
+use App\Filament\Pages\Dashboard;
+use App\Filament\Pages\EditSiteSettings;
 use App\Filament\Pages\MyModernProfile;
+use App\Filament\Pages\RevenueReport;
 use App\Livewire\MyCustomComponent;
+use App\Models\Setting;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -28,13 +32,32 @@ class AppPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        $setting = Setting::first();
         return $panel
             ->default()
             ->id('app')
             ->path('app')
+            ->pages([
+                // ... halaman lain
+            ])
             ->login()
             ->registration(RegisterMentor::class)
-            ->brandName('web kursus')
+            ->brandName($setting?->site_name ?: 'GoEdu Admin')  // Tetap pasang untuk keperluan metadata/alt-text
+            ->brandLogo(function () use ($setting) {
+                // 1. Tentukan URL Logo
+                $logoUrl = $setting?->logo
+                    ? asset('storage/' . $setting->logo)
+                    : asset('images/logo-default.svg');
+
+                // 2. Tentukan Nama Site
+                $siteName = $setting?->site_name ?: 'GoEdu Admin';
+
+                // 3. Kembalikan HTML yang menggabungkan Gambar dan Teks
+                return view('filament.components.brand-logo', [
+                    'logoUrl' => $logoUrl,
+                    'siteName' => $siteName,
+                ]);
+            })
             ->topNavigation()
             // ->sidebarCollapsibleOnDesktop()
             ->colors([
@@ -43,13 +66,10 @@ class AppPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                EditSiteSettings::class,
+                Dashboard::class,  // ← ganti default dashboard
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
-            ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -81,12 +101,8 @@ class AppPanelProvider extends PanelProvider
                 BreezyCore::make()
                     ->myProfileComponents([])
                     ->myProfile(
-                        // shouldRegisterUserMenu: true,  // Sets the 'account' link in the panel User Menu (default = true)
-                        // userMenuLabel: 'My Profile',  // Customizes the 'account' link label in the panel User Menu (default = null)
-                        // shouldRegisterNavigation: false,  // Adds a main navigation item for the My Profile page (default = false)
-                        // navigationGroup: 'Settings',  // Sets the navigation group for the My Profile page (default = null)
-                        hasAvatars: true,  // Enables the avatar upload form component (default = false)
-                        // slug: 'my-profile'  // Sets the slug for the profile page (default = 'my-profile')
+                        hasAvatars: true,
+                        //  enableAccountDeletion: true,
                     )
             );
     }

@@ -7,66 +7,79 @@
             </h2>
 
             <!-- Grid Responsif untuk Kartu Kelas -->
-            <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($enrolledClasses as $class)
-                    <!-- START: Kartu Kelas Elegan -->
-                    <!-- Gunakan tag 'a' agar seluruh kartu bisa diklik. Sesuaikan rute Anda! -->
-                    <a href="{{ route('kelas', $class->id) }}" class="block">
-                        <div class="transform overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl transition duration-300 ease-in-out hover:scale-[1.03] hover:border-indigo-400 hover:shadow-2xl">
+                    <a href="{{ route('kelas', $class->id) }}" class="group block">
+                        <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:border-indigo-300 hover:shadow-md">
+                            <!-- Gambar Course (jika ada) -->
+                            @if ($class->thumbnail)
+                                <div class="h-32 overflow-hidden">
+                                    <img src="{{ $class->thumbnail_url }}" alt="Kelas {{ $class->name }}" class="h-full w-full object-cover">
+                                </div>
+                            @else
+                                <div class="h-32 bg-gradient-to-r from-indigo-400 to-purple-500"></div>
+                            @endif
 
-                            <!-- Header Visual Tipis -->
-                            <!-- Ganti warna indigo-500 dengan warna yang merepresentasikan status atau kategori kelas -->
-                            <div class="h-2 bg-indigo-500"></div>
+                            <div class="p-5">
+                                <!-- Nama Kursus (utama) -->
+                                <h3 class="line-clamp-2 text-lg font-extrabold text-slate-800 group-hover:text-indigo-700">
+                                    {{ $class->course->name ?? 'Nama Kursus' }}
+                                </h3>
 
-                            <div class="p-6">
-                                <!-- Informasi Utama Kelas -->
-                                <div class="mb-4">
-                                    <h3 class="text-xl font-bold leading-tight text-gray-900">
-                                        {{ $class->course->name ?? 'Nama Kursus' }}
-                                    </h3>
-                                    <p class="mt-1 text-lg font-medium text-indigo-600">
-                                        Kelas {{ $class->name }}
-                                    </p>
+                                <!-- Nama Kelas (sub) -->
+                                <p class="mt-1 text-sm font-medium text-indigo-600">
+                                    Kelas {{ $class->name }}
+                                </p>
+
+                                <!-- Mentor -->
+                                <div class="mt-3 flex items-center text-xs text-gray-500">
+                                    <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    <span>{{ $class->createdBy->name ?? 'Mentor' }}</span>
                                 </div>
 
-                                <!-- Detail Tambahan (Contoh data dummy) -->
-                                <div class="mb-6 space-y-1 text-sm text-gray-500">
-                                    <div class="flex items-center">
-                                        <svg class="mr-2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                        <span>Durasi: 12 Minggu</span>
+                                <!-- Progress Bar (opsional, jika ada enrollment) -->
+                                @if (isset($class->enrollment) && $class->enrollment->progress_percentage > 0)
+                                    <div class="mt-3">
+                                        <div class="flex justify-between text-xs">
+                                            <span class="text-gray-500">Kemajuan</span>
+                                            <span class="font-semibold text-gray-700">{{ $class->enrollment->progress_percentage }}%</span>
+                                        </div>
+                                        <div class="mt-1 h-1.5 w-full rounded-full bg-gray-200">
+                                            <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-600" style="width: {{ $class->enrollment->progress_percentage }}%">
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="flex items-center">
-                                        <svg class="mr-2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                        </svg>
-                                        <span>{{ $class->createdBy->name }}</span>
-                                    </div>
-                                </div>
+                                @endif
 
-                                <!-- Status dan CTA (Call to Action) -->
-                                <div class="flex items-center justify-between border-t border-gray-100 pt-4">
+                                <!-- Status dengan Warna Dinamis -->
+                                <div class="mt-4 flex items-center justify-between">
+                                    @php
+                                        $status = strtolower($class->status);
+                                        $statusColor = match ($status) {
+                                            'open' => 'bg-green-100 text-green-800',
+                                            'closed' => 'bg-red-100 text-red-800',
+                                            'draft' => 'bg-gray-100 text-gray-800',
+                                            'archived' => 'bg-yellow-100 text-yellow-800',
+                                            default => 'bg-blue-100 text-blue-800',
+                                        };
+                                    @endphp
 
-                                    <!-- Label Status yang Berwarna -->
-                                    <span class="<!-- Logika penentuan warna status --> @php $status = strtolower($class->status); @endphp @if ($status == 'aktif') @elseif ($status == 'selesai') @elseif ($status == 'dalam proses') @else @endif bg-blue-100px-3 inline-flex items-center rounded-full py-1 text-xs font-semibold uppercase tracking-wider text-blue-800">
-                                        {{ $class->status }}
+                                    <span class="{{ $statusColor }} rounded-full px-2.5 py-0.5 text-xs font-medium">
+                                        {{ ucfirst($class->status) }}
                                     </span>
 
-                                    <!-- Tombol/Link Aksi -->
-                                    <span class="flex items-center text-sm font-semibold text-indigo-600 transition duration-150 hover:text-indigo-800">
-                                        Mulai Belajar
-                                        <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                    <span class="inline-flex items-center text-sm font-semibold text-indigo-600 group-hover:text-indigo-800">
+                                        Lanjutkan
+                                        <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                         </svg>
                                     </span>
                                 </div>
-
                             </div>
                         </div>
                     </a>
-                    <!-- END: Kartu Kelas Elegan -->
                 @endforeach
             </div>
 
