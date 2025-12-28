@@ -18,9 +18,9 @@
 
             <!-- Search Bar -->
             <div class="mx-4 hidden w-full max-w-md md:block">
-                <form method="GET" action="" class="relative">
+                <form method="GET" action="{{ route('listkursus') }}" class="relative">
                     <div class="relative">
-                        <input type="text" name="q" placeholder="Cari kursus, materi, atau tugas..." class="w-full rounded-full border border-gray-300 bg-white/90 px-4 py-2 pl-10 text-sm text-gray-800 placeholder-gray-500 shadow-sm transition focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400" />
+                        <input type="text" name="q" placeholder="Cari kursus..." value="{{ request('q') }}" class="w-full rounded-full border border-gray-300 bg-white/90 px-4 py-2 pl-10 text-sm text-gray-800 placeholder-gray-500 shadow-sm transition focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400" />
                         <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>

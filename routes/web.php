@@ -63,7 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::view('/kelas', 'student.class');
+    Route::get('/kelas', [CourseClassController::class, 'showClasses'])->name('student.kelas');
     Route::view('/quiz', 'student.quiz.quiz');
     Route::view('/hasilQuiz', 'student.quiz.hasilQuiz');
 
