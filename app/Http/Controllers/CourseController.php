@@ -24,16 +24,28 @@ class CourseController extends Controller
     //     return view('student.course.listcourse', compact('courses'));
     // }
 
-    public function index()
+    public function index(Request $request)
     {
-        $courses = Course::Open()
+        $query = Course::Open()
             ->with('user')
             // Sesuaikan dengan logic dashboard kamu:
             ->withAvg('enrollments as avg_rating', 'rating')
             ->withCount('enrollments as review_count')
-            ->withCount('enrollments as enrollment_count')
-            ->latest()
-            ->paginate(9);
+            ->withCount('enrollments as enrollment_count');
+
+        // Add search logic if 'q' parameter exists
+        if ($request->filled('q')) {
+            $searchTerm = $request->get('q');
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', '%' . $searchTerm . '%')
+                  ->orWhere('description', 'like', '%' . $searchTerm . '%')
+                  ->orWhereHas('user', function ($q) use ($searchTerm) {
+                      $q->where('name', 'like', '%' . $searchTerm . '%');
+                  });
+            });
+        }
+
+        $courses = $query->latest()->paginate(9);
 
         return view('student.course.listcourse', compact('courses'));
     }
