@@ -14,9 +14,11 @@ use App\Filament\Widgets\RecentClasses;
 use App\Filament\Widgets\MentorOverview;
 use Filament\Widgets\StatsOverviewWidget;
 use App\Filament\Widgets\AdminStatsOverview;
+use App\Filament\Widgets\MentorStatsOverview;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Filament\Resources\CommissionResource\Widgets\RevenueChart;
+use App\Filament\Widgets\RecentReviews;
 
 class Dashboard extends BaseDashboard
 {
@@ -34,8 +36,8 @@ class Dashboard extends BaseDashboard
 
         if ($user->isMentor()) {
             return [
-                MentorOverview::class,
-                RecentClasses::class
+                MentorStatsOverview::class,
+                RecentClasses::class,
             ];
         }
 

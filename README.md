@@ -58,6 +58,16 @@ MIDTRANS_SERVER_KEY=your_sandbox_server_key
 MIDTRANS_CLIENT_KEY=your_sandbox_client_key
 MIDTRANS_IS_PRODUCTION=false
 
+#SMTP
+MAIL_MAILER=smtp
+MAIL_SCHEME=null
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=username anda
+MAIL_PASSWORD=password anda
+MAIL_FROM_ADDRESS="admin@belajar-quiz.com"
+MAIL_FROM_NAME="${APP_NAME}"
+
 # File Storage
 FILESYSTEM_DISK=public
 ```
@@ -91,10 +101,23 @@ php artisan storage:link
 php artisan serve
 ```
 
+
 Akses:
 
 -   **Frontend**: [http://localhost:8000]
 -   **Admin (Filament)**: [http://localhost:8000/app]
+
+---
+
+---
+untuk menggunakan fitur payment gateway dengan midtrans
+lakukan beberapa langkah
+1. jalankan ngrok perintah 
+ngrok http 8000
+
+2. salin urlnya lalu gabungkan dengan route api. letakan di midtrans->pengaturan->payment->URL notifikasi->Endpoint URL notifikasi-> simpan
+http://...../payment/notify
+
 
 ---
 
@@ -165,3 +188,4 @@ Jika menemui masalah:
 > Kontribusi & saran sangat diterima.
 
 ---
+

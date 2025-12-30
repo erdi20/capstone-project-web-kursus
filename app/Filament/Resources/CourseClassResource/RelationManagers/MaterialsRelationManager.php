@@ -41,10 +41,10 @@ class MaterialsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama Materi')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('pivot.schedule_date')
-                    ->label('Jadwal Pertemuan')
-                    ->dateTime()
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('pivot.schedule_date')
+                //     ->label('Jadwal Pertemuan')
+                //     ->dateTime()
+                //     ->sortable(),
                 Tables\Columns\BadgeColumn::make('pivot.visibility')
                     ->label('Status')
                     ->colors([
