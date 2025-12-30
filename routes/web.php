@@ -13,18 +13,12 @@ use App\Http\Controllers\QuizController;
 use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/', function () {
-//     return view('guest');
-// });
-
 Route::get('/', [HomeController::class, 'index']);
 Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
 Route::get('/privacy-policy', [HomeController::class, 'privacyPolicy'])->name('privacy.policy');
 Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
 Route::get('/contact-us', [HomeController::class, 'contact'])->name('contact.us');
-// Route::get('/dashboard', [HomeController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 // web.php
-// Route::delete('/profile', [ProfileController::class, 'destroyUserFilament'])->name('profile.delete');
 Route::get('/listkursus', [CourseController::class, 'index'])->name('listkursus');
 Route::middleware('auth')->group(function () {
     Route::get('/payment', function () {
@@ -63,11 +57,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::view('/kelas', 'student.class');
-    Route::view('/quiz', 'student.quiz.quiz');
-    Route::view('/hasilQuiz', 'student.quiz.hasilQuiz');
-
-    Route::get('/essay', [EssayController::class, 'index']);
 });
 
 require __DIR__ . '/auth.php';

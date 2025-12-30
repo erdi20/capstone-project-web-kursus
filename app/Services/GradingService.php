@@ -184,4 +184,17 @@ class GradingService
             'is_passed' => $isPassed,
         ];
     }
+
+    public function updateEnrollmentScoreOnly(ClassEnrollment $enrollment): void
+    {
+        $class = $enrollment->courseClass;
+        $studentId = $enrollment->student_id;
+
+        $result = $this->calculateFinalScore($class, $studentId);
+
+        // ✅ HANYA update nilai, TIDAK update status atau completed_at
+        $enrollment->update([
+            'grade' => $result['final_score'],
+        ]);
+    }
 }

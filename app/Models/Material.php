@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Material extends Model
 {
@@ -52,4 +53,6 @@ class Material extends Model
         'attendance_start' => 'datetime',
         'attendance_end' => 'datetime',
     ];
+
+  
 }

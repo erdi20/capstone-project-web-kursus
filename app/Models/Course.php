@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Course extends Model
 {
@@ -74,5 +75,15 @@ class Course extends Model
         // Asumsi foreign key di tabel 'class_enrollments' adalah 'class_id'
         // dan merujuk ke 'id' dari 'course_classes'
         return $this->hasMany(ClassEnrollment::class, 'class_id');
+    }
+
+    protected static function booted()
+    {
+        static::deleted(function ($course) {
+            // Hapus file thumbnail jika ada saat data kursus dihapus
+            if ($course->thumbnail && Storage::disk('public')->exists($course->thumbnail)) {
+                Storage::disk('public')->delete($course->thumbnail);
+            }
+        });
     }
 }

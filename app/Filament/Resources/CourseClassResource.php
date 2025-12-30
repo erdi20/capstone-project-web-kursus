@@ -2,35 +2,38 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CourseClassResource\RelationManagers\MaterialsRelationManager;
-use App\Filament\Resources\CourseClassResource\Pages;
-use App\Filament\Resources\CourseClassResource\RelationManagers;
-use App\Models\CourseClass;
-use App\Services\GradingService;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Group;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Resources\Resource;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Columns\BadgeColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
-use Filament\Tables\Table;
+use Closure;
 use Filament\Forms;
 use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Get;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use App\Models\CourseClass;
+use App\Services\GradingService;
+use Filament\Resources\Resource;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Group;
+use function Laravel\Prompts\select;
 use Illuminate\Support\Facades\Auth;
-use Closure;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
+use Filament\Tables\Columns\TextColumn;
+use Illuminate\Support\Facades\Storage;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Forms\Components\DateTimePicker;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\CourseClassResource\Pages;
+
+use App\Filament\Resources\CourseClassResource\RelationManagers;
+use App\Filament\Resources\CourseClassResource\RelationManagers\MaterialsRelationManager;
 
 class CourseClassResource extends Resource
 {
@@ -89,14 +92,23 @@ class CourseClassResource extends Resource
                                     ->image()
                                     ->imageEditor()
                                     ->required(false)
+                                    ->deleteUploadedFileUsing(function ($file) {
+                                        if ($file) {
+                                            Storage::disk('public')->delete($file);
+                                        }
+                                    })
                                     ->helperText('Unggah gambar representatif untuk kelas ini (misal: ilustrasi sesi, grup belajar, dll.)'),
-                                // Select::make('course_id')
-                                //     ->label('Kursus Induk')
-                                //     ->relationship('course', 'name')
-                                //     ->searchable()
-                                //     ->preload()
-                                //     ->required()
-                                //     ->helperText('Kelas ini akan berada di bawah kursus utama yang dipilih.'),
+                                Select::make('course_id')
+                                    ->label('Kursus Induk')
+                                    ->relationship(
+                                        name: 'course',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn(Builder $query, Get $get) => $query->where('created_by', auth()->id())
+                                    )
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->helperText('Kelas ini akan berada di bawah kursus utama yang dipilih.'),
                                 TextInput::make('name')
                                     ->label('Nama Sesi Kelas')
                                     ->placeholder('Contoh: Sesi 1: Pengenalan PHP dan Laravel')

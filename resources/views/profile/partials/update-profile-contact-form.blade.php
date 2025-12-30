@@ -87,7 +87,6 @@
                             <option value="" disabled {{ is_null(old('gender', $user->gender)) ? 'selected' : '' }}>Pilih Jenis Kelamin</option>
                             <option value="male" {{ old('gender', $user->gender) == 'male' ? 'selected' : '' }}>Laki-laki</option>
                             <option value="female" {{ old('gender', $user->gender) == 'female' ? 'selected' : '' }}>Perempuan</option>
-                            <option value="other" {{ old('gender', $user->gender) == 'other' ? 'selected' : '' }}>Lainnya</option>
                         </select>
                         <x-input-error class="mt-2" :messages="$errors->get('gender')" />
                     </div>
@@ -100,8 +99,32 @@
                 </div>
 
                 <div>
-                    <x-input-label for="education_level" :value="__('Tingkat Pendidikan')" class="text-sm font-medium text-gray-700" />
-                    <x-text-input id="education_level" name="education_level" type="text" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" :value="old('education_level', $user->education_level)" placeholder="Contoh: S1 Teknik Informatika" />
+                    <x-input-label for="education_level" :value="__('Tingkat Pendidikan')" />
+
+                    <select id="education_level" name="education_level" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm transition duration-150 ease-in-out focus:border-indigo-500 focus:ring-indigo-500">
+
+                        <option value="" disabled {{ is_null(old('education_level', $user->education_level)) ? 'selected' : '' }}>
+                            -- Pilih Pendidikan --
+                        </option>
+
+                        @php
+                            $educationOptions = [
+                                'SD' => 'SD',
+                                'SMP' => 'SMP',
+                                'SMA/SMK' => 'SMA/SMK',
+                                'S1' => 'S1',
+                                'S2' => 'S2',
+                                'S3' => 'S3',
+                            ];
+                        @endphp
+
+                        @foreach ($educationOptions as $value => $label)
+                            <option value="{{ $value }}" {{ old('education_level', $user->education_level) == $value ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                        @endforeach
+                    </select>
+
                     <x-input-error class="mt-2" :messages="$errors->get('education_level')" />
                 </div>
             </div>

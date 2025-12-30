@@ -2,23 +2,23 @@
 
 namespace App\Filament\Resources\MaterialResource\Pages;
 
-use App\Filament\Resources\MaterialResource;
-use App\Models\Attendance;
-use App\Models\ClassMaterial;
-use Filament\Resources\Pages\Page;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Table;
 use Filament\Tables;
-use Illuminate\Support\Facades\Storage;
+use App\Models\Attendance;
+use Filament\Tables\Table;
+use App\Models\ClassMaterial;
+use Filament\Actions\ActionGroup;
+use Filament\Resources\Pages\Page;
 use Illuminate\Support\HtmlString;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Contracts\HasTable;
+use Illuminate\Support\Facades\Storage;
+use Filament\Tables\Columns\ImageColumn;
+use App\Filament\Resources\MaterialResource;
+use Filament\Tables\Concerns\InteractsWithTable;
 
 class ViewMaterialAttendances extends Page implements HasTable
 {
     use InteractsWithTable;
-
 
     protected static string $resource = MaterialResource::class;
     protected static string $view = 'filament.resources.material-resource.pages.view-material-attendances';
@@ -63,10 +63,6 @@ class ViewMaterialAttendances extends Page implements HasTable
                     ->label('Siswa')
                     ->sortable()
                     ->searchable(),
-                TextColumn::make('classMaterial.schedule_date')
-                    ->label('Tanggal Pertemuan')
-                    ->dateTime('d M Y')
-                    ->sortable(),
                 ImageColumn::make('photo_path')
                     ->label('Foto Absen')
                     ->disk('public')
@@ -88,31 +84,31 @@ class ViewMaterialAttendances extends Page implements HasTable
                     ->multiple(),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make()
-                    ->label('Lihat')
-                    ->modalHeading(fn(Attendance $record) => 'Detail Absensi: ' . $record->student->name)
-                    ->modalWidth('lg')
-                    ->modalContent(function (Attendance $record) {
-                        $studentName = e($record->student?->name ?? '—');
-                        $courseName = e($record->classMaterial?->courseClass?->course?->name ?? '—');
-                        $className = e($record->classMaterial?->courseClass?->name ?? '—');
-                        $materialName = e($record->classMaterial?->material?->name ?? '—');
-                        $scheduleDate = $record->classMaterial?->schedule_date
-                            ? \Carbon\Carbon::parse($record->classMaterial->schedule_date)->translatedFormat('d F Y')
-                            : '—';
-                        $attendedAt = $record->attended_at
-                            ? $record->attended_at->translatedFormat('d F Y, H:i')
-                            : '—';
+                    Tables\Actions\ViewAction::make()
+                        ->label('Lihat')
+                        ->modalHeading(fn(Attendance $record) => 'Detail Absensi: ' . $record->student->name)
+                        ->modalWidth('lg')
+                        ->modalContent(function (Attendance $record) {
+                            $studentName = e($record->student?->name ?? '—');
+                            $courseName = e($record->classMaterial?->courseClass?->course?->name ?? '—');
+                            $className = e($record->classMaterial?->courseClass?->name ?? '—');
+                            $materialName = e($record->classMaterial?->material?->name ?? '—');
+                            $scheduleDate = $record->classMaterial?->schedule_date
+                                ? \Carbon\Carbon::parse($record->classMaterial->schedule_date)->translatedFormat('d F Y')
+                                : '—';
+                            $attendedAt = $record->attended_at
+                                ? $record->attended_at->translatedFormat('d F Y, H:i')
+                                : '—';
 
-                        $photoHtml = '';
-                        if ($record->photo_path && Storage::disk('public')->exists($record->photo_path)) {
-                            $photoUrl = Storage::url($record->photo_path);
-                            $photoHtml = "<img src=\"{$photoUrl}\" class=\"max-h-80 w-auto rounded-lg border shadow-sm\">";
-                        } else {
-                            $photoHtml = '<span class="text-gray-500 italic">Tidak ada foto</span>';
-                        }
+                            $photoHtml = '';
+                            if ($record->photo_path && Storage::disk('public')->exists($record->photo_path)) {
+                                $photoUrl = Storage::url($record->photo_path);
+                                $photoHtml = "<img src=\"{$photoUrl}\" class=\"max-h-80 w-auto rounded-lg border shadow-sm\">";
+                            } else {
+                                $photoHtml = '<span class="text-gray-500 italic">Tidak ada foto</span>';
+                            }
 
-                        $html = "
+                            $html = "
                             <div class=\"space-y-5 text-sm text-gray-800\">
                                 <div class=\"grid grid-cols-1 gap-4 sm:grid-cols-2\">
                                     <div><dt class=\"font-medium text-gray-600\">Nama Siswa</dt><dd class=\"mt-1 font-semibold\">{$studentName}</dd></div>
@@ -128,24 +124,24 @@ class ViewMaterialAttendances extends Page implements HasTable
                                 </div>
                             </div>
                         ";
-                        return new HtmlString($html);
-                    }),
-                Tables\Actions\Action::make('delete_photo')
-                    ->label('Hapus Foto')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->modalHeading('Hapus Foto Absensi?')
-                    ->modalDescription('Foto akan dihapus permanen. Data absen tetap ada.')
-                    ->action(function (Attendance $record) {
-                        if ($record->photo_path && Storage::disk('public')->exists($record->photo_path)) {
-                            Storage::disk('public')->delete($record->photo_path);
-                        }
-                        $record->update(['photo_path' => null]);
-                        \Filament\Notifications\Notification::make()
-                            ->title('Foto absensi dihapus')
-                            ->success()
-                            ->send();
-                    }),
+                            return new HtmlString($html);
+                        }),
+                    Tables\Actions\Action::make('delete_photo')
+                        ->label('Hapus Foto')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->modalHeading('Hapus Foto Absensi?')
+                        ->modalDescription('Foto akan dihapus permanen. Data absen tetap ada.')
+                        ->action(function (Attendance $record) {
+                            if ($record->photo_path && Storage::disk('public')->exists($record->photo_path)) {
+                                Storage::disk('public')->delete($record->photo_path);
+                            }
+                            $record->update(['photo_path' => null]);
+                            \Filament\Notifications\Notification::make()
+                                ->title('Foto absensi dihapus')
+                                ->success()
+                                ->send();
+                        }),
             ])
             ->defaultSort('attended_at', 'desc');
     }

@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->string('email')->nullable()->after('copyright_text');
             $table->string('phone')->nullable()->after('email');
             $table->text('address')->nullable()->after('phone');
-            $table->string('gmaps_embed_url')->nullable()->after('address');
+            $table->text('gmaps_embed_url')->nullable()->after('address');
         });
     }
 

@@ -80,6 +80,17 @@ class QuizAssignmentResource extends Resource
                                 $materialId = app('request')->query('material_id');
                                 return is_numeric($materialId) ? (int) $materialId : null;
                             }),
+                        Select::make('material_id')
+                            ->label('Materi')
+                            ->relationship(
+                                name: 'material',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn(Builder $query) => $query
+                                    ->whereHas('course', fn($q) => $q->where('created_by', auth()->id()))
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->required(),
                         TextInput::make('title')
                             ->label('Judul Kuis')
                             ->required()

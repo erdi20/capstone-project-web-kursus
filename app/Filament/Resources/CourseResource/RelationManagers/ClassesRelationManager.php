@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\CourseResource\RelationManagers;
 
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor;
@@ -27,18 +28,45 @@ class ClassesRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Section::make('Detail Kelas')
-                    ->description('Isi nama dan deskripsi sesi kelas ini.')
+                // Kolom utama untuk tata letak 2 kolom besar di desktop
+                Section::make('Detail Kelas & Kursus Induk')
+                    ->description('Pilih kursus induk, nama, dan deskripsi sesi kelas ini.')
                     ->schema([
-                        TextInput::make('name')
-                            ->label('Nama Sesi Kelas')
-                            ->placeholder('Contoh: Sesi 1: Pengenalan PHP dan Laravel')
-                            ->required()
-                            ->maxLength(255)
-                            ->autofocus(),
-                        RichEditor::make('description')
+                        // Grup untuk Kursus Induk dan Nama Kelas (Horizontal)
+                        Group::make()
+                            ->columns(2)
+                            ->schema([
+                                Hidden::make('course_id')
+                                    ->default(function () {
+                                        $courseId = app('request')->query('course_id');
+                                        return is_numeric($courseId) ? (int) $courseId : null;
+                                    }),
+                                FileUpload::make('thumbnail')
+                                    ->label('Foto Kelas (Thumbnail)')
+                                    ->disk('public')
+                                    ->directory('class-thumbnails')
+                                    ->image()
+                                    ->imageEditor()
+                                    ->required(false)
+                                    ->helperText('Unggah gambar representatif untuk kelas ini (misal: ilustrasi sesi, grup belajar, dll.)'),
+                                // Select::make('course_id')
+                                //     ->label('Kursus Induk')
+                                //     ->relationship('course', 'name')
+                                //     ->searchable()
+                                //     ->preload()
+                                //     ->required()
+                                //     ->helperText('Kelas ini akan berada di bawah kursus utama yang dipilih.'),
+                                TextInput::make('name')
+                                    ->label('Nama Sesi Kelas')
+                                    ->placeholder('Contoh: Sesi 1: Pengenalan PHP dan Laravel')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->autofocus(),
+                            ]),
+                        // Deskripsi Kelas (Full Column Span)
+                        RichEditor::make('description')  // Menggunakan RichEditor
                             ->label('Deskripsi Sesi Kelas')
-                            ->placeholder('Jelaskan materi yang akan dibahas...')
+                            ->placeholder('Jelaskan materi yang akan dibahas, tujuan, dan prasyarat pada sesi kelas ini.')
                             ->toolbarButtons([
                                 'bold',
                                 'italic',
@@ -53,27 +81,44 @@ class ClassesRelationManager extends RelationManager
                             ->required()
                             ->columnSpanFull(),
                     ]),
+                // Bagian Pengaturan Teknis dan Publikasi
                 Section::make('Pengaturan Teknis & Jadwal Pendaftaran')
-                    ->columns(['default' => 1, 'lg' => 3])
+                    ->description('Atur kuota peserta, periode pendaftaran, dan status kelas.')
+                    ->columns([
+                        'default' => 1,
+                        'lg' => 3,  // Menggunakan 3 kolom
+                    ])
                     ->schema([
+                        // Field 1: Kuota Maksimum
                         TextInput::make('max_quota')
                             ->label('Kuota Maksimum Peserta')
                             ->required()
                             ->numeric()
-                            ->minValue(1),
+                            ->minValue(1)
+                            ->inputMode('numeric')
+                            ->helperText('Jumlah maksimum peserta yang dapat mendaftar.'),
+                        // Field 2 & 3: Periode Pendaftaran (Dikelompokkan secara visual)
                         Group::make()
-                            ->columnSpan(2)
+                            ->columnSpan(2)  // Mengambil 2 kolom dari 3 kolom
                             ->columns(2)
                             ->schema([
+                                // Pastikan tidak ada konflik seconds()
                                 DateTimePicker::make('enrollment_start')
                                     ->label('Mulai Pendaftaran')
+                                    // Coba hapus ->seconds(false) atau set ke true
+                                    ->seconds(true)  // <-- UBAH KE TRUE ATAU HAPUS SAJA
                                     ->required()
+                                    ->timezone('Asia/Jakarta')
                                     ->live(onBlur: true),
                                 DateTimePicker::make('enrollment_end')
                                     ->label('Akhir Pendaftaran')
+                                    // Coba hapus ->seconds(false) atau set ke true
+                                    ->seconds(true)  // <-- UBAH KE TRUE ATAU HAPUS SAJA
                                     ->required()
+                                    ->timezone('Asia/Jakarta')
                                     ->minDate(fn(Get $get) => $get('enrollment_start') ?? now())
-                                    ->rule(fn(Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+                                    // Rule validasi tetap dipertahankan
+                                    ->rule(fn(Get $get, $state): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
                                         $start = $get('enrollment_start');
                                         if ($start && $value && $value <= $start) {
                                             $fail('Akhir Pendaftaran harus setelah Mulai Pendaftaran.');
@@ -81,7 +126,9 @@ class ClassesRelationManager extends RelationManager
                                     }),
                             ]),
                     ]),
+                // Bagian Status Publikasi (Dapat dipisah ke Section sendiri jika banyak pengaturan)
                 Section::make('Status Kelas')
+                    ->columns(1)
                     ->schema([
                         Select::make('status')
                             ->label('Status Kelas')
@@ -92,11 +139,9 @@ class ClassesRelationManager extends RelationManager
                                 'archived' => 'Archived (Diarsipkan)',
                             ])
                             ->default('draft')
-                            ->required(),
+                            ->required()
+                            ->helperText('Atur apakah kelas ini siap untuk didaftarkan oleh peserta.'),
                     ]),
-                // ✅ Isi otomatis
-                Hidden::make('course_id')
-                    ->default(fn($livewire) => $livewire->ownerRecord->id),
                 Hidden::make('created_by')
                     ->default(auth()->id()),
             ]);
@@ -130,7 +175,8 @@ class ClassesRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                ->label('Tambah Kelas'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

@@ -2,30 +2,32 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
+use App\Filament\Resources\CourseResource\Pages\ListCourseMaterials;
+use App\Filament\Resources\MaterialResource\Pages;
+use App\Filament\Resources\MaterialResource\RelationManagers;
 use App\Models\Material;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
-use Filament\Tables\Table;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
-use Filament\Forms\Components\Group;
-use Illuminate\Support\Facades\Auth;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\TextInput;
 use Filament\Tables\Actions\ActionGroup;
-use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Filters\TernaryFilter;
-use Filament\Forms\Components\DateTimePicker;
-use App\Filament\Resources\MaterialResource\Pages;
+use Filament\Tables\Table;
+use Filament\Forms;
+use Filament\Tables;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\MaterialResource\RelationManagers;
-use App\Filament\Resources\CourseResource\Pages\ListCourseMaterials;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class MaterialResource extends Resource
 {
@@ -75,6 +77,16 @@ class MaterialResource extends Resource
                                 return is_numeric($courseId) ? (int) $courseId : null;
                             }),
                         // Kolom Kiri
+                        Select::make('course_id')
+                            ->label('Kursus Induk')
+                            ->relationship(
+                                name: 'course',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn(Builder $query, Get $get) => $query->where('created_by', auth()->id())
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->required(),
                         Forms\Components\TextInput::make('name')
                             ->label('Judul Materi')
                             ->placeholder('Contoh: Struktur Data dan Array')
@@ -118,21 +130,29 @@ class MaterialResource extends Resource
                         // Video Link
                         TextInput::make('link_video')
                             ->label('Tautan Video (YouTube/Vimeo)')
-                            // ->url()  // Menambah validasi URL
                             ->placeholder('Masukkan URL video'),
-                        // Unggah PDF
                         FileUpload::make('pdf')
                             ->label('File PDF / Dokumen')
                             ->directory('material-docs')
-                            ->acceptedFileTypes(['application/pdf'])  // Hanya terima PDF
-                            ->preserveFilenames(),
-                        // Gambar Ilustrasi
+                            ->disk('public')
+                            ->acceptedFileTypes(['application/pdf'])
+                            ->maxSize(5120)
+                            // Otomatis hapus file lama saat file baru diupload atau dihapus dari form
+                            ->deleteUploadedFileUsing(function ($file, $record) {
+                                Storage::disk('public')->delete($file);
+                            })
+                            ->downloadable()
+                            ->openable(),
                         FileUpload::make('image')
                             ->label('Gambar Ilustrasi')
                             ->directory('material-images')
+                            ->disk('public')
                             ->image()
-                            ->maxSize(1024)  // Maksimal 1MB
-                            ->preserveFilenames()
+                            ->imageEditor()
+                            ->maxSize(1024)
+                            ->deleteUploadedFileUsing(function ($file, $record) {
+                                Storage::disk('public')->delete($file);
+                            })
                             ->nullable(),
                     ]),
                 // 4. FIELD TERSEMBUNYI (Sistem)

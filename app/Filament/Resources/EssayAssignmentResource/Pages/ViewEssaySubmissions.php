@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\EssayAssignmentResource\Pages;
 
 use App\Filament\Resources\EssayAssignmentResource;
+use App\Models\ClassEnrollment;
 use App\Models\EssayAssignment;
 use App\Models\EssaySubmission;
+use App\Services\GradingService;
 use Filament\Resources\Pages\Page;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -63,7 +65,25 @@ class ViewEssaySubmissions extends Page implements HasTable
                         \Filament\Forms\Components\TextInput::make('score')->numeric()->minValue(0)->maxValue(100),
                         \Filament\Forms\Components\Textarea::make('feedback'),
                         \Filament\Forms\Components\Toggle::make('is_graded'),
-                    ]),
+                    ])
+                    ->after(function (EssaySubmission $record) {
+                        if ($record->is_graded) {
+                            $material = $record->assignment->material;
+                            $classMaterial = \App\Models\ClassMaterial::where('material_id', $material->id)->first();
+
+                            if ($classMaterial) {
+                                $enrollment = ClassEnrollment::where('student_id', $record->student_id)
+                                    ->where('class_id', $classMaterial->course_class_id)
+                                    ->first();
+
+                                if ($enrollment) {
+                                    $enrollment->updateProgress();
+                                    // ✅ Gunakan method baru yang hanya update nilai
+                                    app(GradingService::class)->updateEnrollmentScoreOnly($enrollment);
+                                }
+                            }
+                        }
+                    }),
             ]);
     }
 }

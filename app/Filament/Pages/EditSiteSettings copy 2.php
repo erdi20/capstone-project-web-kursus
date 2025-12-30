@@ -3,23 +3,22 @@
 namespace App\Filament\Pages;
 
 use App\Models\Setting;
+use Filament\Forms\Form;
+use Filament\Pages\Page;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Tabs\Tab;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Group;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Split;
 use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Split;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
-use Filament\Pages\Page;
-use Illuminate\Support\Facades\Storage;  // Tambahkan ini
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Concerns\InteractsWithForms;
 
 class EditSiteSettings extends Page implements HasForms
 {
@@ -33,19 +32,30 @@ class EditSiteSettings extends Page implements HasForms
     // --- Pengaturan Visual ---
     protected static ?string $navigationIcon = 'heroicon-o-adjustments-horizontal';  // Ikon pengaturan yang lebih modern
     protected static ?string $activeNavigationIcon = 'heroicon-s-adjustments-horizontal';
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 3;  // Urutan terakhir setelah Slider (1) dan FAQ (2)
+
+    // --- Pengaturan Heading ---
     protected ?string $heading = 'Konfigurasi Identitas Situs';
     protected ?string $subheading = 'Kelola informasi publik, logo, dan kontak resmi platform Anda.';
+
+    // --- Pengaturan UX ---
+    protected static ?string $navigationBadgeTooltip = 'Periksa konfigurasi situs secara berkala';
+
     public ?array $data = [];
 
     public static function canAccess(): bool
     {
-        return auth()->user()->isAdmin();
+        $user = auth()->user();
+
+        // Izinkan akses jika user adalah admin atau mentor
+        return $user->isAdmin();
     }
 
     public function mount(): void
     {
+        // Mengambil data pertama, atau array kosong jika tidak ada
         $setting = Setting::first();
+
         if ($setting) {
             $this->form->fill($setting->toArray());
         }
@@ -57,14 +67,23 @@ class EditSiteSettings extends Page implements HasForms
             ->schema([
                 Tabs::make('Pengaturan Utama')
                     ->tabs([
+                        // --- TAB 1: BRANDING ---
                         Tab::make('Identitas Situs')
                             ->icon('heroicon-m-globe-alt')
                             ->schema([
                                 Split::make([
                                     Section::make([
-                                        TextInput::make('site_name')->required()->maxLength(50),
-                                        Textarea::make('site_description')->rows(4)->required(),
-                                        TextInput::make('copyright_text')->required(),
+                                        TextInput::make('site_name')
+                                            ->label('Nama Platform')
+                                            ->required()
+                                            ->maxLength(50),
+                                        Textarea::make('site_description')
+                                            ->label('Deskripsi Singkat (SEO)')
+                                            ->rows(4)
+                                            ->required(),
+                                        TextInput::make('copyright_text')
+                                            ->label('Teks Hak Cipta')
+                                            ->required(),
                                     ])->grow(),
                                     Section::make([
                                         FileUpload::make('logo')
@@ -72,12 +91,9 @@ class EditSiteSettings extends Page implements HasForms
                                             ->image()
                                             ->imageEditor()
                                             ->directory('settings')
-                                            ->disk('public')
-                                            ->columnSpan(1)
-                                            // Menghapus file secara otomatis dari storage saat klik ikon 'X' di form
-                                            ->reorderable()
-                                            ->preserveFilenames(false),  // Memastikan nama unik
+                                            ->disk('public'),
                                         TextInput::make('mentor_commission_percent')
+                                            ->label('Komisi Mentor')
                                             ->numeric()
                                             ->suffix('%')
                                             ->required(),
@@ -88,23 +104,28 @@ class EditSiteSettings extends Page implements HasForms
                             ->icon('heroicon-m-photo')
                             ->schema([
                                 Section::make('Visual Utama (Hero)')
+                                    ->description('Atur gambar dan teks sambutan yang muncul di halaman depan.')
                                     ->schema([
-                                        Grid::make(2)
-                                            ->schema([
-                                                FileUpload::make('hero_image')
-                                                    ->label('Gambar Hero')
-                                                    ->image()
-                                                    ->imageEditor()
-                                                    ->directory('settings')
-                                                    ->disk('public')
-                                                    ->columnSpan(1)
-                                                    ->preserveFilenames(false),
-                                                Group::make([
-                                                    TextInput::make('hero_title')->maxLength(100),
-                                                    Textarea::make('hero_subtitle')->rows(3),
-                                                ])->columnSpan(1),
-                                            ])
-                                            ->columnSpan(1)
+                                        Grid::make(2)->schema([
+                                            FileUpload::make('hero_image')
+                                                ->label('Gambar Hero')
+                                                ->image()
+                                                ->imageEditor()
+                                                ->directory('settings')
+                                                ->disk('public')
+                                                ->helperText('Gunakan gambar landscape berkualitas tinggi (Rekomendasi: 1920x1080px)')
+                                                ->columnSpan(1),
+                                            Group::make([
+                                                TextInput::make('hero_title')
+                                                    ->label('Judul Hero (Headline)')
+                                                    ->placeholder('Contoh: Belajar Skill Baru Tanpa Batas')
+                                                    ->maxLength(100),
+                                                Textarea::make('hero_subtitle')
+                                                    ->label('Sub-judul Hero')
+                                                    ->placeholder('Jelaskan singkat tentang platform Anda...')
+                                                    ->rows(3),
+                                            ])->columnSpan(1),
+                                        ]),
                                     ]),
                             ]),
                         // --- TAB 2: KONTAK ---
@@ -193,26 +214,13 @@ class EditSiteSettings extends Page implements HasForms
     public function save(): void
     {
         try {
-            $newData = $this->form->getState();
-            $setting = Setting::first();
+            $data = $this->form->getState();
 
-            if ($setting) {
-                // List field yang berupa file
-                $fileFields = ['logo', 'hero_image'];
-
-                foreach ($fileFields as $field) {
-                    // Cek jika ada file lama DAN (file lama berbeda dengan yang baru atau file baru kosong/dihapus)
-                    if ($setting->$field && ($setting->$field !== ($newData[$field] ?? null))) {
-                        // Hapus file fisik dari folder storage
-                        if (Storage::disk('public')->exists($setting->$field)) {
-                            Storage::disk('public')->delete($setting->$field);
-                        }
-                    }
-                }
-            }
-
-            // Update atau buat data baru
-            Setting::updateOrCreate(['id' => 1], $newData);
+            // Menggunakan updateOrCreate agar aman jika record belum ada di DB
+            Setting::updateOrCreate(
+                ['id' => 1],  // Mengasumsikan kita hanya pakai 1 row ID 1
+                $data
+            );
 
             Notification::make()
                 ->success()

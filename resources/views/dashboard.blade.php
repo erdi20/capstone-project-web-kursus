@@ -38,41 +38,59 @@
             </section>
         @endif
 
+        {{-- hero --}}
         <section class="mb-24 grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
             <div class="order-2 lg:order-1">
                 <div class="relative inline-block">
-                    <span class="mb-4 inline-block rounded-lg bg-indigo-100 px-4 py-1 text-sm font-bold uppercase text-indigo-700">Growth Mindset</span>
+                    <span class="mb-4 inline-block rounded-lg bg-indigo-100 px-4 py-1 text-sm font-bold uppercase text-indigo-700">
+                        Growth Mindset
+                    </span>
                 </div>
-                <h1 class="mb-6 text-4xl font-black leading-[1.1] text-slate-900 md:text-6xl">Kuasai Skill Baru <br><span class="text-green-600">Tanpa Batas Jarak.</span></h1>
-                <p class="mb-10 text-xl leading-relaxed text-slate-500">Mulai belajar dari dasar hingga mahir dengan kurikulum yang disusun oleh pakar industri global. Sertifikat resmi siap menantimu.</p>
 
-                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                    <div class="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+                {{-- Hero Title --}}
+                <h1 class="mb-6 text-4xl font-black leading-[1.1] text-slate-900 md:text-6xl">
+                    {!! $setting?->hero_title ?? 'Kuasai Skill Baru <br><span class="text-green-600">Tanpa Batas Jarak.</span>' !!}
+                </h1>
+
+                {{-- Hero Subtitle --}}
+                <p class="mb-10 text-xl leading-relaxed text-slate-500">
+                    {{ $setting?->hero_subtitle ?? 'Mulai belajar dari dasar hingga mahir dengan kurikulum yang disusun oleh pakar industri global. Sertifikat resmi siap menantimu.' }}
+                </p>
+
+                {{-- Feature Badge (Hanya Materi Terupdate) --}}
+                <div class="flex flex-wrap gap-4">
+                    <div class="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 pr-8 shadow-sm transition-transform hover:scale-105">
                         <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-green-600">
                             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <span class="font-bold text-slate-700">Materi Terupdate</span>
-                    </div>
-                    <div class="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
-                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
+                        <div>
+                            <span class="block font-bold text-slate-700">Materi Terupdate</span>
+                            <span class="text-xs text-slate-400">Kurikulum 2025</span>
                         </div>
-                        <span class="font-bold text-slate-700">Diskusi Komunitas</span>
                     </div>
+
+                    {{-- Tombol CTA Tambahan (Opsional) --}}
+                    <a href="{{ route('listkursus') }}" class="flex items-center justify-center rounded-2xl bg-slate-900 px-8 py-4 font-bold text-white transition-all hover:bg-slate-800 hover:shadow-lg">
+                        Mulai Belajar
+                    </a>
                 </div>
             </div>
+
             <div class="relative order-1 lg:order-2">
                 <div class="absolute -bottom-6 -right-6 h-full w-full rounded-[2.5rem] bg-green-500/10"></div>
                 <div class="relative overflow-hidden rounded-[2.5rem] shadow-2xl">
-                    <img src="{{ asset('img/satu.jpg') }}" alt="Learning" class="w-full transform object-cover transition duration-700 hover:scale-105">
+                    {{-- Hero Image --}}
+                    @if ($setting && $setting->hero_image)
+                        <img src="{{ asset('storage/' . $setting->hero_image) }}" alt="Hero Image" class="w-full transform object-cover transition duration-700 hover:scale-105">
+                    @else
+                        <img src="{{ asset('img/satu.jpg') }}" alt="Default Hero" class="w-full transform object-cover transition duration-700 hover:scale-105">
+                    @endif
                 </div>
             </div>
         </section>
-
+        {{-- kursus --}}
         @php
             $sections = [
                 ['title' => 'Kursus Terpopuler', 'desc' => 'Paling banyak dipelajari', 'data' => $popularCourses, 'badge' => '🔥 Populer', 'color' => 'amber'],
@@ -165,6 +183,7 @@
             </section>
         @endforeach
 
+        {{-- TESTIMONI --}}
         <section class="relative mb-20 overflow-hidden rounded-[3rem] bg-slate-950 px-6 py-12 text-white shadow-xl">
             <div class="absolute -right-10 -top-10 h-64 w-64 rounded-full bg-green-500/5 blur-[80px]"></div>
             <div class="absolute -bottom-10 -left-10 h-64 w-64 rounded-full bg-indigo-500/5 blur-[80px]"></div>
@@ -174,13 +193,13 @@
 
                     <div class="md:w-1/3">
                         <span class="mb-2 inline-block text-[10px] font-black uppercase tracking-[0.3em] text-green-500">
-                            Testimoni
+                            Ulasan Belajar
                         </span>
                         <h3 class="text-3xl font-black tracking-tighter">
-                            Cerita <span class="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text italic text-transparent">Sukses</span>
+                            Apa Kata <span class="bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text italic text-transparent">Peserta?</span>
                         </h3>
                         <p class="mt-3 text-sm leading-relaxed text-slate-400">
-                            Alumni kami telah bekerja di berbagai tech company ternama.
+                            Ulasan jujur dari alumni yang telah menyelesaikan kursus mereka.
                         </p>
 
                         <div class="mt-6 flex justify-center gap-3 md:justify-start">
@@ -241,6 +260,8 @@
             </div>
         </section>
 
+
+        {{-- faq --}}
         <section id="#faq-section" class="mx-auto mb-24 max-w-4xl">
             <div class="mb-12 text-center">
                 <h3 class="text-3xl font-black text-slate-900">Masih Bingung?</h3>
@@ -341,4 +362,5 @@
             }, 8000);
         });
     </script>
+
 </x-app-layout>

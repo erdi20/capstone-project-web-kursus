@@ -23,6 +23,7 @@ use Filament\Forms;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Storage;
 
 class EssayAssignmentResource extends Resource
 {
@@ -70,6 +71,17 @@ class EssayAssignmentResource extends Resource
                                 $materialId = app('request')->query('material_id');
                                 return is_numeric($materialId) ? (int) $materialId : null;
                             }),
+                        Select::make('material_id')
+                            ->label('Materi')
+                            ->relationship(
+                                name: 'material',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn(Builder $query) => $query
+                                    ->whereHas('course', fn($q) => $q->where('created_by', auth()->id()))
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->required(),
                         TextInput::make('title')
                             ->label('Judul Tugas')
                             ->required()
@@ -94,15 +106,6 @@ class EssayAssignmentResource extends Resource
                             ->columnSpanFull()
                             ->fileAttachmentsDirectory('assignments/attachments')
                             ->placeholder('Jelaskan secara rinci apa yang harus dikerjakan oleh peserta...'),
-                        FileUpload::make('attachment')
-                            ->label('Lampiran File Pendukung (Opsional)')
-                            ->disk('public')
-                            ->directory('assignments/attachments')
-                            ->visibility('public')
-                            ->preserveFilenames()
-                            ->maxSize(10240)  // 10 MB
-                            ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/*'])
-                            ->helperText('Format: PDF, DOC, DOCX, atau gambar. Maks. 10 MB.'),
                     ]),
                 Section::make('Pengaturan Pengumpulan')
                     ->description('Atur cara peserta mengumpulkan tugas dan kapan tugas dipublikasikan.')
@@ -112,17 +115,6 @@ class EssayAssignmentResource extends Resource
                             ->label('Publikasikan segera')
                             ->default(true)
                             ->helperText('Jika dimatikan, tugas tidak akan terlihat oleh peserta.'),
-                        Toggle::make('allow_file_upload')
-                            ->label('Izinkan unggah file')
-                            ->default(true)
-                            ->helperText('Jika dimatikan, peserta hanya bisa menulis jawaban teks.'),
-                        TextInput::make('word_limit')
-                            ->label('Batas kata (opsional)')
-                            ->numeric()
-                            ->minValue(10)
-                            ->maxValue(10000)
-                            ->helperText('Contoh: 500. Biarkan kosong jika tidak dibatasi.')
-                            ->visible(fn(callable $get) => !$get('allow_file_upload')),
                     ]),
                 Hidden::make('created_by')
                     ->default(fn() => auth()->id()),
@@ -133,12 +125,6 @@ class EssayAssignmentResource extends Resource
     {
         return $table
             ->columns([
-                // 1. Kelas Tujuan (Menggunakan Relasi Nama)
-                Tables\Columns\TextColumn::make('courseClass.name')  // Asumsi relasi 'courseClass' ada
-                    ->label('Kelas Tujuan')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(),
                 // 2. Judul Tugas
                 Tables\Columns\TextColumn::make('title')
                     ->label('Judul Tugas')
@@ -165,11 +151,6 @@ class EssayAssignmentResource extends Resource
                         now()->diffInDays($state) <= 2 => 'warning',  // Kuning jika mendekati deadline (2 hari)
                         default => 'success',  // Hijau jika masih lama
                     }),
-                // 5. Izin Upload File (Icon)
-                Tables\Columns\IconColumn::make('allow_file_upload')
-                    ->label('Izin Upload')
-                    ->boolean()
-                    ->sortable(),
                 // 6. Dibuat Oleh (Menggunakan Relasi Nama)
                 Tables\Columns\TextColumn::make('creator.name')  // Asumsi relasi 'creator' ada ke Model User
                     ->label('Dibuat Oleh')

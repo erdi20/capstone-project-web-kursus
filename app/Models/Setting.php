@@ -28,5 +28,8 @@ class Setting extends Model
         'mentor_commission_percent',
         'privacy_policy',
         'terms_conditions',
+        'hero_image',
+        'hero_title',
+        'hero_subtitle',
     ];
 }

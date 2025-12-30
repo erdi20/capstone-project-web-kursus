@@ -88,6 +88,7 @@ class HomeController extends Controller
     // -----------------------------
     public function index()
     {
+        $setting = \App\Models\Setting::first();
         $sliders = \App\Models\Slider::where('is_active', true)
             ->orderBy('order')
             ->take(5)
@@ -96,6 +97,7 @@ class HomeController extends Controller
         // Query Dasar agar DRY (Don't Repeat Yourself)
         $baseQuery = Course::query()
             ->with('user')
+            ->where('status', 'open')
             ->withAvg('enrollments as avg_rating', 'rating')
             ->withCount('enrollments as review_count')
             ->withCount('enrollments as enrollment_count');
@@ -119,7 +121,7 @@ class HomeController extends Controller
         $randomCourses = (clone $baseQuery)
             ->whereNotIn('id', $excludeIds)
             ->inRandomOrder()
-            ->limit(10)
+            ->limit(9)
             ->get();
 
         //  Testimoni & FAQ (Tetap sama)
@@ -132,7 +134,7 @@ class HomeController extends Controller
 
         $faqs = \App\Models\Faq::where('is_active', true)->orderBy('order')->get();
 
-        return view('dashboard', compact('sliders', 'topRatedCourses', 'popularCourses', 'randomCourses', 'testimonials', 'faqs'));
+        return view('dashboard', compact('setting','sliders', 'topRatedCourses', 'popularCourses', 'randomCourses', 'testimonials', 'faqs'));
     }
 
     public function privacyPolicy()

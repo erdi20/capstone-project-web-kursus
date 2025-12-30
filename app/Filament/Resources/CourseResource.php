@@ -2,47 +2,48 @@
 
 namespace App\Filament\Resources;
 
-use Closure;
-use Filament\Forms;
-use Filament\Tables;
+use App\Filament\Resources\CourseResource\Pages\MaterialAttendances;
+use App\Filament\Resources\CourseResource\RelationManagers\ClassesRelationManager;
+use App\Filament\Resources\CourseResource\Pages;
+use App\Filament\Resources\CourseResource\RelationManagers;
+use App\Filament\Resources\MaterialResource\Pages\ViewMaterialAttendances;
 use App\Models\Course;
+use App\Models\CourseClass;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Group;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
-use Filament\Forms\Form;
-use Filament\Tables\Table;
-use App\Models\CourseClass;
-use Illuminate\Support\Str;
 use Filament\Resources\Resource;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Tabs;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\Group;
-use Illuminate\Support\Facades\Auth;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Section;
-use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Model;
-use Filament\Forms\Components\TextInput;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\ImageColumn;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
 use Filament\Tables\Columns\SelectColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Forms\Components\Placeholder;
 use Filament\Tables\Filters\TernaryFilter;
-use Filament\Forms\Components\DateTimePicker;
-use App\Filament\Resources\CourseResource\Pages;
+use Filament\Tables\Table;
+use Filament\Forms;
+use Filament\Tables;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use App\Filament\Resources\CourseResource\RelationManagers;
-use App\Filament\Resources\CourseResource\Pages\MaterialAttendances;
-use App\Filament\Resources\MaterialResource\Pages\ViewMaterialAttendances;
-use App\Filament\Resources\CourseResource\RelationManagers\ClassesRelationManager;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Closure;
 
 class CourseResource extends Resource
 {
@@ -130,7 +131,11 @@ class CourseResource extends Resource
                                     ->directory('course-thumbnails')
                                     ->image()
                                     ->imageEditor()
-                                    ->required()
+                                    ->deleteUploadedFileUsing(function ($file) {
+                                        if ($file) {
+                                            Storage::disk('public')->delete($file);
+                                        }
+                                    })
                                     ->columnSpan([
                                         'default' => 1,
                                         'lg' => 1,
@@ -161,6 +166,7 @@ class CourseResource extends Resource
                                         TextInput::make('price')
                                             ->label('Harga Dasar')
                                             ->numeric()
+                                            ->default(400000)
                                             ->prefix('Rp')
                                             ->required()
                                             ->minValue(0),
@@ -205,6 +211,7 @@ class CourseResource extends Resource
                                                     ->label('Bobot Essay')
                                                     ->numeric()
                                                     ->minValue(0)
+                                                    ->default(50)
                                                     ->maxValue(100)
                                                     ->suffix('%')
                                                     ->required()
@@ -213,6 +220,7 @@ class CourseResource extends Resource
                                                     ->label('Bobot Quiz')
                                                     ->numeric()
                                                     ->minValue(0)
+                                                    ->default(40)
                                                     ->maxValue(100)
                                                     ->suffix('%')
                                                     ->required()
@@ -221,6 +229,7 @@ class CourseResource extends Resource
                                                     ->label('Bobot Absensi')
                                                     ->numeric()
                                                     ->minValue(0)
+                                                    ->default(10)
                                                     ->maxValue(100)
                                                     ->suffix('%')
                                                     ->required()

@@ -1,17 +1,10 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <style>
-        @page {
-            margin: 0;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Helvetica', 'Arial', sans-serif;
-        }
+        @page { margin: 0; }
+        body { margin: 0; font-family: 'Helvetica', 'Arial', sans-serif; }
 
         .container {
             position: relative;
@@ -41,11 +34,10 @@
             text-transform: uppercase;
         }
 
-        /* NAMA KURSUS - Mendukung 2 baris jika panjang */
+        /* NAMA KURSUS */
         .course-container {
             position: absolute;
-            top: 435px;
-            /* Dinaikkan sedikit */
+            top: 430px; /* Dinaikkan sedikit untuk ruang nilai */
             width: 100%;
             text-align: center;
         }
@@ -53,26 +45,40 @@
         .course-name {
             display: inline-block;
             max-width: 800px;
-            /* Membatasi lebar agar pecah baris */
             font-size: 26px;
             font-weight: bold;
             color: #3b82f6;
             line-height: 1.2;
         }
 
+        /* NILAI AKHIR (Final Score) */
+        .score-container {
+            position: absolute;
+            top: 515px; /* Di bawah nama kursus */
+            width: 100%;
+            text-align: center;
+            font-size: 18px;
+            color: #444;
+        }
+
+        .score-box {
+            font-weight: bold;
+            color: #2D5496;
+            font-size: 22px;
+        }
+
         /* NAMA WEB KURSUS */
         .web-name-container {
             position: absolute;
-            top: 520px;
+            top: 552px; /* Diturunkan sedikit agar tidak menabrak nilai */
             width: 100%;
             text-align: center;
-            font-size: 20px;
+            font-size: 22px;
         }
 
         .site-name-text {
             font-weight: bold;
-            margin-left: 410px;
-            /* Menyesuaikan teks "diselenggarakan oleh:" */
+            margin-left: 435px; /* Menyesuaikan teks "diselenggarakan oleh:" */
         }
 
         /* FOOTER KIRI: KODE & TANGGAL */
@@ -80,7 +86,7 @@
             position: absolute;
             bottom: 85px;
             left: 175px;
-            font-size: 20px;
+            font-size: 16px;
             line-height: 1.5;
         }
 
@@ -94,7 +100,7 @@
         }
 
         .mentor-name {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             color: #000;
             border-bottom: 1px solid #000;
@@ -104,7 +110,7 @@
         }
 
         .mentor-title {
-            font-size: 20px;
+            font-size: 14px;
             color: #333;
         }
     </style>
@@ -112,12 +118,16 @@
 
 <body>
     <div class="container">
-        <img src="{{ public_path('img/s.png') }}" class="background">
+        <img src="{{ public_path('img/serbaru.png') }}" class="background">
 
         <div class="student-name">{{ $student->name }}</div>
 
         <div class="course-container">
             <div class="course-name">{{ $course->name }}</div>
+        </div>
+
+        <div class="score-container">
+            dengan Nilai Akhir: <span class="score-box">{{ $enrollment->final_score ?? '0' }}/100</span>
         </div>
 
         <div class="web-name-container">
@@ -135,5 +145,4 @@
         </div>
     </div>
 </body>
-
 </html>

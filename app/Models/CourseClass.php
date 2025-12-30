@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class CourseClass extends Model
 {
@@ -84,7 +84,7 @@ class CourseClass extends Model
     {
         return $this
             ->belongsToMany(Material::class, 'class_materials')
-            ->withPivot('id','order', 'schedule_date', 'visibility')
+            ->withPivot('id', 'order', 'schedule_date', 'visibility')
             ->orderBy('class_materials.order');
     }
 
@@ -107,5 +107,15 @@ class CourseClass extends Model
             return Storage::url($this->thumbnail);
         }
         return null;
+    }
+
+    protected static function booted()
+    {
+        static::deleted(function ($courseClass) {
+            // Hapus file thumbnail fisik saat data record dihapus
+            if ($courseClass->thumbnail && Storage::disk('public')->exists($courseClass->thumbnail)) {
+                Storage::disk('public')->delete($courseClass->thumbnail);
+            }
+        });
     }
 }

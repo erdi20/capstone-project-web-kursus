@@ -16,27 +16,45 @@ use Midtrans\Snap;
 
 class CourseController extends Controller
 {
-    // public function index()
-    // {
-    //     // Ganti get() menjadi paginate()
-    //     $courses = Course::Open()->with('user')->latest()->paginate(9);
-
-    //     return view('student.course.listcourse', compact('courses'));
-    // }
-
-    public function index()
+    public function index(Request $request)
     {
         $courses = Course::Open()
             ->with('user')
-            // Sesuaikan dengan logic dashboard kamu:
             ->withAvg('enrollments as avg_rating', 'rating')
             ->withCount('enrollments as review_count')
             ->withCount('enrollments as enrollment_count')
+            // Logika Pencarian
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q
+                        ->where('name', 'like', '%' . $search . '%')
+                        ->orWhereHas('user', function ($userQuery) use ($search) {
+                            $userQuery->where('name', 'like', '%' . $search . '%');
+                        });
+                });
+            })
             ->latest()
-            ->paginate(9);
+            ->paginate(9)
+            ->withQueryString();  // Sangat penting agar filter pencarian tidak hilang saat pindah halaman (pagination)
 
         return view('student.course.listcourse', compact('courses'));
     }
+
+    // ----------------
+
+    // public function index()
+    // {
+    //     $courses = Course::Open()
+    //         ->with('user')
+    //         // Sesuaikan dengan logic dashboard kamu:
+    //         ->withAvg('enrollments as avg_rating', 'rating')
+    //         ->withCount('enrollments as review_count')
+    //         ->withCount('enrollments as enrollment_count')
+    //         ->latest()
+    //         ->paginate(9);
+
+    //     return view('student.course.listcourse', compact('courses'));
+    // }
 
     // public function show($slug)
     // {
