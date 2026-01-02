@@ -5,13 +5,14 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 
-class User extends Authenticatable implements HasAvatar
+class User extends Authenticatable implements HasAvatar, FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -109,5 +110,12 @@ class User extends Authenticatable implements HasAvatar
     public function withdrawals()
     {
         return $this->hasMany(Withdrawal::class, 'mentor_id');
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        // Student otomatis ditolak (false)
+        // Admin dan Mentor diizinkan (true)
+        return $this->isAdmin() || $this->isMentor();
     }
 }
